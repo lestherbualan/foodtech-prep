@@ -1,0 +1,54 @@
+{
+  "project_info": {
+    "project_number": "924627647381",
+    "project_id": "foodtech-prep",
+    "storage_bucket": "foodtech-prep.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:924627647381:android:c132c040dbd6c209d1d49c",
+        "android_client_info": {
+          "package_name": "com.labsoftware.foodtechprep"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "924627647381-3ifg2e2e5immltmavq78f8vv68fjueqf.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.labsoftware.foodtechprep",
+            "certificate_hash": "677406e46fbc633650882d6cc86dc92fa8bcf6de"
+          }
+        },
+        {
+          "client_id": "924627647381-fhmemhs892pu7i38js94msol4ri5kq8i.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAOs3Le0Hl1XRfgTM5OsEeOzKubYPuypBQ"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "924627647381-fhmemhs892pu7i38js94msol4ri5kq8i.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "924627647381-gtfb523asmg5v7ksujotl46s3tuin0ti.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.foodtechPrep"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
