@@ -26,3 +26,4 @@ flutter:
 
   assets:
     - assets/data/questions/
+    - assets/images/google.png

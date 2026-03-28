@@ -8,4 +8,11 @@ class RouteNames {
   static const String questionBank = '/questions';
   static const String questionDetail = '/questions/detail';
   static const String practice = '/practice';
+  static const String examSetup = '/exam-setup';
+  static const String timedExam = '/exam';
+  static const String examResult = '/exam/result';
+  static const String examReview = '/exam/review';
+  static const String examHistory = '/exam/history';
+  static const String dashboard = '/dashboard';
+  static const String profile = '/profile';
 }

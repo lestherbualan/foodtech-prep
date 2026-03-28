@@ -61,12 +61,24 @@ class LoginScreen extends ConsumerWidget {
                               .read(authActionProvider.notifier)
                               .signInWithGoogle(),
                     icon: isLoading
-                        ? const SizedBox(
+                        ? SizedBox(
                             width: 20,
                             height: 20,
-                            child: CircularProgressIndicator(strokeWidth: 2),
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: AppColors.primary,
+                            ),
                           )
-                        : const Icon(Icons.g_mobiledata_rounded, size: 28),
+                        : Image.asset(
+                            'assets/images/google_g.png',
+                            width: 28,
+                            height: 28,
+                            errorBuilder: (context, error, stackTrace) => Icon(
+                              Icons.g_mobiledata_rounded,
+                              size: 28,
+                              color: AppColors.primary,
+                            ),
+                          ),
                     label: Text(
                       isLoading ? 'Signing in…' : 'Continue with Google',
                     ),

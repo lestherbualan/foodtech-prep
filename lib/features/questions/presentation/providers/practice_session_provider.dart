@@ -1,15 +1,19 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../data/choice_randomizer.dart';
 import '../../domain/question.dart';
 
 /// State for a single question during practice.
 class PracticeQuestionState {
-  const PracticeQuestionState({this.selectedAnswer, this.isChecked = false});
+  const PracticeQuestionState({
+    this.selectedAnswer,
+    this.isChecked = false,
+    this.isCorrect = false,
+  });
 
   final String? selectedAnswer;
   final bool isChecked;
-
-  bool get isCorrect => false; // Resolved via the question model externally
+  final bool isCorrect;
 }
 
 /// Full state for a practice session.
@@ -18,6 +22,7 @@ class PracticeSessionState {
     required this.questions,
     this.currentIndex = 0,
     this.questionStates = const {},
+    this.choiceOrders = const {},
   });
 
   final List<Question> questions;
@@ -25,6 +30,9 @@ class PracticeSessionState {
 
   /// Per-question state keyed by questionId.
   final Map<String, PracticeQuestionState> questionStates;
+
+  /// Stable shuffled choice order per question.
+  final Map<String, List<String>> choiceOrders;
 
   Question get currentQuestion => questions[currentIndex];
   int get totalQuestions => questions.length;
@@ -35,14 +43,20 @@ class PracticeSessionState {
       questionStates[currentQuestion.questionId] ??
       const PracticeQuestionState();
 
+  /// Returns the shuffled display order for the current question.
+  List<String> get currentChoiceOrder =>
+      choiceOrders[currentQuestion.questionId] ?? ['A', 'B', 'C', 'D'];
+
   PracticeSessionState copyWith({
     int? currentIndex,
     Map<String, PracticeQuestionState>? questionStates,
+    Map<String, List<String>>? choiceOrders,
   }) {
     return PracticeSessionState(
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
       questionStates: questionStates ?? this.questionStates,
+      choiceOrders: choiceOrders ?? this.choiceOrders,
     );
   }
 }
@@ -50,7 +64,11 @@ class PracticeSessionState {
 class PracticeSessionNotifier extends StateNotifier<PracticeSessionState> {
   PracticeSessionNotifier(List<Question> questions, int startIndex)
     : super(
-        PracticeSessionState(questions: questions, currentIndex: startIndex),
+        PracticeSessionState(
+          questions: questions,
+          currentIndex: startIndex,
+          choiceOrders: generateChoiceOrders(questions),
+        ),
       );
 
   void selectAnswer(String answer) {
@@ -71,11 +89,14 @@ class PracticeSessionNotifier extends StateNotifier<PracticeSessionState> {
     final qState = state.currentQuestionState;
     if (qState.selectedAnswer == null || qState.isChecked) return;
 
+    final correct =
+        qState.selectedAnswer == state.currentQuestion.correctAnswer;
     final updated = {
       ...state.questionStates,
       state.currentQuestion.questionId: PracticeQuestionState(
         selectedAnswer: qState.selectedAnswer,
         isChecked: true,
+        isCorrect: correct,
       ),
     };
     state = state.copyWith(questionStates: updated);

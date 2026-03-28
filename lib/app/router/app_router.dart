@@ -5,8 +5,17 @@ import 'package:go_router/go_router.dart';
 
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/exam/domain/exam_models.dart';
+import '../../features/exam/presentation/providers/timed_exam_provider.dart';
+import '../../features/exam/presentation/screens/exam_history_screen.dart';
+import '../../features/exam/presentation/screens/dashboard_screen.dart';
+import '../../features/exam/presentation/screens/exam_result_screen.dart';
+import '../../features/exam/presentation/screens/exam_review_screen.dart';
+import '../../features/exam/presentation/screens/exam_setup_screen.dart';
+import '../../features/exam/presentation/screens/timed_exam_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
+import '../../features/profile/presentation/screens/profile_screen.dart';
 import '../../features/onboarding/presentation/screens/welcome_screen.dart';
 import '../../features/questions/domain/question.dart';
 import '../../features/questions/presentation/providers/practice_session_provider.dart';
@@ -106,6 +115,51 @@ final routerProvider = Provider<GoRouter>((ref) {
             child: const PracticeQuestionScreen(),
           );
         },
+      ),
+      GoRoute(
+        path: RouteNames.examSetup,
+        builder: (context, state) => const ExamSetupScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.timedExam,
+        builder: (context, state) {
+          final args = state.extra! as TimedExamArgs;
+          return ProviderScope(
+            overrides: [
+              timedExamProvider.overrideWith(
+                (ref) =>
+                    TimedExamNotifier(args.questions, args.durationMinutes),
+              ),
+            ],
+            child: const TimedExamScreen(),
+          );
+        },
+      ),
+      GoRoute(
+        path: RouteNames.examResult,
+        builder: (context, state) {
+          final result = state.extra! as ExamResult;
+          return ExamResultScreen(result: result);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.examReview,
+        builder: (context, state) {
+          final result = state.extra! as ExamResult;
+          return ExamReviewScreen(result: result);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.examHistory,
+        builder: (context, state) => const ExamHistoryScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.dashboard,
+        builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.profile,
+        builder: (context, state) => const ProfileScreen(),
       ),
     ],
   );
