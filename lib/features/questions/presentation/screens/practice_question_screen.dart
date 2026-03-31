@@ -87,21 +87,23 @@ class PracticeQuestionScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.lg),
 
                   // ── Answer choices ──
-                  ...session.currentChoiceOrder.map(
-                    (letter) => AnswerOptionCard(
-                      letter: letter,
-                      text: question.choices[letter] ?? '',
+                  ...List.generate(question.options.length, (i) {
+                    const labels = ['A', 'B', 'C', 'D'];
+                    final originalIndex = session.currentChoiceOrder[i];
+                    return AnswerOptionCard(
+                      letter: labels[i],
+                      text: question.options[originalIndex].text,
                       optionState: _resolveOptionState(
-                        letter: letter,
+                        letter: labels[i],
                         selectedAnswer: qState.selectedAnswer,
                         isChecked: qState.isChecked,
-                        correctAnswer: question.correctAnswer,
+                        correctAnswer: session.currentDisplayCorrectAnswer,
                       ),
                       onTap: qState.isChecked
                           ? null
-                          : () => notifier.selectAnswer(letter),
-                    ),
-                  ),
+                          : () => notifier.selectAnswer(labels[i]),
+                    );
+                  }),
 
                   // ── Result feedback + explanation ──
                   if (qState.isChecked) ...[

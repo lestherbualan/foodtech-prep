@@ -1,3 +1,16 @@
+/// A single answer option for a question.
+class QuestionOption {
+  const QuestionOption({
+    required this.optionId,
+    required this.text,
+    required this.isCorrect,
+  });
+
+  final String optionId;
+  final String text;
+  final bool isCorrect;
+}
+
 class Question {
   const Question({
     required this.questionId,
@@ -6,8 +19,7 @@ class Question {
     required this.subtopicId,
     required this.subtopicName,
     required this.questionText,
-    required this.choices,
-    required this.correctAnswer,
+    required this.options,
     required this.explanation,
     this.conceptCluster,
     this.difficulty = 'Medium',
@@ -34,8 +46,7 @@ class Question {
   final String subtopicId;
   final String subtopicName;
   final String questionText;
-  final Map<String, String> choices; // {'A': '...', 'B': '...', ...}
-  final String correctAnswer; // 'A', 'B', 'C', or 'D'
+  final List<QuestionOption> options;
   final String explanation;
   final String? conceptCluster;
   final String difficulty;
@@ -55,7 +66,20 @@ class Question {
   final String? version;
   final String? lastUpdated;
 
+  /// Index of the correct option in the options list (-1 if none).
+  int get correctOptionIndex => options.indexWhere((o) => o.isCorrect);
+
+  /// Display label for the correct answer in natural (unshuffled) order.
+  static const _labels = ['A', 'B', 'C', 'D'];
+  String get correctAnswerLabel {
+    final idx = correctOptionIndex;
+    if (idx < 0 || idx >= _labels.length) return 'A';
+    return _labels[idx];
+  }
+
+  /// Parses v1 local JSON (choiceA/B/C/D + correctAnswer).
   factory Question.fromJson(Map<String, dynamic> json) {
+    final String correctLetter = json['correctAnswer'] as String;
     return Question(
       questionId: json['questionId'] as String,
       subjectId: json['subjectId'] as String,
@@ -63,13 +87,28 @@ class Question {
       subtopicId: json['subtopicId'] as String,
       subtopicName: json['subtopicName'] as String,
       questionText: json['questionText'] as String,
-      choices: {
-        'A': json['choiceA'] as String,
-        'B': json['choiceB'] as String,
-        'C': json['choiceC'] as String,
-        'D': json['choiceD'] as String,
-      },
-      correctAnswer: json['correctAnswer'] as String,
+      options: [
+        QuestionOption(
+          optionId: 'A',
+          text: json['choiceA'] as String,
+          isCorrect: correctLetter == 'A',
+        ),
+        QuestionOption(
+          optionId: 'B',
+          text: json['choiceB'] as String,
+          isCorrect: correctLetter == 'B',
+        ),
+        QuestionOption(
+          optionId: 'C',
+          text: json['choiceC'] as String,
+          isCorrect: correctLetter == 'C',
+        ),
+        QuestionOption(
+          optionId: 'D',
+          text: json['choiceD'] as String,
+          isCorrect: correctLetter == 'D',
+        ),
+      ],
       explanation: json['explanation'] as String,
       conceptCluster: json['conceptCluster'] as String?,
       difficulty: json['difficulty'] as String? ?? 'Medium',
@@ -91,9 +130,49 @@ class Question {
     );
   }
 
-  /// Maps a Firestore question document into the app model.
-  /// Firestore docs use the same flat field structure as local JSON.
+  /// Parses a Firestore question document (v2 schema with options[],
+  /// falls back to v1 flat choiceA-D if options is absent).
   factory Question.fromFirestore(String docId, Map<String, dynamic> data) {
+    final rawOptions = data['options'] as List<dynamic>?;
+    final List<QuestionOption> options;
+
+    if (rawOptions != null && rawOptions.isNotEmpty) {
+      // v2 schema
+      options = rawOptions.map((o) {
+        final m = o as Map<String, dynamic>;
+        return QuestionOption(
+          optionId: m['optionId'] as String? ?? '',
+          text: m['text'] as String? ?? '',
+          isCorrect: m['isCorrect'] as bool? ?? false,
+        );
+      }).toList();
+    } else {
+      // v1 fallback
+      final correctLetter = data['correctAnswer'] as String? ?? '';
+      options = [
+        QuestionOption(
+          optionId: 'A',
+          text: data['choiceA'] as String? ?? '',
+          isCorrect: correctLetter == 'A',
+        ),
+        QuestionOption(
+          optionId: 'B',
+          text: data['choiceB'] as String? ?? '',
+          isCorrect: correctLetter == 'B',
+        ),
+        QuestionOption(
+          optionId: 'C',
+          text: data['choiceC'] as String? ?? '',
+          isCorrect: correctLetter == 'C',
+        ),
+        QuestionOption(
+          optionId: 'D',
+          text: data['choiceD'] as String? ?? '',
+          isCorrect: correctLetter == 'D',
+        ),
+      ];
+    }
+
     return Question(
       questionId: data['questionId'] as String? ?? docId,
       subjectId: data['subjectId'] as String? ?? '',
@@ -101,13 +180,7 @@ class Question {
       subtopicId: data['subtopicId'] as String? ?? '',
       subtopicName: data['subtopicName'] as String? ?? '',
       questionText: data['questionText'] as String? ?? '',
-      choices: {
-        'A': data['choiceA'] as String? ?? '',
-        'B': data['choiceB'] as String? ?? '',
-        'C': data['choiceC'] as String? ?? '',
-        'D': data['choiceD'] as String? ?? '',
-      },
-      correctAnswer: data['correctAnswer'] as String? ?? '',
+      options: options,
       explanation: data['explanation'] as String? ?? '',
       conceptCluster: data['conceptCluster'] as String?,
       difficulty: data['difficulty'] as String? ?? 'Medium',
@@ -127,39 +200,5 @@ class Question {
       version: data['version']?.toString(),
       lastUpdated: data['lastUpdated']?.toString(),
     );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'questionId': questionId,
-      'subjectId': subjectId,
-      'subjectName': subjectName,
-      'subtopicId': subtopicId,
-      'subtopicName': subtopicName,
-      'questionText': questionText,
-      'choiceA': choices['A'],
-      'choiceB': choices['B'],
-      'choiceC': choices['C'],
-      'choiceD': choices['D'],
-      'correctAnswer': correctAnswer,
-      'explanation': explanation,
-      'conceptCluster': conceptCluster,
-      'difficulty': difficulty,
-      'questionType': questionType,
-      'studyNote': studyNote,
-      'weaknessLabel': weaknessLabel,
-      'recommendationText': recommendationText,
-      'sourceType': sourceType,
-      'sourceFile': sourceFile,
-      'sourceReference': sourceReference,
-      'confidenceLevel': confidenceLevel,
-      'needsManualReview': needsManualReview,
-      'isOfficiallyVerified': isOfficiallyVerified,
-      'status': status,
-      'createdBy': createdBy,
-      'reviewedBy': reviewedBy,
-      'version': version,
-      'lastUpdated': lastUpdated,
-    };
   }
 }

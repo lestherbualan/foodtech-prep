@@ -23,6 +23,7 @@ class PracticeSessionState {
     this.currentIndex = 0,
     this.questionStates = const {},
     this.choiceOrders = const {},
+    this.displayCorrectAnswers = const {},
   });
 
   final List<Question> questions;
@@ -31,8 +32,11 @@ class PracticeSessionState {
   /// Per-question state keyed by questionId.
   final Map<String, PracticeQuestionState> questionStates;
 
-  /// Stable shuffled choice order per question.
-  final Map<String, List<String>> choiceOrders;
+  /// Stable shuffled choice order per question (display position → original option index).
+  final Map<String, List<int>> choiceOrders;
+
+  /// Display-level correct answer per question after shuffle.
+  final Map<String, String> displayCorrectAnswers;
 
   Question get currentQuestion => questions[currentIndex];
   int get totalQuestions => questions.length;
@@ -44,32 +48,47 @@ class PracticeSessionState {
       const PracticeQuestionState();
 
   /// Returns the shuffled display order for the current question.
-  List<String> get currentChoiceOrder =>
-      choiceOrders[currentQuestion.questionId] ?? ['A', 'B', 'C', 'D'];
+  List<int> get currentChoiceOrder =>
+      choiceOrders[currentQuestion.questionId] ?? [0, 1, 2, 3];
+
+  /// Display-level correct answer for the current question.
+  String get currentDisplayCorrectAnswer =>
+      displayCorrectAnswers[currentQuestion.questionId] ??
+      currentQuestion.correctAnswerLabel;
 
   PracticeSessionState copyWith({
     int? currentIndex,
     Map<String, PracticeQuestionState>? questionStates,
-    Map<String, List<String>>? choiceOrders,
+    Map<String, List<int>>? choiceOrders,
+    Map<String, String>? displayCorrectAnswers,
   }) {
     return PracticeSessionState(
       questions: questions,
       currentIndex: currentIndex ?? this.currentIndex,
       questionStates: questionStates ?? this.questionStates,
       choiceOrders: choiceOrders ?? this.choiceOrders,
+      displayCorrectAnswers:
+          displayCorrectAnswers ?? this.displayCorrectAnswers,
     );
   }
 }
 
 class PracticeSessionNotifier extends StateNotifier<PracticeSessionState> {
   PracticeSessionNotifier(List<Question> questions, int startIndex)
-    : super(
-        PracticeSessionState(
-          questions: questions,
-          currentIndex: startIndex,
-          choiceOrders: generateChoiceOrders(questions),
-        ),
-      );
+    : super(_initialState(questions, startIndex));
+
+  static PracticeSessionState _initialState(
+    List<Question> questions,
+    int startIndex,
+  ) {
+    final mappings = generateChoiceMappings(questions);
+    return PracticeSessionState(
+      questions: questions,
+      currentIndex: startIndex,
+      choiceOrders: mappings.choiceOrders,
+      displayCorrectAnswers: mappings.displayCorrectAnswers,
+    );
+  }
 
   void selectAnswer(String answer) {
     final qState = state.currentQuestionState;
@@ -89,8 +108,7 @@ class PracticeSessionNotifier extends StateNotifier<PracticeSessionState> {
     final qState = state.currentQuestionState;
     if (qState.selectedAnswer == null || qState.isChecked) return;
 
-    final correct =
-        qState.selectedAnswer == state.currentQuestion.correctAnswer;
+    final correct = qState.selectedAnswer == state.currentDisplayCorrectAnswer;
     final updated = {
       ...state.questionStates,
       state.currentQuestion.questionId: PracticeQuestionState(

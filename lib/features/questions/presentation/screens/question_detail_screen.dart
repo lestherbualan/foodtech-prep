@@ -11,7 +11,7 @@ class QuestionDetailScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final choices = question.choices.entries.toList();
+    const labels = ['A', 'B', 'C', 'D'];
 
     return Scaffold(
       appBar: AppBar(title: Text(question.questionId)),
@@ -57,12 +57,12 @@ class QuestionDetailScreen extends StatelessWidget {
             const SizedBox(height: AppSpacing.lg),
 
             // Choices
-            ...choices.map((entry) {
-              final isCorrect = entry.key == question.correctAnswer;
+            ...List.generate(question.options.length, (i) {
+              final option = question.options[i];
               return _ChoiceCard(
-                letter: entry.key,
-                text: entry.value,
-                isCorrect: isCorrect,
+                letter: i < labels.length ? labels[i] : '${i + 1}',
+                text: option.text,
+                isCorrect: option.isCorrect,
               );
             }),
 
@@ -80,7 +80,7 @@ class QuestionDetailScreen extends StatelessWidget {
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Text(
-                  'Correct Answer: ${question.correctAnswer}',
+                  'Correct Answer: ${question.correctAnswerLabel}',
                   style: Theme.of(
                     context,
                   ).textTheme.titleMedium?.copyWith(color: AppColors.success),

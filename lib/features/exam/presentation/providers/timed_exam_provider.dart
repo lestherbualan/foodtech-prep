@@ -21,17 +21,21 @@ class TimedExamState {
     this.wasAutoSubmitted = false,
     this.result,
     this.choiceOrders = const {},
+    this.displayCorrectAnswers = const {},
   });
 
   final List<Question> questions;
   final int currentIndex;
-  final Map<String, String> answers; // questionId → selected letter
+  final Map<String, String> answers; // questionId → selected display label
   final int remainingSeconds;
   final int totalDurationSeconds;
   final ExamStatus status;
   final bool wasAutoSubmitted;
   final ExamResult? result;
-  final Map<String, List<String>> choiceOrders; // questionId → shuffled letters
+  final Map<String, List<int>>
+  choiceOrders; // questionId → [origOptionIndex0, ...]
+  final Map<String, String>
+  displayCorrectAnswers; // questionId → display correct label
 
   Question get currentQuestion => questions[currentIndex];
   int get totalQuestions => questions.length;
@@ -45,8 +49,8 @@ class TimedExamState {
   String? selectedAnswerFor(String questionId) => answers[questionId];
 
   /// Returns the shuffled display order for the current question.
-  List<String> get currentChoiceOrder =>
-      choiceOrders[currentQuestion.questionId] ?? ['A', 'B', 'C', 'D'];
+  List<int> get currentChoiceOrder =>
+      choiceOrders[currentQuestion.questionId] ?? [0, 1, 2, 3];
 
   String get formattedTime {
     final minutes = remainingSeconds ~/ 60;
@@ -61,7 +65,8 @@ class TimedExamState {
     ExamStatus? status,
     bool? wasAutoSubmitted,
     ExamResult? result,
-    Map<String, List<String>>? choiceOrders,
+    Map<String, List<int>>? choiceOrders,
+    Map<String, String>? displayCorrectAnswers,
   }) {
     return TimedExamState(
       questions: questions,
@@ -73,6 +78,8 @@ class TimedExamState {
       wasAutoSubmitted: wasAutoSubmitted ?? this.wasAutoSubmitted,
       result: result ?? this.result,
       choiceOrders: choiceOrders ?? this.choiceOrders,
+      displayCorrectAnswers:
+          displayCorrectAnswers ?? this.displayCorrectAnswers,
     );
   }
 }
@@ -80,14 +87,21 @@ class TimedExamState {
 /// Notifier for a timed exam session with countdown timer.
 class TimedExamNotifier extends StateNotifier<TimedExamState> {
   TimedExamNotifier(List<Question> questions, int durationMinutes)
-    : super(
-        TimedExamState(
-          questions: questions,
-          remainingSeconds: durationMinutes * 60,
-          totalDurationSeconds: durationMinutes * 60,
-          choiceOrders: generateChoiceOrders(questions),
-        ),
-      );
+    : super(_initialState(questions, durationMinutes));
+
+  static TimedExamState _initialState(
+    List<Question> questions,
+    int durationMinutes,
+  ) {
+    final mappings = generateChoiceMappings(questions);
+    return TimedExamState(
+      questions: questions,
+      remainingSeconds: durationMinutes * 60,
+      totalDurationSeconds: durationMinutes * 60,
+      choiceOrders: mappings.choiceOrders,
+      displayCorrectAnswers: mappings.displayCorrectAnswers,
+    );
+  }
 
   Timer? _timer;
 
@@ -151,6 +165,7 @@ class TimedExamNotifier extends StateNotifier<TimedExamState> {
       wasAutoSubmitted: autoSubmitted,
       timeLimitSeconds: state.totalDurationSeconds,
       choiceOrders: state.choiceOrders,
+      displayCorrectAnswers: state.displayCorrectAnswers,
     );
 
     state = state.copyWith(

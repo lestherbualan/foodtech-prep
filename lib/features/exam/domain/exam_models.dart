@@ -40,6 +40,7 @@ class ExamResult {
     required this.answers,
     this.timeLimitSeconds,
     this.choiceOrders = const {},
+    this.displayCorrectAnswers = const {},
   });
 
   final int totalQuestions;
@@ -51,9 +52,10 @@ class ExamResult {
   final int durationSeconds;
   final bool wasAutoSubmitted;
   final List<Question> questions;
-  final Map<String, String> answers; // questionId → selected letter
+  final Map<String, String> answers; // questionId → selected display label
   final int? timeLimitSeconds;
-  final Map<String, List<String>> choiceOrders; // questionId → shuffled letters
+  final Map<String, List<int>> choiceOrders;
+  final Map<String, String> displayCorrectAnswers;
 
   factory ExamResult.compute({
     required List<Question> questions,
@@ -61,7 +63,8 @@ class ExamResult {
     required int durationSeconds,
     required bool wasAutoSubmitted,
     int? timeLimitSeconds,
-    Map<String, List<String>> choiceOrders = const {},
+    Map<String, List<int>> choiceOrders = const {},
+    Map<String, String> displayCorrectAnswers = const {},
   }) {
     int correct = 0;
     int incorrect = 0;
@@ -69,9 +72,11 @@ class ExamResult {
 
     for (final q in questions) {
       final selected = answers[q.questionId];
+      final correctAnswer =
+          displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
       if (selected == null) {
         unanswered++;
-      } else if (selected == q.correctAnswer) {
+      } else if (selected == correctAnswer) {
         correct++;
       } else {
         incorrect++;
@@ -94,6 +99,7 @@ class ExamResult {
       answers: answers,
       timeLimitSeconds: timeLimitSeconds,
       choiceOrders: choiceOrders,
+      displayCorrectAnswers: displayCorrectAnswers,
     );
   }
 
@@ -104,7 +110,8 @@ class ExamResult {
   /// Questions the user answered incorrectly.
   List<Question> get incorrectQuestions => questions.where((q) {
     final sel = answers[q.questionId];
-    return sel != null && sel != q.correctAnswer;
+    final correct = displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
+    return sel != null && sel != correct;
   }).toList();
 
   /// Questions the user did not answer.
@@ -167,9 +174,11 @@ class ExamPerformanceBreakdown {
         () => _SubjectAccumulator(q.subjectName),
       );
       final selected = result.answers[q.questionId];
+      final correctAnswer =
+          result.displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
       if (selected == null) {
         acc.unanswered++;
-      } else if (selected == q.correctAnswer) {
+      } else if (selected == correctAnswer) {
         acc.correct++;
       } else {
         acc.incorrect++;

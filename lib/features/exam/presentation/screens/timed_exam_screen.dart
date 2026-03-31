@@ -113,18 +113,20 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
                     const SizedBox(height: AppSpacing.lg),
 
                     // Choices — exam mode: only idle/selected states
-                    ...choiceOrder.map(
-                      (letter) => AnswerOptionCard(
-                        letter: letter,
-                        text: question.choices[letter] ?? '',
-                        optionState: selectedAnswer == letter
+                    ...List.generate(question.options.length, (i) {
+                      const labels = ['A', 'B', 'C', 'D'];
+                      final originalIndex = choiceOrder[i];
+                      return AnswerOptionCard(
+                        letter: labels[i],
+                        text: question.options[originalIndex].text,
+                        optionState: selectedAnswer == labels[i]
                             ? AnswerOptionState.selected
                             : AnswerOptionState.idle,
                         onTap: () => ref
                             .read(timedExamProvider.notifier)
-                            .selectAnswer(question.questionId, letter),
-                      ),
-                    ),
+                            .selectAnswer(question.questionId, labels[i]),
+                      );
+                    }),
                   ],
                 ),
               ),

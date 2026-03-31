@@ -28,7 +28,9 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
       _ReviewFilter.all => result.questions,
       _ReviewFilter.incorrect => result.questions.where((q) {
         final sel = result.answers[q.questionId];
-        return sel != null && sel != q.correctAnswer;
+        final correct =
+            result.displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
+        return sel != null && sel != correct;
       }).toList(),
       _ReviewFilter.unanswered =>
         result.questions
@@ -134,7 +136,11 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
                     choiceOrder:
                         result.choiceOrders[questions[_currentIndex]
                             .questionId] ??
-                        ['A', 'B', 'C', 'D'],
+                        [0, 1, 2, 3],
+                    displayCorrectAnswer:
+                        result.displayCorrectAnswers[questions[_currentIndex]
+                            .questionId] ??
+                        questions[_currentIndex].correctAnswerLabel,
                   ),
           ),
 
@@ -145,7 +151,10 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
               total: questions.length,
               selectedAnswer:
                   result.answers[questions[_currentIndex].questionId],
-              correctAnswer: questions[_currentIndex].correctAnswer,
+              correctAnswer:
+                  result.displayCorrectAnswers[questions[_currentIndex]
+                      .questionId] ??
+                  questions[_currentIndex].correctAnswerLabel,
               onPrevious: _currentIndex > 0
                   ? () => setState(() => _currentIndex--)
                   : null,
@@ -240,13 +249,15 @@ class _ReviewBody extends StatelessWidget {
     required this.totalFiltered,
     required this.selectedAnswer,
     required this.choiceOrder,
+    required this.displayCorrectAnswer,
   });
 
   final Question question;
   final int questionNumber;
   final int totalFiltered;
   final String? selectedAnswer;
-  final List<String> choiceOrder;
+  final List<int> choiceOrder;
+  final String displayCorrectAnswer;
 
   @override
   Widget build(BuildContext context) {
@@ -281,14 +292,16 @@ class _ReviewBody extends StatelessWidget {
           const SizedBox(height: AppSpacing.lg),
 
           // ── Choices (read-only) ──
-          ...choiceOrder.map(
-            (letter) => AnswerOptionCard(
-              letter: letter,
-              text: question.choices[letter] ?? '',
-              optionState: _resolveState(letter),
+          ...List.generate(question.options.length, (i) {
+            const labels = ['A', 'B', 'C', 'D'];
+            final originalIndex = choiceOrder[i];
+            return AnswerOptionCard(
+              letter: labels[i],
+              text: question.options[originalIndex].text,
+              optionState: _resolveState(labels[i]),
               onTap: null, // read-only
-            ),
-          ),
+            );
+          }),
 
           // ── Explanation ──
           const SizedBox(height: AppSpacing.sm),
@@ -298,9 +311,9 @@ class _ReviewBody extends StatelessWidget {
     );
   }
 
-  AnswerOptionState _resolveState(String letter) {
-    final isCorrect = letter == question.correctAnswer;
-    final isSelected = letter == selectedAnswer;
+  AnswerOptionState _resolveState(String displayLabel) {
+    final isCorrect = displayLabel == displayCorrectAnswer;
+    final isSelected = displayLabel == selectedAnswer;
 
     if (isCorrect) return AnswerOptionState.correct;
     if (isSelected) return AnswerOptionState.incorrect;
