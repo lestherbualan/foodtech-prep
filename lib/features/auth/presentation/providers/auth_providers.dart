@@ -2,7 +2,11 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../data/activity_logger.dart';
 import '../../data/auth_repository.dart';
+import '../../data/user_repository.dart';
+import '../../domain/activity_log.dart';
+import '../../domain/user_profile.dart';
 
 // ---------------------------------------------------------------------------
 // Firebase Auth instance
@@ -29,6 +33,20 @@ final authRepositoryProvider = Provider<AuthRepository>((ref) {
 });
 
 // ---------------------------------------------------------------------------
+// User repository (Firestore user documents)
+// ---------------------------------------------------------------------------
+final userRepositoryProvider = Provider<UserRepository>((ref) {
+  return UserRepository();
+});
+
+// ---------------------------------------------------------------------------
+// Activity logger (Firestore activity logs)
+// ---------------------------------------------------------------------------
+final activityLoggerProvider = Provider<ActivityLogger>((ref) {
+  return ActivityLogger();
+});
+
+// ---------------------------------------------------------------------------
 // Auth state stream (drives router redirects)
 // ---------------------------------------------------------------------------
 final authStateProvider = StreamProvider<User?>((ref) {
@@ -36,21 +54,51 @@ final authStateProvider = StreamProvider<User?>((ref) {
 });
 
 // ---------------------------------------------------------------------------
+// Current user profile from Firestore (lazy, refreshable)
+// ---------------------------------------------------------------------------
+final userProfileProvider = FutureProvider<UserProfile?>((ref) async {
+  final authState = ref.watch(authStateProvider);
+  final user = authState.valueOrNull;
+  if (user == null) return null;
+  return ref.watch(userRepositoryProvider).getProfile(user.uid);
+});
+
+// ---------------------------------------------------------------------------
 // Auth action notifier (Google sign-in / sign-out)
 // ---------------------------------------------------------------------------
 class AuthActionNotifier extends StateNotifier<AsyncValue<void>> {
-  AuthActionNotifier(this._repository) : super(const AsyncData(null));
+  AuthActionNotifier(this._repository, this._userRepo, this._activityLogger)
+    : super(const AsyncData(null));
 
   final AuthRepository _repository;
+  final UserRepository _userRepo;
+  final ActivityLogger _activityLogger;
 
   Future<void> signInWithGoogle() async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
-      await _repository.signInWithGoogle();
+      final credential = await _repository.signInWithGoogle();
+      final user = credential.user;
+      if (user != null) {
+        // Sync profile to Firestore (create or merge).
+        await _userRepo.syncUserProfile(user);
+        // Log the sign-in event.
+        _activityLogger.log(
+          uid: user.uid,
+          type: ActivityType.login,
+          metadata: {'method': 'google'},
+        );
+      }
     });
   }
 
   Future<void> signOut() async {
+    // Log before signing out so we still have the uid.
+    final uid = _repository.currentUser?.uid;
+    if (uid != null) {
+      _activityLogger.log(uid: uid, type: ActivityType.logout);
+    }
+
     state = const AsyncLoading();
     state = await AsyncValue.guard(() => _repository.signOut());
   }
@@ -58,5 +106,9 @@ class AuthActionNotifier extends StateNotifier<AsyncValue<void>> {
 
 final authActionProvider =
     StateNotifierProvider<AuthActionNotifier, AsyncValue<void>>((ref) {
-      return AuthActionNotifier(ref.watch(authRepositoryProvider));
+      return AuthActionNotifier(
+        ref.watch(authRepositoryProvider),
+        ref.watch(userRepositoryProvider),
+        ref.watch(activityLoggerProvider),
+      );
     });

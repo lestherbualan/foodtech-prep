@@ -9,7 +9,6 @@ import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../domain/question.dart';
-import '../providers/practice_session_provider.dart';
 import '../providers/question_providers.dart';
 
 /// Manual subject-selection entry point for practice.
@@ -39,7 +38,7 @@ class SubjectPracticeScreen extends ConsumerWidget {
               const SliverToBoxAdapter(
                 child: SecondaryScreenHeader(
                   title: 'Subject Practice',
-                  subtitle: 'Choose what you want to study',
+                  subtitle: 'Choose what you want to study.',
                 ),
               ),
 

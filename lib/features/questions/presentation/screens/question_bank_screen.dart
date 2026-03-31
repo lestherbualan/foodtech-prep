@@ -45,8 +45,7 @@ class QuestionBankScreen extends ConsumerWidget {
               SliverToBoxAdapter(
                 child: SecondaryScreenHeader(
                   title: 'Question Bank',
-                  subtitle:
-                      '${questions.length} questions across ${counts.length} subjects',
+                  subtitle: 'Browse questions by subject and topic.',
                 ),
               ),
 

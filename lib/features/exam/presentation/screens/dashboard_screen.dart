@@ -8,6 +8,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/dashboard_stats.dart';
 import '../../domain/saved_exam_attempt.dart';
@@ -23,74 +24,92 @@ class DashboardScreen extends ConsumerWidget {
 
     if (user == null) {
       return Scaffold(
-        appBar: AppBar(title: const Text('Dashboard')),
-        body: const Center(child: Text('Please sign in to view dashboard.')),
+        backgroundColor: AppColors.background,
+        body: Column(
+          children: [
+            const SecondaryScreenHeader(title: 'Progress'),
+            const Expanded(
+              child: Center(child: Text('Please sign in to view dashboard.')),
+            ),
+          ],
+        ),
       );
     }
 
     final statsAsync = ref.watch(dashboardStatsProvider(user.uid));
 
     return Scaffold(
-      appBar: AppBar(
-        title: const Text('My Progress'),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.history_rounded),
-            tooltip: 'Full History',
-            onPressed: () => context.push(RouteNames.examHistory),
+      backgroundColor: AppColors.background,
+      body: Column(
+        children: [
+          SecondaryScreenHeader(
+            title: 'Progress',
+            subtitle: 'Scores, trends, and insights.',
+            trailing: SecondaryScreenHeader.trailingIconButton(
+              icon: Icons.history_rounded,
+              onTap: () => context.push(RouteNames.examHistory),
+              tooltip: 'Full History',
+            ),
+          ),
+          Expanded(
+            child: statsAsync.when(
+              loading: () => const LoadingIndicator(),
+              error: (error, _) => ErrorStateWidget(
+                message: 'Could not load dashboard.',
+                onRetry: () => ref.invalidate(recentAttemptsProvider),
+              ),
+              data: (stats) {
+                if (stats.totalAttempts == 0) {
+                  return Center(
+                    child: Padding(
+                      padding: const EdgeInsets.all(AppSpacing.xl),
+                      child: Column(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          const EmptyStateWidget(
+                            icon: Icons.insights_rounded,
+                            message:
+                                'No exam data yet.\nComplete a timed exam to start tracking your progress.',
+                          ),
+                          const SizedBox(height: AppSpacing.lg),
+                          FilledButton.icon(
+                            onPressed: () => context.push(RouteNames.examSetup),
+                            icon: const Icon(
+                              Icons.play_arrow_rounded,
+                              size: 20,
+                            ),
+                            label: const Text('Take an Exam'),
+                          ),
+                        ],
+                      ),
+                    ),
+                  );
+                }
+
+                return SingleChildScrollView(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      _ScoreSummaryCard(stats: stats),
+                      const SizedBox(height: AppSpacing.md),
+                      _TrendCard(stats: stats),
+                      const SizedBox(height: AppSpacing.md),
+                      _SubjectSummaryCard(stats: stats),
+                      const SizedBox(height: AppSpacing.md),
+                      _FocusAdviceCard(tips: stats.focusAdvice),
+                      const SizedBox(height: AppSpacing.lg),
+                      _RecentAttemptsSection(attempts: stats.recentAttempts),
+                      const SizedBox(height: AppSpacing.lg),
+                    ],
+                  ),
+                );
+              },
+            ),
           ),
         ],
-      ),
-      body: statsAsync.when(
-        loading: () => const LoadingIndicator(),
-        error: (error, _) => ErrorStateWidget(
-          message: 'Could not load dashboard.',
-          onRetry: () => ref.invalidate(recentAttemptsProvider),
-        ),
-        data: (stats) {
-          if (stats.totalAttempts == 0) {
-            return Center(
-              child: Padding(
-                padding: const EdgeInsets.all(AppSpacing.xl),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const EmptyStateWidget(
-                      icon: Icons.insights_rounded,
-                      message:
-                          'No exam data yet.\nComplete a timed exam to start tracking your progress.',
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
-                    FilledButton.icon(
-                      onPressed: () => context.push(RouteNames.examSetup),
-                      icon: const Icon(Icons.play_arrow_rounded, size: 20),
-                      label: const Text('Take an Exam'),
-                    ),
-                  ],
-                ),
-              ),
-            );
-          }
-
-          return SingleChildScrollView(
-            padding: const EdgeInsets.all(AppSpacing.lg),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                _ScoreSummaryCard(stats: stats),
-                const SizedBox(height: AppSpacing.md),
-                _TrendCard(stats: stats),
-                const SizedBox(height: AppSpacing.md),
-                _SubjectSummaryCard(stats: stats),
-                const SizedBox(height: AppSpacing.md),
-                _FocusAdviceCard(tips: stats.focusAdvice),
-                const SizedBox(height: AppSpacing.lg),
-                _RecentAttemptsSection(attempts: stats.recentAttempts),
-                const SizedBox(height: AppSpacing.lg),
-              ],
-            ),
-          );
-        },
       ),
     );
   }

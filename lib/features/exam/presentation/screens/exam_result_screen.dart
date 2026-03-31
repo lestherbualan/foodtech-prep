@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/domain/activity_log.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../questions/presentation/providers/practice_session_provider.dart';
 import '../../domain/exam_models.dart';
@@ -47,6 +48,30 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
       final repo = ref.read(examAttemptRepositoryProvider);
       await repo.saveAttempt(attempt);
       ref.invalidate(recentAttemptsProvider);
+
+      // Update user stats in Firestore.
+      final breakdown = widget.result.performanceBreakdown;
+      ref
+          .read(userRepositoryProvider)
+          .updateStatsAfterExam(
+            uid: user.uid,
+            scorePercent: widget.result.scorePercent,
+            strongestSubject: breakdown.strongest?.subjectName,
+            weakestSubject: breakdown.weakest?.subjectName,
+          );
+
+      // Log exam submission activity.
+      ref
+          .read(activityLoggerProvider)
+          .log(
+            uid: user.uid,
+            type: ActivityType.submitTimedExam,
+            metadata: {
+              'score': widget.result.scorePercent,
+              'correct': widget.result.correctCount,
+              'total': widget.result.totalQuestions,
+            },
+          );
     } catch (e) {
       debugPrint('[ExamResultScreen] Failed to save attempt: $e');
       // Non-blocking — result screen still works

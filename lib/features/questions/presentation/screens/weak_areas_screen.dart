@@ -9,7 +9,6 @@ import '../../../../core/widgets/premium_card.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../../core/widgets/section_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
-import '../../../exam/domain/dashboard_stats.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../../exam/presentation/providers/dashboard_providers.dart';
 import '../providers/question_providers.dart';
@@ -35,7 +34,8 @@ class WeakAreasScreen extends ConsumerWidget {
           const SliverToBoxAdapter(
             child: SecondaryScreenHeader(
               title: 'Weak Areas',
-              subtitle: 'Personalised review recommendations',
+              subtitle:
+                  'Review the subjects and concepts that need more attention.',
             ),
           ),
 

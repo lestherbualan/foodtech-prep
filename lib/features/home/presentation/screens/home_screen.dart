@@ -17,6 +17,13 @@ import '../../../exam/presentation/providers/dashboard_providers.dart';
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
 
+  static String _timeGreeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
@@ -31,7 +38,7 @@ class HomeScreen extends ConsumerWidget {
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
-            // ── Premium top bar with greeting ──
+            // ── Smart greeting header ──
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(
@@ -47,7 +54,7 @@ class HomeScreen extends ConsumerWidget {
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
                           Text(
-                            'Hello, $firstName!',
+                            '${_timeGreeting()}, $firstName',
                             style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
                                   fontWeight: FontWeight.w800,
@@ -55,14 +62,17 @@ class HomeScreen extends ConsumerWidget {
                                 ),
                           ),
                           const SizedBox(height: AppSpacing.xs + 2),
-                          Text(
-                            'Keep building momentum for your board exam.',
-                            style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.4,
-                                ),
-                          ),
+                          if (user != null)
+                            _SmartSubtitle(userId: user.uid)
+                          else
+                            Text(
+                              'Prepare for your board exam.',
+                              style: Theme.of(context).textTheme.bodyMedium
+                                  ?.copyWith(
+                                    color: AppColors.textSecondary,
+                                    height: 1.4,
+                                  ),
+                            ),
                         ],
                       ),
                     ),
@@ -116,6 +126,51 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Smart subtitle — context-aware status line
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _SmartSubtitle extends ConsumerWidget {
+  const _SmartSubtitle({required this.userId});
+  final String userId;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final statsAsync = ref.watch(dashboardStatsProvider(userId));
+
+    final text = statsAsync.when(
+      loading: () => 'Prepare for your board exam.',
+      error: (_, _) => 'Prepare for your board exam.',
+      data: (stats) {
+        if (stats.totalAttempts == 0) {
+          return 'Start your first exam to track your progress.';
+        }
+        final parts = <String>[];
+        parts.add(
+          '${stats.totalAttempts} exam${stats.totalAttempts == 1 ? '' : 's'} taken',
+        );
+        parts.add('Best ${stats.bestScore.round()}%');
+        if (stats.weakestSubject != null) {
+          parts.add(
+            'Focus next: ${ExamSubject.abbreviate(stats.weakestSubject!)}',
+          );
+        }
+        return parts.join(' · ');
+      },
+    );
+
+    return Text(
+      text,
+      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+        color: AppColors.textSecondary,
+        height: 1.4,
+      ),
+      maxLines: 2,
+      overflow: TextOverflow.ellipsis,
     );
   }
 }
@@ -280,7 +335,7 @@ class _EmptyDashboard extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 1. Hero performance card — the visual anchor
+// 1. Hero performance card — dominant latest score with context
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _HeroPerformanceCard extends StatelessWidget {
@@ -289,55 +344,72 @@ class _HeroPerformanceCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final focusSubject = stats.weakestSubject != null
+        ? ExamSubject.abbreviate(stats.weakestSubject!)
+        : null;
+
     return PremiumCard(
       padding: const EdgeInsets.all(AppSpacing.lg + 4),
       elevated: true,
       gradient: AppColors.heroGradient,
       child: Column(
         children: [
+          // ── Top: score ring + dominant score + context ──
           Row(
             children: [
-              // Score ring
               _ScoreRing(score: stats.latestScore),
-              const SizedBox(width: AppSpacing.lg + 4),
-              // Stats
+              const SizedBox(width: AppSpacing.lg),
               Expanded(
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Latest Score',
-                      style: TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: Colors.white.withValues(alpha: 0.7),
-                        letterSpacing: 0.3,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
                       '${stats.latestScore.round()}%',
                       style: const TextStyle(
-                        fontSize: 32,
+                        fontSize: 38,
                         fontWeight: FontWeight.w800,
                         color: Colors.white,
-                        letterSpacing: -0.5,
+                        height: 1.1,
+                        letterSpacing: -1,
                       ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      'Latest Score',
+                      style: TextStyle(
+                        fontSize: 13,
+                        fontWeight: FontWeight.w600,
+                        color: Colors.white.withValues(alpha: 0.75),
+                        letterSpacing: 0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 8),
+                    // ── Context line ──
+                    Text(
+                      _contextLine(focusSubject),
+                      style: TextStyle(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w500,
+                        color: Colors.white.withValues(alpha: 0.55),
+                        height: 1.3,
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
                     ),
                   ],
                 ),
               ),
             ],
           ),
-          const SizedBox(height: AppSpacing.lg),
-          // Stats row
+          const SizedBox(height: AppSpacing.md + 4),
+          // ── Bottom: supporting stats bar ──
           Container(
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: AppSpacing.sm + 4,
+              horizontal: AppSpacing.md + 4,
+              vertical: AppSpacing.sm + 6,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.12),
+              color: Colors.white.withValues(alpha: 0.10),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Row(
@@ -359,6 +431,17 @@ class _HeroPerformanceCard extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  String _contextLine(String? focusSubject) {
+    final parts = <String>[];
+    parts.add(
+      '${stats.totalAttempts} exam${stats.totalAttempts == 1 ? '' : 's'}',
+    );
+    if (focusSubject != null) {
+      parts.add('Focus next: $focusSubject');
+    }
+    return parts.join(' · ');
   }
 
   Widget _heroDivider() {
@@ -507,7 +590,7 @@ class _QuickActionsSection extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 3. Performance snapshot grid
+// 3. Performance snapshot — unified card with hierarchy
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _PerformanceGrid extends StatelessWidget {
@@ -516,41 +599,98 @@ class _PerformanceGrid extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      children: [
-        Expanded(
-          child: _PerformanceGridItem(
-            icon: Icons.emoji_events_rounded,
-            label: 'Best',
-            value: '${stats.bestScore.round()}%',
-            color: AppColors.success,
+    return PremiumCard(
+      padding: const EdgeInsets.all(AppSpacing.md + 4),
+      child: Column(
+        children: [
+          // ── Primary metric: average score ──
+          Container(
+            width: double.infinity,
+            padding: const EdgeInsets.symmetric(
+              vertical: AppSpacing.md + 2,
+              horizontal: AppSpacing.md,
+            ),
+            decoration: BoxDecoration(
+              color: AppColors.primarySurface.withValues(alpha: 0.5),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+            child: Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(10),
+                  decoration: BoxDecoration(
+                    gradient: AppColors.primaryGradient,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Icon(
+                    Icons.analytics_rounded,
+                    size: 20,
+                    color: Colors.white,
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.md),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Average Score',
+                        style: Theme.of(context).textTheme.labelMedium
+                            ?.copyWith(
+                              color: AppColors.textSecondary,
+                              fontWeight: FontWeight.w500,
+                            ),
+                      ),
+                      const SizedBox(height: 2),
+                      Text(
+                        '${stats.averageScore.round()}%',
+                        style: Theme.of(context).textTheme.headlineSmall
+                            ?.copyWith(
+                              fontWeight: FontWeight.w800,
+                              color: AppColors.primary,
+                              letterSpacing: -0.5,
+                            ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm + 2),
-        Expanded(
-          child: _PerformanceGridItem(
-            icon: Icons.analytics_rounded,
-            label: 'Average',
-            value: '${stats.averageScore.round()}%',
-            color: AppColors.secondary,
+          const SizedBox(height: AppSpacing.md),
+          // ── Supporting metrics row ──
+          Row(
+            children: [
+              _SnapshotMetric(
+                icon: Icons.emoji_events_rounded,
+                label: 'Best Score',
+                value: '${stats.bestScore.round()}%',
+                color: AppColors.success,
+              ),
+              const SizedBox(width: AppSpacing.sm + 2),
+              _SnapshotMetric(
+                icon: Icons.assignment_rounded,
+                label: 'Exams Taken',
+                value: '${stats.totalAttempts}',
+                color: AppColors.secondary,
+              ),
+              const SizedBox(width: AppSpacing.sm + 2),
+              _SnapshotMetric(
+                icon: Icons.update_rounded,
+                label: 'Latest',
+                value: '${stats.latestScore.round()}%',
+                color: AppColors.accent,
+              ),
+            ],
           ),
-        ),
-        const SizedBox(width: AppSpacing.sm + 2),
-        Expanded(
-          child: _PerformanceGridItem(
-            icon: Icons.assignment_rounded,
-            label: 'Exams',
-            value: '${stats.totalAttempts}',
-            color: AppColors.primary,
-          ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }
 
-class _PerformanceGridItem extends StatelessWidget {
-  const _PerformanceGridItem({
+class _SnapshotMetric extends StatelessWidget {
+  const _SnapshotMetric({
     required this.icon,
     required this.label,
     required this.value,
@@ -564,50 +704,39 @@ class _PerformanceGridItem extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        vertical: AppSpacing.md + 4,
-        horizontal: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.card,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.04),
-            blurRadius: 8,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Column(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(12),
+    return Expanded(
+      child: Container(
+        padding: const EdgeInsets.symmetric(
+          vertical: AppSpacing.sm + 4,
+          horizontal: AppSpacing.sm,
+        ),
+        decoration: BoxDecoration(
+          color: color.withValues(alpha: 0.05),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+        child: Column(
+          children: [
+            Icon(icon, size: 18, color: color),
+            const SizedBox(height: AppSpacing.sm),
+            Text(
+              value,
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontWeight: FontWeight.w800,
+                color: AppColors.textPrimary,
+                letterSpacing: -0.3,
+              ),
             ),
-            child: Icon(icon, size: 20, color: color),
-          ),
-          const SizedBox(height: AppSpacing.sm + 2),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
-              color: AppColors.textPrimary,
-              letterSpacing: -0.3,
+            const SizedBox(height: 2),
+            Text(
+              label,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w500,
+                fontSize: 10.5,
+              ),
             ),
-          ),
-          const SizedBox(height: 2),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
@@ -654,6 +783,27 @@ class _SubjectInsightsCard extends StatelessWidget {
                 fullName: stats.weakestSubject!,
                 color: AppColors.warning,
               ),
+            const SizedBox(height: AppSpacing.sm + 4),
+            // ── Tappable affordance ──
+            Row(
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  'View Subject Breakdown',
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: AppColors.primary,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(width: 4),
+                Icon(
+                  Icons.arrow_forward_rounded,
+                  size: 14,
+                  color: AppColors.primary,
+                ),
+              ],
+            ),
           ],
         ),
       ),
