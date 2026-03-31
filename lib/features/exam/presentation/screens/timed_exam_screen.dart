@@ -1,3 +1,5 @@
+import 'dart:ui';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -21,7 +23,6 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
   @override
   void initState() {
     super.initState();
-    // Start the exam on first frame to ensure provider is ready.
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_started) {
         _started = true;
@@ -34,7 +35,6 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
   Widget build(BuildContext context) {
     final exam = ref.watch(timedExamProvider);
 
-    // Auto-navigate to results when submitted.
     ref.listen<TimedExamState>(timedExamProvider, (prev, next) {
       if (prev?.isSubmitted != true &&
           next.isSubmitted &&
@@ -60,90 +60,79 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
         if (!didPop) _showExitDialog(context);
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
-        appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () => _showExitDialog(context),
-          ),
-          title: _TimerChip(
-            formattedTime: exam.formattedTime,
-            remainingSeconds: exam.remainingSeconds,
-          ),
-          centerTitle: true,
-          bottom: PreferredSize(
-            preferredSize: const Size.fromHeight(3),
-            child: LinearProgressIndicator(
-              value: (exam.currentIndex + 1) / exam.totalQuestions,
-              backgroundColor: AppColors.divider,
-              color: AppColors.secondary,
-              minHeight: 3,
-            ),
-          ),
-        ),
-        body: Column(
-          children: [
-            Expanded(
-              child: SingleChildScrollView(
-                padding: const EdgeInsets.fromLTRB(
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.md,
-                  AppSpacing.lg,
-                ),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    // Question counter + subject
-                    _ExamQuestionHeader(
-                      questionNumber: exam.currentIndex + 1,
-                      totalQuestions: exam.totalQuestions,
-                      subjectName: question.subjectName,
-                    ),
-                    const SizedBox(height: AppSpacing.md + 4),
+        backgroundColor: AppColors.background,
+        body: SafeArea(
+          child: Column(
+            children: [
+              // ── Top exam bar ──
+              _ExamTopBar(exam: exam, onClose: () => _showExitDialog(context)),
 
-                    // Question text
-                    Text(
-                      question.questionText,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        height: 1.55,
-                        fontWeight: FontWeight.w500,
+              // ── Question content ──
+              Expanded(
+                child: SingleChildScrollView(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppSpacing.lg,
+                    AppSpacing.md,
+                    AppSpacing.lg,
+                    AppSpacing.lg,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Subject badge
+                      _ExamQuestionHeader(
+                        questionNumber: exam.currentIndex + 1,
+                        totalQuestions: exam.totalQuestions,
+                        subjectName: question.subjectName,
                       ),
-                    ),
-                    const SizedBox(height: AppSpacing.lg),
+                      const SizedBox(height: AppSpacing.md + 4),
 
-                    // Choices — exam mode: only idle/selected states
-                    ...List.generate(question.options.length, (i) {
-                      const labels = ['A', 'B', 'C', 'D'];
-                      final originalIndex = choiceOrder[i];
-                      return AnswerOptionCard(
-                        letter: labels[i],
-                        text: question.options[originalIndex].text,
-                        optionState: selectedAnswer == labels[i]
-                            ? AnswerOptionState.selected
-                            : AnswerOptionState.idle,
-                        onTap: () => ref
-                            .read(timedExamProvider.notifier)
-                            .selectAnswer(question.questionId, labels[i]),
-                      );
-                    }),
-                  ],
+                      // Question text
+                      Text(
+                        question.questionText,
+                        style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+                          height: 1.65,
+                          fontWeight: FontWeight.w500,
+                          fontSize: 17,
+                          color: AppColors.textPrimary,
+                          letterSpacing: -0.1,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.lg + 4),
+
+                      // Answer options
+                      ...List.generate(question.options.length, (i) {
+                        const labels = ['A', 'B', 'C', 'D'];
+                        final originalIndex = choiceOrder[i];
+                        return AnswerOptionCard(
+                          letter: labels[i],
+                          text: question.options[originalIndex].text,
+                          optionState: selectedAnswer == labels[i]
+                              ? AnswerOptionState.selected
+                              : AnswerOptionState.idle,
+                          onTap: () => ref
+                              .read(timedExamProvider.notifier)
+                              .selectAnswer(question.questionId, labels[i]),
+                        );
+                      }),
+                    ],
+                  ),
                 ),
               ),
-            ),
 
-            // Bottom bar
-            _ExamBottomBar(
-              exam: exam,
-              onPrevious: exam.isFirst
-                  ? null
-                  : () => ref.read(timedExamProvider.notifier).goToPrevious(),
-              onNext: exam.isLast
-                  ? null
-                  : () => ref.read(timedExamProvider.notifier).goToNext(),
-              onSubmit: () => _showSubmitDialog(context, exam),
-            ),
-          ],
+              // ── Bottom navigation bar ──
+              _ExamBottomBar(
+                exam: exam,
+                onPrevious: exam.isFirst
+                    ? null
+                    : () => ref.read(timedExamProvider.notifier).goToPrevious(),
+                onNext: exam.isLast
+                    ? null
+                    : () => ref.read(timedExamProvider.notifier).goToNext(),
+                onSubmit: () => _showSubmitDialog(context, exam),
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -171,7 +160,6 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
               Navigator.pop(ctx);
               ref.read(timedExamProvider.notifier).submitExam();
             },
-            style: FilledButton.styleFrom(backgroundColor: AppColors.secondary),
             child: const Text('Submit'),
           ),
         ],
@@ -203,9 +191,101 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
   }
 }
 
-// ===========================================================================
+// ═══════════════════════════════════════════════════════════════════════════════
+// Top exam bar
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _ExamTopBar extends StatelessWidget {
+  const _ExamTopBar({required this.exam, required this.onClose});
+  final TimedExamState exam;
+  final VoidCallback onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 2,
+      ),
+      decoration: BoxDecoration(
+        color: AppColors.card,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+            offset: const Offset(0, 2),
+          ),
+        ],
+      ),
+      child: Column(
+        children: [
+          Row(
+            children: [
+              // Close button
+              Container(
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: IconButton(
+                  icon: const Icon(Icons.close_rounded, size: 20),
+                  onPressed: onClose,
+                  constraints: const BoxConstraints(
+                    minWidth: 38,
+                    minHeight: 38,
+                  ),
+                  padding: EdgeInsets.zero,
+                  color: AppColors.textSecondary,
+                ),
+              ),
+              const Spacer(),
+              // Timer — the visual anchor
+              _TimerChip(
+                formattedTime: exam.formattedTime,
+                remainingSeconds: exam.remainingSeconds,
+              ),
+              const Spacer(),
+              // Question counter pill
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: AppColors.primarySurface,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+                child: Text(
+                  '${exam.currentIndex + 1}/${exam.totalQuestions}',
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.primary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          // Progress bar
+          ClipRRect(
+            borderRadius: BorderRadius.circular(4),
+            child: LinearProgressIndicator(
+              value: (exam.currentIndex + 1) / exam.totalQuestions,
+              backgroundColor: AppColors.divider,
+              color: AppColors.primary,
+              minHeight: 5,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
 // Timer chip
-// ===========================================================================
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _TimerChip extends StatelessWidget {
   const _TimerChip({
@@ -218,20 +298,14 @@ class _TimerChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final isLow = remainingSeconds <= 60;
-    final color = isLow ? AppColors.error : AppColors.textPrimary;
+    final color = isLow ? AppColors.error : AppColors.primary;
 
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
+      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
       decoration: BoxDecoration(
-        color: isLow
-            ? AppColors.error.withValues(alpha: 0.08)
-            : AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(
-          color: isLow
-              ? AppColors.error.withValues(alpha: 0.3)
-              : AppColors.divider,
-        ),
+        color: isLow ? AppColors.errorLight : AppColors.primarySurface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -242,9 +316,10 @@ class _TimerChip extends StatelessWidget {
             formattedTime,
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w700,
+              fontWeight: FontWeight.w800,
               fontFeatures: const [FontFeature.tabularFigures()],
               color: color,
+              letterSpacing: 0.5,
             ),
           ),
         ],
@@ -253,9 +328,9 @@ class _TimerChip extends StatelessWidget {
   }
 }
 
-// ===========================================================================
-// Question header (exam-specific, simpler than practice)
-// ===========================================================================
+// ═══════════════════════════════════════════════════════════════════════════════
+// Question header
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _ExamQuestionHeader extends StatelessWidget {
   const _ExamQuestionHeader({
@@ -273,28 +348,37 @@ class _ExamQuestionHeader extends StatelessWidget {
     return Row(
       children: [
         Container(
-          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            color: AppColors.secondary,
-            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            gradient: AppColors.primaryGradient,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
           child: Text(
             'Q$questionNumber of $totalQuestions',
             style: const TextStyle(
               fontSize: 12,
-              fontWeight: FontWeight.w600,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
+              letterSpacing: 0.2,
             ),
           ),
         ),
-        const SizedBox(width: AppSpacing.sm),
+        const SizedBox(width: AppSpacing.sm + 2),
         Expanded(
-          child: Text(
-            subjectName,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-            overflow: TextOverflow.ellipsis,
+          child: Container(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+            ),
+            child: Text(
+              subjectName,
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
+              ),
+              overflow: TextOverflow.ellipsis,
+            ),
           ),
         ),
       ],
@@ -302,9 +386,9 @@ class _ExamQuestionHeader extends StatelessWidget {
   }
 }
 
-// ===========================================================================
+// ═══════════════════════════════════════════════════════════════════════════════
 // Bottom bar
-// ===========================================================================
+// ═══════════════════════════════════════════════════════════════════════════════
 
 class _ExamBottomBar extends StatelessWidget {
   const _ExamBottomBar({
@@ -323,62 +407,61 @@ class _ExamBottomBar extends StatelessWidget {
   Widget build(BuildContext context) {
     return Container(
       padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: AppSpacing.sm,
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 4,
       ),
       decoration: BoxDecoration(
         color: AppColors.card,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
-            blurRadius: 8,
+            blurRadius: 10,
             offset: const Offset(0, -2),
           ),
         ],
       ),
-      child: SafeArea(
-        child: Row(
-          children: [
-            // Prev
-            _NavButton(
-              icon: Icons.chevron_left_rounded,
-              label: 'Prev',
-              onPressed: onPrevious,
-            ),
-            const SizedBox(width: AppSpacing.sm),
+      child: Row(
+        children: [
+          _NavButton(
+            icon: Icons.chevron_left_rounded,
+            label: 'Prev',
+            onPressed: onPrevious,
+          ),
+          const SizedBox(width: AppSpacing.sm),
 
-            // Progress / submit
-            Expanded(
-              child: exam.isLast
-                  ? FilledButton(
-                      onPressed: onSubmit,
-                      style: FilledButton.styleFrom(
-                        minimumSize: const Size(0, 46),
-                        backgroundColor: AppColors.secondary,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(
-                            AppSpacing.radiusMd,
-                          ),
+          Expanded(
+            child: exam.isLast
+                ? FilledButton(
+                    onPressed: onSubmit,
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 50),
+                      backgroundColor: AppColors.primary,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusLg,
                         ),
                       ),
-                      child: const Text('Submit Exam'),
-                    )
-                  : _ProgressInfo(
-                      answered: exam.answeredCount,
-                      total: exam.totalQuestions,
+                      textStyle: const TextStyle(
+                        fontSize: 15,
+                        fontWeight: FontWeight.w700,
+                      ),
                     ),
-            ),
+                    child: const Text('Submit Exam'),
+                  )
+                : _ProgressInfo(
+                    answered: exam.answeredCount,
+                    total: exam.totalQuestions,
+                  ),
+          ),
 
-            const SizedBox(width: AppSpacing.sm),
-            // Next
-            _NavButton(
-              icon: Icons.chevron_right_rounded,
-              label: 'Next',
-              onPressed: onNext,
-              iconFirst: false,
-            ),
-          ],
-        ),
+          const SizedBox(width: AppSpacing.sm),
+          _NavButton(
+            icon: Icons.chevron_right_rounded,
+            label: 'Next',
+            onPressed: onNext,
+            iconFirst: false,
+          ),
+        ],
       ),
     );
   }
@@ -392,18 +475,18 @@ class _ProgressInfo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Container(
-      height: 46,
+      height: 50,
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Text(
         '$answered of $total answered',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
           color: AppColors.textSecondary,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w600,
         ),
       ),
     );
@@ -426,19 +509,25 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onPressed != null
-        ? AppColors.textSecondary
+        ? AppColors.textPrimary
         : AppColors.disabled;
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: color),
+      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w600, color: color),
     );
 
     return InkWell(
       onTap: onPressed,
-      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 10),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+        decoration: BoxDecoration(
+          color: onPressed != null
+              ? AppColors.surface
+              : AppColors.surface.withValues(alpha: 0.5),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: iconFirst

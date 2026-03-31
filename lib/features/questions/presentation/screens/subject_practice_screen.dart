@@ -5,20 +5,20 @@ import 'package:go_router/go_router.dart';
 import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
-import '../../../../core/widgets/error_state_widget.dart';
 import '../../../../core/widgets/loading_indicator.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
-import '../../../../core/widgets/section_header.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../domain/question.dart';
+import '../providers/practice_session_provider.dart';
 import '../providers/question_providers.dart';
 
-/// Level 1 of the Question Bank — a scalable subject explorer.
+/// Manual subject-selection entry point for practice.
 ///
-/// Shows the 4 official subject groups as distinct cards.
-/// Tapping a subject navigates to the Level 2 subtopic screen.
-class QuestionBankScreen extends ConsumerWidget {
-  const QuestionBankScreen({super.key});
+/// Lets the user explicitly choose which subject to study.
+/// This is intentionally different from the Weak Areas screen,
+/// which is recommendation-driven.
+class SubjectPracticeScreen extends ConsumerWidget {
+  const SubjectPracticeScreen({super.key});
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -27,42 +27,32 @@ class QuestionBankScreen extends ConsumerWidget {
     return Scaffold(
       backgroundColor: AppColors.background,
       body: questionsAsync.when(
-        loading: () => const LoadingIndicator(message: 'Loading questions…'),
-        error: (error, _) => ErrorStateWidget(
-          message: 'Failed to load questions.\n$error',
-          onRetry: () => ref.invalidate(questionsProvider),
-        ),
+        loading: () => const LoadingIndicator(message: 'Loading subjects…'),
+        error: (error, _) =>
+            Center(child: Text('Failed to load questions.\n$error')),
         data: (questions) {
-          if (questions.isEmpty) {
-            return const Center(child: Text('No questions found.'));
-          }
-
-          final counts = _countBySubjectId(questions);
+          final subjectGroups = _groupBySubjectId(questions);
 
           return CustomScrollView(
             slivers: [
-              // ── Header ──
-              SliverToBoxAdapter(
+              // Header
+              const SliverToBoxAdapter(
                 child: SecondaryScreenHeader(
-                  title: 'Question Bank',
-                  subtitle:
-                      '${questions.length} questions across ${counts.length} subjects',
+                  title: 'Subject Practice',
+                  subtitle: 'Choose what you want to study',
                 ),
               ),
 
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
 
-              // ── Total count banner ──
+              // Intro card
               SliverToBoxAdapter(
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppSpacing.lg,
                   ),
                   child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md + 2,
-                      vertical: AppSpacing.md,
-                    ),
+                    padding: const EdgeInsets.all(AppSpacing.md + 2),
                     decoration: BoxDecoration(
                       color: AppColors.primarySurface.withValues(alpha: 0.5),
                       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -76,31 +66,20 @@ class QuestionBankScreen extends ConsumerWidget {
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: const Icon(
-                            Icons.library_books_rounded,
+                            Icons.menu_book_rounded,
                             size: 20,
                             color: Colors.white,
                           ),
                         ),
                         const SizedBox(width: AppSpacing.md),
                         Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                '${questions.length} Total Questions',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primaryDark,
-                                    ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Browse by subject to start practicing',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppColors.textSecondary),
-                              ),
-                            ],
+                          child: Text(
+                            'Select a subject group below to practice questions at your own pace.',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(
+                                  color: AppColors.textSecondary,
+                                  height: 1.5,
+                                ),
                           ),
                         ),
                       ],
@@ -111,19 +90,7 @@ class QuestionBankScreen extends ConsumerWidget {
 
               const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
 
-              // ── Subject group section ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: SectionHeader(
-                    title: 'Subject Groups',
-                    trailingText: '${counts.length} subjects',
-                  ),
-                ),
-              ),
-
+              // Subject cards
               SliverPadding(
                 padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
                 sliver: SliverList(
@@ -133,19 +100,19 @@ class QuestionBankScreen extends ConsumerWidget {
                           .where((s) => !s.isAll)
                           .toList();
                       final subject = subjectOptions[index];
-                      final count = counts[subject.id] ?? 0;
+                      final qs = subjectGroups[subject.id] ?? [];
 
                       return Padding(
                         padding: const EdgeInsets.only(
                           bottom: AppSpacing.sm + 4,
                         ),
-                        child: _SubjectExplorerCard(
+                        child: _SubjectCard(
                           subject: subject,
-                          questionCount: count,
+                          questionCount: qs.length,
                           color: _subjectColor(index),
                           icon: _subjectIcon(index),
                           onTap: () {
-                            if (count == 0) return;
+                            if (qs.isEmpty) return;
                             context.push(
                               RouteNames.questionBankSubject,
                               extra: subject.id,
@@ -168,38 +135,20 @@ class QuestionBankScreen extends ConsumerWidget {
       ),
     );
   }
-}
 
-Map<String, int> _countBySubjectId(List<Question> questions) {
-  final map = <String, int>{};
-  for (final q in questions) {
-    map[q.subjectId] = (map[q.subjectId] ?? 0) + 1;
+  Map<String, List<Question>> _groupBySubjectId(List<Question> questions) {
+    final map = <String, List<Question>>{};
+    for (final q in questions) {
+      map.putIfAbsent(q.subjectId, () => []).add(q);
+    }
+    return map;
   }
-  return map;
 }
 
-Color _subjectColor(int index) {
-  const colors = [
-    AppColors.primary,
-    AppColors.secondary,
-    AppColors.accent,
-    Color(0xFF7B68EE),
-  ];
-  return colors[index % colors.length];
-}
+// ─── Subject card ────────────────────────────────────────────────────────────
 
-IconData _subjectIcon(int index) {
-  const icons = [
-    Icons.science_rounded,
-    Icons.restaurant_rounded,
-    Icons.verified_rounded,
-    Icons.gavel_rounded,
-  ];
-  return icons[index % icons.length];
-}
-
-class _SubjectExplorerCard extends StatelessWidget {
-  const _SubjectExplorerCard({
+class _SubjectCard extends StatelessWidget {
+  const _SubjectCard({
     required this.subject,
     required this.questionCount,
     required this.color,
@@ -306,23 +255,32 @@ class _SubjectExplorerCard extends StatelessWidget {
                   ),
                 ],
               ),
-              const SizedBox(width: AppSpacing.xs),
-              Container(
-                padding: const EdgeInsets.all(4),
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(6),
-                ),
-                child: const Icon(
-                  Icons.chevron_right_rounded,
-                  size: 18,
-                  color: AppColors.textHint,
-                ),
-              ),
             ],
           ),
         ),
       ),
     );
   }
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+Color _subjectColor(int index) {
+  const colors = [
+    AppColors.primary,
+    AppColors.secondary,
+    AppColors.accent,
+    Color(0xFF7B68EE),
+  ];
+  return colors[index % colors.length];
+}
+
+IconData _subjectIcon(int index) {
+  const icons = [
+    Icons.science_rounded,
+    Icons.restaurant_rounded,
+    Icons.verified_rounded,
+    Icons.gavel_rounded,
+  ];
+  return icons[index % icons.length];
 }

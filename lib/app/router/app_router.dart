@@ -12,6 +12,7 @@ import '../../features/exam/presentation/screens/dashboard_screen.dart';
 import '../../features/exam/presentation/screens/exam_result_screen.dart';
 import '../../features/exam/presentation/screens/exam_review_screen.dart';
 import '../../features/exam/presentation/screens/exam_setup_screen.dart';
+import '../../features/exam/presentation/screens/subject_breakdown_screen.dart';
 import '../../features/exam/presentation/screens/timed_exam_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
@@ -21,7 +22,10 @@ import '../../features/questions/domain/question.dart';
 import '../../features/questions/presentation/providers/practice_session_provider.dart';
 import '../../features/questions/presentation/screens/practice_question_screen.dart';
 import '../../features/questions/presentation/screens/question_bank_screen.dart';
+import '../../features/questions/presentation/screens/question_bank_subject_screen.dart';
 import '../../features/questions/presentation/screens/question_detail_screen.dart';
+import '../../features/questions/presentation/screens/subject_practice_screen.dart';
+import '../../features/questions/presentation/screens/weak_areas_screen.dart';
 import 'route_names.dart';
 
 /// Notifier that triggers GoRouter redirect re-evaluation when auth state changes.
@@ -156,6 +160,25 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.dashboard,
         builder: (context, state) => const DashboardScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.subjectPractice,
+        builder: (context, state) => const SubjectPracticeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.weakAreas,
+        builder: (context, state) => const WeakAreasScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.subjectBreakdown,
+        builder: (context, state) => const SubjectBreakdownScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.questionBankSubject,
+        builder: (context, state) {
+          final subjectId = state.extra! as String;
+          return QuestionBankSubjectScreen(subjectId: subjectId);
+        },
       ),
       GoRoute(
         path: RouteNames.profile,

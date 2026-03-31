@@ -69,82 +69,128 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
       child: Scaffold(
         backgroundColor: AppColors.surface,
         appBar: AppBar(
-          leading: IconButton(
-            icon: const Icon(Icons.close_rounded),
-            onPressed: () => context.go(RouteNames.home),
+          leading: Padding(
+            padding: const EdgeInsets.all(6),
+            child: Material(
+              color: AppColors.card,
+              borderRadius: BorderRadius.circular(14),
+              elevation: 0,
+              child: InkWell(
+                borderRadius: BorderRadius.circular(14),
+                onTap: () => context.go(RouteNames.home),
+                child: const Icon(Icons.close_rounded, size: 20),
+              ),
+            ),
           ),
           title: Text(
             'Exam Results',
-            style: Theme.of(
-              context,
-            ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+              fontWeight: FontWeight.w700,
+              letterSpacing: -0.3,
+            ),
           ),
         ),
         body: SingleChildScrollView(
           padding: const EdgeInsets.all(AppSpacing.lg),
           child: Column(
             children: [
-              // ── Score card ──
+              // ── Score hero card ──
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: AppSpacing.xl),
+                padding: const EdgeInsets.symmetric(
+                  vertical: AppSpacing.xl + 8,
+                  horizontal: AppSpacing.lg,
+                ),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  gradient: passed
+                      ? const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF0D9488), Color(0xFF0F766E)],
+                        )
+                      : const LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFFDC2626), Color(0xFFB91C1C)],
+                        ),
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  border: Border.all(color: AppColors.divider),
+                  boxShadow: [
+                    BoxShadow(
+                      color: (passed ? AppColors.primary : AppColors.error)
+                          .withValues(alpha: 0.25),
+                      blurRadius: 20,
+                      offset: const Offset(0, 8),
+                    ),
+                  ],
                 ),
                 child: Column(
                   children: [
                     // Score circle
                     Container(
-                      width: 100,
-                      height: 100,
+                      width: 110,
+                      height: 110,
                       decoration: BoxDecoration(
                         shape: BoxShape.circle,
-                        color: passed
-                            ? AppColors.success.withValues(alpha: 0.1)
-                            : AppColors.error.withValues(alpha: 0.1),
+                        color: Colors.white.withValues(alpha: 0.18),
                         border: Border.all(
-                          color: passed ? AppColors.success : AppColors.error,
-                          width: 3,
+                          color: Colors.white.withValues(alpha: 0.5),
+                          width: 3.5,
                         ),
                       ),
                       alignment: Alignment.center,
                       child: Text(
                         '${result.scorePercent.round()}%',
-                        style: TextStyle(
-                          fontSize: 28,
+                        style: const TextStyle(
+                          fontSize: 30,
                           fontWeight: FontWeight.w800,
-                          color: passed ? AppColors.success : AppColors.error,
+                          color: Colors.white,
+                          letterSpacing: -0.5,
                         ),
                       ),
                     ),
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md + 4),
                     Text(
                       feedback.headline,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.w700,
+                        color: Colors.white,
+                        letterSpacing: -0.3,
                       ),
                     ),
                     const SizedBox(height: AppSpacing.xs),
                     Padding(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: AppSpacing.lg,
+                        horizontal: AppSpacing.md,
                       ),
                       child: Text(
                         feedback.subtitle,
                         textAlign: TextAlign.center,
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: Colors.white.withValues(alpha: 0.85),
+                          height: 1.4,
                         ),
                       ),
                     ),
                     if (result.wasAutoSubmitted) ...[
-                      const SizedBox(height: AppSpacing.xs),
-                      Text(
-                        'Time expired — auto-submitted',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                          color: AppColors.warning,
+                      const SizedBox(height: AppSpacing.sm),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm + 2,
+                          vertical: AppSpacing.xs,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.15),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusFull,
+                          ),
+                        ),
+                        child: Text(
+                          'Time expired — auto-submitted',
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.9),
+                                fontWeight: FontWeight.w500,
+                              ),
                         ),
                       ),
                     ],
@@ -152,27 +198,49 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
-              // ── Breakdown card ──
+              // ── Summary breakdown card ──
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.all(AppSpacing.lg),
+                padding: const EdgeInsets.all(AppSpacing.lg + 4),
                 decoration: BoxDecoration(
                   color: AppColors.card,
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   border: Border.all(color: AppColors.divider),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
                 ),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
-                      'Summary',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                    Row(
+                      children: [
+                        Container(
+                          width: 3,
+                          height: 18,
+                          decoration: BoxDecoration(
+                            color: AppColors.primary,
+                            borderRadius: BorderRadius.circular(2),
+                          ),
+                        ),
+                        const SizedBox(width: AppSpacing.sm),
+                        Text(
+                          'Summary',
+                          style: Theme.of(context).textTheme.titleSmall
+                              ?.copyWith(
+                                fontWeight: FontWeight.w700,
+                                letterSpacing: -0.2,
+                              ),
+                        ),
+                      ],
                     ),
-                    const SizedBox(height: AppSpacing.md),
+                    const SizedBox(height: AppSpacing.md + 4),
                     _StatRow(
                       label: 'Total Questions',
                       value: '${result.totalQuestions}',
@@ -187,13 +255,13 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                       value: '${result.correctCount}',
                       color: AppColors.success,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm + 2),
                     _StatRow(
                       label: 'Incorrect',
                       value: '${result.incorrectCount}',
                       color: AppColors.error,
                     ),
-                    const SizedBox(height: AppSpacing.sm),
+                    const SizedBox(height: AppSpacing.sm + 2),
                     _StatRow(
                       label: 'Unanswered',
                       value: '${result.unansweredCount}',
@@ -212,39 +280,50 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                 ),
               ),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Performance insights ──
               PerformanceInsightCard(breakdown: breakdown),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Subject breakdown ──
               if (breakdown.subjects.isNotEmpty) ...[
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: Text(
-                    'Subject Breakdown',
-                    style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                      fontWeight: FontWeight.w600,
+                Row(
+                  children: [
+                    Container(
+                      width: 3,
+                      height: 18,
+                      decoration: BoxDecoration(
+                        color: AppColors.primary,
+                        borderRadius: BorderRadius.circular(2),
+                      ),
                     ),
-                  ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      'Subject Breakdown',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                  ],
                 ),
-                const SizedBox(height: AppSpacing.sm),
+                const SizedBox(height: AppSpacing.md),
                 ...breakdown.subjects.map(
                   (s) => Padding(
-                    padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                    padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
                     child: SubjectPerformanceCard(performance: s),
                   ),
                 ),
               ],
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Study guidance ──
               StudyGuidanceCard(tips: guidance),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Retry actions ──
               RetryActionsSection(
@@ -269,7 +348,7 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                     : null,
               ),
 
-              const SizedBox(height: AppSpacing.lg),
+              const SizedBox(height: AppSpacing.xl),
 
               // ── Actions ──
               SizedBox(
@@ -280,22 +359,30 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                   icon: const Icon(Icons.rate_review_rounded, size: 20),
                   label: const Text('Review Exam'),
                   style: FilledButton.styleFrom(
-                    minimumSize: const Size(0, 52),
+                    minimumSize: const Size(0, 54),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w700,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                     ),
                   ),
                 ),
               ),
-              const SizedBox(height: AppSpacing.sm),
+              const SizedBox(height: AppSpacing.sm + 2),
               SizedBox(
                 width: double.infinity,
                 child: OutlinedButton(
                   onPressed: () => context.go(RouteNames.home),
                   style: OutlinedButton.styleFrom(
-                    minimumSize: const Size(0, 52),
+                    minimumSize: const Size(0, 54),
+                    textStyle: const TextStyle(
+                      fontSize: 15,
+                      fontWeight: FontWeight.w600,
+                    ),
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                     ),
                   ),
                   child: const Text('Back to Home'),
@@ -334,16 +421,18 @@ class _StatRow extends StatelessWidget {
         Expanded(
           child: Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.textSecondary,
+              fontWeight: FontWeight.w500,
+            ),
           ),
         ),
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
+            fontWeight: FontWeight.w800,
             color: color,
+            letterSpacing: -0.2,
           ),
         ),
       ],

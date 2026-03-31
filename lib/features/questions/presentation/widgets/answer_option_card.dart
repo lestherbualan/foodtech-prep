@@ -3,22 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 
-enum AnswerOptionState {
-  /// Default unselected state.
-  idle,
-
-  /// User has selected this option but hasn't checked yet.
-  selected,
-
-  /// After check: this is the correct answer (whether or not user picked it).
-  correct,
-
-  /// After check: user picked this but it is wrong.
-  incorrect,
-
-  /// After check: option not selected and not the correct answer.
-  disabled,
-}
+enum AnswerOptionState { idle, selected, correct, incorrect, disabled }
 
 class AnswerOptionCard extends StatelessWidget {
   const AnswerOptionCard({
@@ -47,35 +32,34 @@ class AnswerOptionCard extends StatelessWidget {
     ) = _resolveStyle();
 
     return Padding(
-      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
+      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 4),
       child: Material(
         color: bgColor,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         child: InkWell(
           onTap: onTap,
-          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           child: AnimatedContainer(
             duration: const Duration(milliseconds: 200),
             curve: Curves.easeOut,
             padding: const EdgeInsets.symmetric(
-              horizontal: AppSpacing.md,
-              vertical: 14,
+              horizontal: AppSpacing.md + 2,
+              vertical: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
               border: Border.all(color: borderColor, width: borderWidth),
             ),
             child: Row(
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                // Letter badge
                 AnimatedContainer(
                   duration: const Duration(milliseconds: 200),
-                  width: 32,
-                  height: 32,
+                  width: 38,
+                  height: 38,
                   decoration: BoxDecoration(
                     color: avatarBg,
-                    shape: BoxShape.circle,
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   alignment: Alignment.center,
                   child: trailingIcon != null
@@ -83,20 +67,22 @@ class AnswerOptionCard extends StatelessWidget {
                       : Text(
                           letter,
                           style: TextStyle(
-                            fontSize: 14,
-                            fontWeight: FontWeight.w600,
+                            fontSize: 15,
+                            fontWeight: FontWeight.w700,
                             color: avatarFg,
                           ),
                         ),
                 ),
-                const SizedBox(width: 14),
-                // Choice text
+                const SizedBox(width: AppSpacing.md),
                 Expanded(
                   child: Text(
                     text,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                      height: 1.45,
+                      height: 1.5,
                       color: textColor,
+                      fontWeight: optionState == AnswerOptionState.selected
+                          ? FontWeight.w600
+                          : FontWeight.w400,
                     ),
                   ),
                 ),
@@ -129,27 +115,27 @@ class AnswerOptionCard extends StatelessWidget {
         null,
       ),
       AnswerOptionState.selected => (
-        AppColors.primary.withValues(alpha: 0.05),
+        AppColors.primarySurface,
         AppColors.primary,
-        1.5,
+        2.0,
         AppColors.primary,
         Colors.white,
         AppColors.textPrimary,
         null,
       ),
       AnswerOptionState.correct => (
-        const Color(0xFFF0F9F1),
-        const Color(0xFFA5D6A7),
-        1.5,
+        AppColors.successLight,
+        AppColors.success.withValues(alpha: 0.4),
+        2.0,
         AppColors.success,
         Colors.white,
         AppColors.textPrimary,
         Icons.check_rounded,
       ),
       AnswerOptionState.incorrect => (
-        const Color(0xFFFDF0F0),
-        const Color(0xFFEF9A9A),
-        1.5,
+        AppColors.errorLight,
+        AppColors.error.withValues(alpha: 0.4),
+        2.0,
         AppColors.error,
         Colors.white,
         AppColors.textPrimary,
