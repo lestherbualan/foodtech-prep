@@ -57,7 +57,7 @@ class HomeScreen extends ConsumerWidget {
                             '${_timeGreeting()}, $firstName',
                             style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
-                                  fontWeight: FontWeight.w800,
+                                  fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,
                                 ),
                           ),
@@ -236,7 +236,7 @@ class _DashboardBody extends ConsumerWidget {
                 const SizedBox(height: AppSpacing.xl),
               ],
 
-              // ── 6. Recent activity ──
+              // ── 6. Recent activity (interactive) ──
               if (stats.recentAttempts.isNotEmpty) ...[
                 SectionHeader(
                   title: 'Recent Activity',
@@ -244,12 +244,8 @@ class _DashboardBody extends ConsumerWidget {
                   onTrailingTap: () => context.push(RouteNames.examHistory),
                 ),
                 _RecentActivityList(attempts: stats.recentAttempts),
-                const SizedBox(height: AppSpacing.xl),
+                const SizedBox(height: AppSpacing.xxl),
               ],
-
-              // ── 7. Trend insight ──
-              _TrendBanner(stats: stats),
-              const SizedBox(height: AppSpacing.xxl),
             ]),
           ),
         );
@@ -293,7 +289,7 @@ class _EmptyDashboard extends StatelessWidget {
                   'Welcome to FoodTech Prep',
                   style: Theme.of(
                     context,
-                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w800),
+                  ).textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700),
                   textAlign: TextAlign.center,
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -367,7 +363,7 @@ class _HeroPerformanceCard extends StatelessWidget {
                       '${stats.latestScore.round()}%',
                       style: const TextStyle(
                         fontSize: 38,
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.1,
                         letterSpacing: -1,
@@ -428,6 +424,12 @@ class _HeroPerformanceCard extends StatelessWidget {
               ],
             ),
           ),
+          // ── Trend chip ──
+          const SizedBox(height: AppSpacing.sm + 4),
+          _PerformanceTrendChip(
+            trend: stats.trend,
+            explanation: stats.trendExplanation,
+          ),
         ],
       ),
     );
@@ -486,7 +488,7 @@ class _ScoreRing extends StatelessWidget {
                 '${score.round()}',
                 style: const TextStyle(
                   fontSize: 22,
-                  fontWeight: FontWeight.w800,
+                  fontWeight: FontWeight.w700,
                   color: Colors.white,
                 ),
               ),
@@ -520,7 +522,7 @@ class _HeroMiniStat extends StatelessWidget {
             value,
             style: const TextStyle(
               fontSize: 16,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
           ),
@@ -646,7 +648,7 @@ class _PerformanceGrid extends StatelessWidget {
                         '${stats.averageScore.round()}%',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
-                              fontWeight: FontWeight.w800,
+                              fontWeight: FontWeight.w700,
                               color: AppColors.primary,
                               letterSpacing: -0.5,
                             ),
@@ -721,7 +723,7 @@ class _SnapshotMetric extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
                 color: AppColors.textPrimary,
                 letterSpacing: -0.3,
               ),
@@ -859,7 +861,7 @@ class _SubjectInsightRow extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: AppColors.textPrimary,
             ),
           ),
@@ -962,7 +964,7 @@ class _FocusRecommendations extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 6. Recent activity
+// 6. Recent activity (interactive)
 // ═══════════════════════════════════════════════════════════════════════════════
 
 class _RecentActivityList extends StatelessWidget {
@@ -995,79 +997,76 @@ class _RecentActivityRow extends StatelessWidget {
     final color = passed ? AppColors.success : AppColors.error;
     final dateStr = _shortDate(attempt.submittedAt);
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.card,
+    return Material(
+      color: AppColors.card,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.03),
-            blurRadius: 6,
-            offset: const Offset(0, 2),
-          ),
-        ],
-      ),
-      child: Row(
-        children: [
-          // Score badge
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.08),
-              borderRadius: BorderRadius.circular(14),
-            ),
-            alignment: Alignment.center,
-            child: Text(
-              '${attempt.scorePercent.round()}%',
-              style: TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.w800,
-                color: color,
+        onTap: () => context.push(RouteNames.attemptDetail, extra: attempt),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 6,
+                offset: const Offset(0, 2),
               ),
-            ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          // Details
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Timed Exam',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
+          child: Row(
+            children: [
+              // Score badge
+              Container(
+                width: 48,
+                height: 48,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
                 ),
-                const SizedBox(height: 3),
-                Text(
-                  '${attempt.correctCount}/${attempt.totalQuestions} correct  •  $dateStr',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                alignment: Alignment.center,
+                child: Text(
+                  '${attempt.scorePercent.round()}%',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w700,
+                    color: color,
                   ),
                 ),
-              ],
-            ),
-          ),
-          // Mini progress bar
-          SizedBox(
-            width: 44,
-            child: Column(
-              children: [
-                ClipRRect(
-                  borderRadius: BorderRadius.circular(3),
-                  child: LinearProgressIndicator(
-                    value: (attempt.scorePercent / 100).clamp(0.0, 1.0),
-                    minHeight: 5,
-                    backgroundColor: color.withValues(alpha: 0.12),
-                    valueColor: AlwaysStoppedAnimation(color),
-                  ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              // Details
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Timed Exam',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      '${attempt.correctCount}/${attempt.totalQuestions} correct  ·  $dateStr',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
                 ),
-              ],
-            ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              // Chevron affordance
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 20,
+                color: AppColors.textHint,
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -1092,76 +1091,61 @@ class _RecentActivityRow extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// 7. Trend banner
+// Performance trend chip — inline inside hero card
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class _TrendBanner extends StatelessWidget {
-  const _TrendBanner({required this.stats});
-  final DashboardStats stats;
+class _PerformanceTrendChip extends StatelessWidget {
+  const _PerformanceTrendChip({required this.trend, required this.explanation});
+
+  final TrendDirection trend;
+  final String explanation;
 
   @override
   Widget build(BuildContext context) {
-    final (icon, color, label) = switch (stats.trend) {
-      TrendDirection.improving => (
-        Icons.trending_up_rounded,
-        AppColors.success,
-        'Improving',
-      ),
-      TrendDirection.steady => (
-        Icons.trending_flat_rounded,
-        AppColors.secondary,
-        'Steady',
-      ),
+    final (icon, label) = switch (trend) {
+      TrendDirection.improving => (Icons.trending_up_rounded, 'Improving'),
+      TrendDirection.steady => (Icons.trending_flat_rounded, 'Steady'),
       TrendDirection.declining => (
         Icons.trending_down_rounded,
-        AppColors.warning,
         'Needs Attention',
       ),
-      TrendDirection.insufficient => (
-        Icons.show_chart_rounded,
-        AppColors.textHint,
-        'Building Data',
-      ),
+      TrendDirection.insufficient => (Icons.show_chart_rounded, 'Still Early'),
     };
 
     return Container(
-      padding: const EdgeInsets.all(AppSpacing.md + 2),
+      padding: const EdgeInsets.symmetric(
+        horizontal: AppSpacing.md,
+        vertical: AppSpacing.sm + 2,
+      ),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.06),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: color.withValues(alpha: 0.15)),
+        color: Colors.white.withValues(alpha: 0.10),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
         children: [
-          Container(
-            padding: const EdgeInsets.all(10),
-            decoration: BoxDecoration(
-              color: color.withValues(alpha: 0.12),
-              shape: BoxShape.circle,
+          Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.8)),
+          const SizedBox(width: AppSpacing.sm),
+          Text(
+            'Trend: $label',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w700,
+              color: Colors.white.withValues(alpha: 0.85),
+              letterSpacing: 0.1,
             ),
-            child: Icon(icon, color: color, size: 20),
           ),
-          const SizedBox(width: AppSpacing.md),
+          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Trend: $label',
-                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: color,
-                  ),
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  stats.trendExplanation,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.4,
-                  ),
-                ),
-              ],
+            child: Text(
+              explanation,
+              style: TextStyle(
+                fontSize: 10.5,
+                fontWeight: FontWeight.w500,
+                color: Colors.white.withValues(alpha: 0.5),
+                height: 1.3,
+              ),
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
             ),
           ),
         ],

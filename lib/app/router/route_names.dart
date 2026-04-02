@@ -18,5 +18,6 @@ class RouteNames {
   static const String subjectPractice = '/subject-practice';
   static const String weakAreas = '/weak-areas';
   static const String subjectBreakdown = '/subject-breakdown';
+  static const String attemptDetail = '/attempt-detail';
   static const String questionBankSubject = '/questions/subject';
 }

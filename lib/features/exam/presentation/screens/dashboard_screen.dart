@@ -198,7 +198,7 @@ class _ScoreIndicator extends StatelessWidget {
         Text(
           '${score.round()}%',
           style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: _scoreColor(score),
           ),
         ),

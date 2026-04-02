@@ -33,7 +33,7 @@ class StatBlock extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
             ),
           ),
@@ -85,7 +85,7 @@ class StatBlock extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: valueColor ?? AppColors.textPrimary,
             ),
           ),

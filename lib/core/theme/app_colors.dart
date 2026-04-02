@@ -49,6 +49,8 @@ class AppColors {
   static const Color divider = Color(0xFFE8E2D9);
   static const Color disabled = Color(0xFFC8C2B8);
   static const Color shimmer = Color(0xFFEDE8E0);
+  static const Color outline = Color(0xFFD5CFC5);
+  static const Color outlineVariant = Color(0xFFE8E2D9);
 
   // ── Gradient helpers ──
   static const LinearGradient primaryGradient = LinearGradient(

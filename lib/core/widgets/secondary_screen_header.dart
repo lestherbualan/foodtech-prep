@@ -95,7 +95,7 @@ class SecondaryScreenHeader extends StatelessWidget {
                   Text(
                     title,
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                      fontWeight: FontWeight.w800,
+                      fontWeight: FontWeight.w700,
                       letterSpacing: -0.4,
                     ),
                   ),

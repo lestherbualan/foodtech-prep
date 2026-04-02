@@ -1,14 +1,19 @@
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import 'app_colors.dart';
 
 class AppTextTheme {
   AppTextTheme._();
 
-  static const TextTheme textTheme = TextTheme(
+  static TextTheme get textTheme {
+    return GoogleFonts.interTextTheme(_baseTextTheme);
+  }
+
+  static const _baseTextTheme = TextTheme(
     headlineLarge: TextStyle(
       fontSize: 30,
-      fontWeight: FontWeight.w800,
+      fontWeight: FontWeight.w700,
       color: AppColors.textPrimary,
       letterSpacing: -0.8,
       height: 1.2,
@@ -71,7 +76,7 @@ class AppTextTheme {
     ),
     labelMedium: TextStyle(
       fontSize: 12,
-      fontWeight: FontWeight.w600,
+      fontWeight: FontWeight.w500,
       color: AppColors.textSecondary,
       letterSpacing: 0.1,
     ),

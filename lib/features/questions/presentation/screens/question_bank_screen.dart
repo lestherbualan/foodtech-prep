@@ -39,128 +39,148 @@ class QuestionBankScreen extends ConsumerWidget {
 
           final counts = _countBySubjectId(questions);
 
-          return CustomScrollView(
-            slivers: [
-              // ── Header ──
-              SliverToBoxAdapter(
-                child: SecondaryScreenHeader(
-                  title: 'Question Bank',
-                  subtitle: 'Browse questions by subject and topic.',
-                ),
+          return Column(
+            children: [
+              SecondaryScreenHeader(
+                title: 'Question Bank',
+                subtitle: 'Browse questions by subject and topic.',
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-
-              // ── Total count banner ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: AppSpacing.md + 2,
-                      vertical: AppSpacing.md,
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.sm),
                     ),
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySurface.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
-                          decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(12),
-                          ),
-                          child: const Icon(
-                            Icons.library_books_rounded,
-                            size: 20,
-                            color: Colors.white,
-                          ),
+
+                    // ── Intro banner ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
                         ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md + 2,
+                            vertical: AppSpacing.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primarySurface.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
+                          ),
+                          child: Row(
                             children: [
-                              Text(
-                                '${questions.length} Total Questions',
-                                style: Theme.of(context).textTheme.titleSmall
-                                    ?.copyWith(
-                                      fontWeight: FontWeight.w700,
-                                      color: AppColors.primaryDark,
-                                    ),
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.primaryGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.library_books_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
                               ),
-                              const SizedBox(height: 2),
-                              Text(
-                                'Browse by subject to start practicing',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(color: AppColors.textSecondary),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Explore Subjects',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryDark,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Browse by subject to start practicing',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
                               ),
                             ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xl),
+                    ),
 
-              // ── Subject group section ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: SectionHeader(
-                    title: 'Subject Groups',
-                    trailingText: '${counts.length} subjects',
-                  ),
-                ),
-              ),
-
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final subjectOptions = ExamSubject.options
-                          .where((s) => !s.isAll)
-                          .toList();
-                      final subject = subjectOptions[index];
-                      final count = counts[subject.id] ?? 0;
-
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSpacing.sm + 4,
+                    // ── Subject group section ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
                         ),
-                        child: _SubjectExplorerCard(
-                          subject: subject,
-                          questionCount: count,
-                          color: _subjectColor(index),
-                          icon: _subjectIcon(index),
-                          onTap: () {
-                            if (count == 0) return;
-                            context.push(
-                              RouteNames.questionBankSubject,
-                              extra: subject.id,
+                        child: SectionHeader(
+                          title: 'Subject Groups',
+                          trailingText: '${counts.length} subjects',
+                        ),
+                      ),
+                    ),
+
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final subjectOptions = ExamSubject.options
+                                .where((s) => !s.isAll)
+                                .toList();
+                            final subject = subjectOptions[index];
+                            final count = counts[subject.id] ?? 0;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.sm + 4,
+                              ),
+                              child: _SubjectExplorerCard(
+                                subject: subject,
+                                questionCount: count,
+                                color: _subjectColor(index),
+                                icon: _subjectIcon(index),
+                                onTap: () {
+                                  if (count == 0) return;
+                                  context.push(
+                                    RouteNames.questionBankSubject,
+                                    extra: subject.id,
+                                  );
+                                },
+                              ),
                             );
                           },
+                          childCount: ExamSubject.options
+                              .where((s) => !s.isAll)
+                              .length,
                         ),
-                      );
-                    },
-                    childCount: ExamSubject.options
-                        .where((s) => !s.isAll)
-                        .length,
-                  ),
+                      ),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xxl),
+                    ),
+                  ],
                 ),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             ],
           );
         },
@@ -254,7 +274,7 @@ class _SubjectExplorerCard extends StatelessWidget {
                     Text(
                       subject.label,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -272,40 +292,6 @@ class _SubjectExplorerCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isEmpty
-                          ? AppColors.surface
-                          : color.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusFull,
-                      ),
-                    ),
-                    child: Text(
-                      '$questionCount',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: isEmpty ? AppColors.textHint : color,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'questions',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textHint,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(width: AppSpacing.xs),
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(

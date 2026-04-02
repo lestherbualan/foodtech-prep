@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 import '../constants/app_spacing.dart';
 import 'app_colors.dart';
@@ -26,9 +27,10 @@ class AppTheme {
         scrolledUnderElevation: 0,
         centerTitle: false,
         foregroundColor: AppColors.textPrimary,
-        titleTextStyle: AppTextTheme.textTheme.titleMedium?.copyWith(
+        titleTextStyle: GoogleFonts.inter(
           fontWeight: FontWeight.w700,
           fontSize: 18,
+          color: AppColors.textPrimary,
         ),
         systemOverlayStyle: SystemUiOverlayStyle.dark.copyWith(
           statusBarColor: Colors.transparent,
@@ -43,7 +45,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.2,
@@ -59,7 +61,7 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
-          textStyle: const TextStyle(
+          textStyle: GoogleFonts.inter(
             fontSize: 16,
             fontWeight: FontWeight.w600,
             letterSpacing: 0.2,
@@ -74,13 +76,19 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           ),
-          textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
+          textStyle: GoogleFonts.inter(
+            fontSize: 16,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       textButtonTheme: TextButtonThemeData(
         style: TextButton.styleFrom(
           foregroundColor: AppColors.primary,
-          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
+          textStyle: GoogleFonts.inter(
+            fontSize: 14,
+            fontWeight: FontWeight.w600,
+          ),
         ),
       ),
       inputDecorationTheme: InputDecorationTheme(
@@ -110,7 +118,7 @@ class AppTheme {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
           borderSide: const BorderSide(color: AppColors.error, width: 2),
         ),
-        hintStyle: const TextStyle(color: AppColors.textHint),
+        hintStyle: GoogleFonts.inter(color: AppColors.textHint),
       ),
       cardTheme: CardThemeData(
         elevation: 0,
@@ -126,7 +134,7 @@ class AppTheme {
       ),
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface,
-        labelStyle: const TextStyle(
+        labelStyle: GoogleFonts.inter(
           fontSize: 12,
           fontWeight: FontWeight.w500,
           color: AppColors.textSecondary,

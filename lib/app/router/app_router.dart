@@ -9,6 +9,8 @@ import '../../features/exam/domain/exam_models.dart';
 import '../../features/exam/presentation/providers/timed_exam_provider.dart';
 import '../../features/exam/presentation/screens/exam_history_screen.dart';
 import '../../features/exam/presentation/screens/dashboard_screen.dart';
+import '../../features/exam/domain/saved_exam_attempt.dart';
+import '../../features/exam/presentation/screens/attempt_detail_screen.dart';
 import '../../features/exam/presentation/screens/exam_result_screen.dart';
 import '../../features/exam/presentation/screens/exam_review_screen.dart';
 import '../../features/exam/presentation/screens/exam_setup_screen.dart';
@@ -178,6 +180,13 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) {
           final subjectId = state.extra! as String;
           return QuestionBankSubjectScreen(subjectId: subjectId);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.attemptDetail,
+        builder: (context, state) {
+          final attempt = state.extra! as SavedExamAttempt;
+          return AttemptDetailScreen(attempt: attempt);
         },
       ),
       GoRoute(

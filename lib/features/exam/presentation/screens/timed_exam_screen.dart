@@ -314,7 +314,7 @@ class _TimerChip extends StatelessWidget {
             formattedTime,
             style: TextStyle(
               fontSize: 15,
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               fontFeatures: const [FontFeature.tabularFigures()],
               color: color,
               letterSpacing: 0.5,

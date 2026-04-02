@@ -32,102 +32,116 @@ class SubjectPracticeScreen extends ConsumerWidget {
         data: (questions) {
           final subjectGroups = _groupBySubjectId(questions);
 
-          return CustomScrollView(
-            slivers: [
-              // Header
-              const SliverToBoxAdapter(
-                child: SecondaryScreenHeader(
-                  title: 'Subject Practice',
-                  subtitle: 'Choose what you want to study.',
-                ),
+          return Column(
+            children: [
+              const SecondaryScreenHeader(
+                title: 'Subject Practice',
+                subtitle: 'Choose what you want to study.',
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-
-              // Intro card
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: Container(
-                    padding: const EdgeInsets.all(AppSpacing.md + 2),
-                    decoration: BoxDecoration(
-                      color: AppColors.primarySurface.withValues(alpha: 0.5),
-                      borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.sm),
                     ),
-                    child: Row(
-                      children: [
-                        Container(
-                          padding: const EdgeInsets.all(10),
+
+                    // Intro card
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.all(AppSpacing.md + 2),
                           decoration: BoxDecoration(
-                            gradient: AppColors.primaryGradient,
-                            borderRadius: BorderRadius.circular(12),
+                            color: AppColors.primarySurface.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
                           ),
-                          child: const Icon(
-                            Icons.menu_book_rounded,
-                            size: 20,
-                            color: Colors.white,
-                          ),
-                        ),
-                        const SizedBox(width: AppSpacing.md),
-                        Expanded(
-                          child: Text(
-                            'Select a subject group below to practice questions at your own pace.',
-                            style: Theme.of(context).textTheme.bodySmall
-                                ?.copyWith(
-                                  color: AppColors.textSecondary,
-                                  height: 1.5,
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.primaryGradient,
+                                  borderRadius: BorderRadius.circular(12),
                                 ),
+                                child: const Icon(
+                                  Icons.menu_book_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Text(
+                                  'Select a subject group below to practice questions at your own pace.',
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary,
+                                        height: 1.5,
+                                      ),
+                                ),
+                              ),
+                            ],
                           ),
                         ),
-                      ],
+                      ),
                     ),
-                  ),
-                ),
-              ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xl),
+                    ),
 
-              // Subject cards
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate(
-                    (context, index) {
-                      final subjectOptions = ExamSubject.options
-                          .where((s) => !s.isAll)
-                          .toList();
-                      final subject = subjectOptions[index];
-                      final qs = subjectGroups[subject.id] ?? [];
+                    // Subject cards
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final subjectOptions = ExamSubject.options
+                                .where((s) => !s.isAll)
+                                .toList();
+                            final subject = subjectOptions[index];
+                            final qs = subjectGroups[subject.id] ?? [];
 
-                      return Padding(
-                        padding: const EdgeInsets.only(
-                          bottom: AppSpacing.sm + 4,
-                        ),
-                        child: _SubjectCard(
-                          subject: subject,
-                          questionCount: qs.length,
-                          color: _subjectColor(index),
-                          icon: _subjectIcon(index),
-                          onTap: () {
-                            if (qs.isEmpty) return;
-                            context.push(
-                              RouteNames.questionBankSubject,
-                              extra: subject.id,
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.sm + 4,
+                              ),
+                              child: _SubjectCard(
+                                subject: subject,
+                                questionCount: qs.length,
+                                color: _subjectColor(index),
+                                icon: _subjectIcon(index),
+                                onTap: () {
+                                  if (qs.isEmpty) return;
+                                  context.push(
+                                    RouteNames.questionBankSubject,
+                                    extra: subject.id,
+                                  );
+                                },
+                              ),
                             );
                           },
+                          childCount: ExamSubject.options
+                              .where((s) => !s.isAll)
+                              .length,
                         ),
-                      );
-                    },
-                    childCount: ExamSubject.options
-                        .where((s) => !s.isAll)
-                        .length,
-                  ),
+                      ),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xxl),
+                    ),
+                  ],
                 ),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             ],
           );
         },
@@ -203,7 +217,7 @@ class _SubjectCard extends StatelessWidget {
                     Text(
                       subject.label,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: -0.2,
                       ),
                     ),
@@ -221,38 +235,17 @@ class _SubjectCard extends StatelessWidget {
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
-              Column(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 12,
-                      vertical: 6,
-                    ),
-                    decoration: BoxDecoration(
-                      color: isEmpty
-                          ? AppColors.surface
-                          : color.withValues(alpha: 0.08),
-                      borderRadius: BorderRadius.circular(
-                        AppSpacing.radiusFull,
-                      ),
-                    ),
-                    child: Text(
-                      '$questionCount',
-                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                        color: isEmpty ? AppColors.textHint : color,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'questions',
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: AppColors.textHint,
-                      fontSize: 10,
-                    ),
-                  ),
-                ],
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: isEmpty ? AppColors.disabled : AppColors.textHint,
+                ),
               ),
             ],
           ),

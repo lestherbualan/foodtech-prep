@@ -28,23 +28,27 @@ class WeakAreasScreen extends ConsumerWidget {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      body: CustomScrollView(
-        slivers: [
-          // Header
-          const SliverToBoxAdapter(
-            child: SecondaryScreenHeader(
-              title: 'Weak Areas',
-              subtitle:
-                  'Review the subjects and concepts that need more attention.',
+      body: Column(
+        children: [
+          const SecondaryScreenHeader(
+            title: 'Weak Areas',
+            subtitle:
+                'Review the subjects and concepts that need more attention.',
+          ),
+          Expanded(
+            child: CustomScrollView(
+              slivers: [
+                if (user == null)
+                  const SliverFillRemaining(
+                    child: Center(
+                      child: Text('Sign in to see recommendations.'),
+                    ),
+                  )
+                else
+                  _WeakAreasBody(userId: user.uid),
+              ],
             ),
           ),
-
-          if (user == null)
-            const SliverFillRemaining(
-              child: Center(child: Text('Sign in to see recommendations.')),
-            )
-          else
-            _WeakAreasBody(userId: user.uid),
         ],
       ),
     );
@@ -266,7 +270,7 @@ class _WeakSubjectHeroCard extends StatelessWidget {
                     Text(
                       subjectAbbr,
                       style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.w800,
+                        fontWeight: FontWeight.w700,
                         letterSpacing: -0.3,
                       ),
                     ),
@@ -290,7 +294,7 @@ class _WeakSubjectHeroCard extends StatelessWidget {
               child: FilledButton.icon(
                 onPressed: onPractice,
                 icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                label: Text('Practice $subjectAbbr ($questionCount questions)'),
+                label: Text('Practice $subjectAbbr'),
                 style: FilledButton.styleFrom(
                   backgroundColor: AppColors.warning,
                   foregroundColor: Colors.white,

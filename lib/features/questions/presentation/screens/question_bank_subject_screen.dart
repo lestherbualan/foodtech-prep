@@ -58,87 +58,97 @@ class QuestionBankSubjectScreen extends ConsumerWidget {
 
           final subtopics = _groupBySubtopic(questions);
 
-          return CustomScrollView(
-            slivers: [
-              // ── Header ──
-              SliverToBoxAdapter(
-                child: SecondaryScreenHeader(
-                  title: subjectOpt.label,
-                  subtitle:
-                      '${subjectOpt.subtitle} • ${questions.length} questions',
-                ),
+          return Column(
+            children: [
+              SecondaryScreenHeader(
+                title: subjectOpt.label,
+                subtitle: subjectOpt.subtitle,
               ),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.sm),
+                    ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.sm)),
-
-              // ── Practice All button ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: _PracticeAllCard(
-                    questionCount: questions.length,
-                    onTap: () {
-                      final shuffled = List<Question>.from(questions)
-                        ..shuffle();
-                      context.push(
-                        RouteNames.practice,
-                        extra: PracticeSessionArgs(
-                          questions: shuffled,
-                          startIndex: 0,
+                    // ── Practice All button ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
                         ),
-                      );
-                    },
-                  ),
-                ),
-              ),
+                        child: _PracticeAllCard(
+                          onTap: () {
+                            final shuffled = List<Question>.from(questions)
+                              ..shuffle();
+                            context.push(
+                              RouteNames.practice,
+                              extra: PracticeSessionArgs(
+                                questions: shuffled,
+                                startIndex: 0,
+                              ),
+                            );
+                          },
+                        ),
+                      ),
+                    ),
 
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xl)),
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xl),
+                    ),
 
-              // ── Subtopic section header ──
-              SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.lg,
-                  ),
-                  child: SectionHeader(
-                    title: 'Subtopics',
-                    trailingText: '${subtopics.length} topics',
-                  ),
-                ),
-              ),
+                    // ── Subtopic section header ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
+                        child: SectionHeader(
+                          title: 'Subtopics',
+                          trailingText: '${subtopics.length} topics',
+                        ),
+                      ),
+                    ),
 
-              // ── Subtopic cards ──
-              SliverPadding(
-                padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
-                sliver: SliverList(
-                  delegate: SliverChildBuilderDelegate((context, index) {
-                    final subtopicName = subtopics.keys.elementAt(index);
-                    final qs = subtopics[subtopicName]!;
+                    // ── Subtopic cards ──
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate((context, index) {
+                          final subtopicName = subtopics.keys.elementAt(index);
+                          final qs = subtopics[subtopicName]!;
 
-                    return Padding(
-                      padding: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
-                      child: _SubtopicCard(
-                        subtopicName: subtopicName,
-                        questionCount: qs.length,
-                        color: _subtopicColor(index),
-                        onTap: () {
-                          context.push(
-                            RouteNames.practice,
-                            extra: PracticeSessionArgs(
-                              questions: qs,
-                              startIndex: 0,
+                          return Padding(
+                            padding: const EdgeInsets.only(
+                              bottom: AppSpacing.sm + 2,
+                            ),
+                            child: _SubtopicCard(
+                              subtopicName: subtopicName,
+                              questionCount: qs.length,
+                              color: _subtopicColor(index),
+                              onTap: () {
+                                context.push(
+                                  RouteNames.practice,
+                                  extra: PracticeSessionArgs(
+                                    questions: qs,
+                                    startIndex: 0,
+                                  ),
+                                );
+                              },
                             ),
                           );
-                        },
+                        }, childCount: subtopics.length),
                       ),
-                    );
-                  }, childCount: subtopics.length),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xxl),
+                    ),
+                  ],
                 ),
               ),
-
-              const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.xxl)),
             ],
           );
         },
@@ -158,9 +168,8 @@ class QuestionBankSubjectScreen extends ConsumerWidget {
 // ─── Practice All card ───────────────────────────────────────────────────────
 
 class _PracticeAllCard extends StatelessWidget {
-  const _PracticeAllCard({required this.questionCount, required this.onTap});
+  const _PracticeAllCard({required this.onTap});
 
-  final int questionCount;
   final VoidCallback onTap;
 
   @override
@@ -189,7 +198,7 @@ class _PracticeAllCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'Practice All Questions',
+                  'Start Subject Review',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w700,
@@ -198,7 +207,7 @@ class _PracticeAllCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 3),
                 Text(
-                  '$questionCount questions • shuffled order',
+                  'Shuffled order · all topics included',
                   style: TextStyle(
                     fontSize: 13,
                     color: Colors.white.withValues(alpha: 0.8),
@@ -277,13 +286,6 @@ class _SubtopicCard extends StatelessWidget {
                       ),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      '$questionCount question${questionCount == 1 ? '' : 's'}',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
                     ),
                   ],
                 ),

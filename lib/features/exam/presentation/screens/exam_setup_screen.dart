@@ -136,7 +136,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                               'Ready for Exam Mode?',
                               style: TextStyle(
                                 fontSize: 22,
-                                fontWeight: FontWeight.w800,
+                                fontWeight: FontWeight.w700,
                                 color: Colors.white,
                                 letterSpacing: -0.3,
                               ),

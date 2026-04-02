@@ -167,7 +167,7 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                         '${result.scorePercent.round()}%',
                         style: const TextStyle(
                           fontSize: 30,
-                          fontWeight: FontWeight.w800,
+                          fontWeight: FontWeight.w700,
                           color: Colors.white,
                           letterSpacing: -0.5,
                         ),
@@ -455,7 +455,7 @@ class _StatRow extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: color,
             letterSpacing: -0.2,
           ),

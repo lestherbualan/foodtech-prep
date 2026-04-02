@@ -309,7 +309,7 @@ class _StatTile extends StatelessWidget {
                 Text(
                   value,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -0.3,
                   ),
                 ),
@@ -453,7 +453,7 @@ class _InsightRow extends StatelessWidget {
         Text(
           value,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w800,
+            fontWeight: FontWeight.w700,
             color: AppColors.textPrimary,
           ),
         ),

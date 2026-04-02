@@ -37,19 +37,25 @@ class ExamSubjectSelectionCard extends StatelessWidget {
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(
               color: isSelected
-                  ? AppColors.primary.withValues(alpha: 0.5)
+                  ? AppColors.primary.withValues(alpha: 0.6)
                   : AppColors.divider,
               width: isSelected ? 1.5 : 1,
             ),
             boxShadow: isSelected
                 ? [
                     BoxShadow(
-                      color: AppColors.primary.withValues(alpha: 0.08),
-                      blurRadius: 8,
-                      offset: const Offset(0, 2),
+                      color: AppColors.primary.withValues(alpha: 0.10),
+                      blurRadius: 12,
+                      offset: const Offset(0, 3),
                     ),
                   ]
-                : null,
+                : [
+                    BoxShadow(
+                      color: Colors.black.withValues(alpha: 0.03),
+                      blurRadius: 6,
+                      offset: const Offset(0, 1),
+                    ),
+                  ],
           ),
           child: Row(
             children: [
@@ -65,6 +71,14 @@ class ExamSubjectSelectionCard extends StatelessWidget {
                     color: isSelected ? AppColors.primary : AppColors.disabled,
                     width: isSelected ? 2 : 1.5,
                   ),
+                  boxShadow: isSelected
+                      ? [
+                          BoxShadow(
+                            color: AppColors.primary.withValues(alpha: 0.2),
+                            blurRadius: 4,
+                          ),
+                        ]
+                      : null,
                 ),
                 child: isSelected
                     ? const Icon(

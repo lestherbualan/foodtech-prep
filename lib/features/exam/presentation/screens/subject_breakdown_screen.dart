@@ -285,7 +285,7 @@ class _SummaryChip extends StatelessWidget {
           Text(
             value,
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
-              fontWeight: FontWeight.w800,
+              fontWeight: FontWeight.w700,
               color: color,
               letterSpacing: -0.3,
             ),
@@ -375,7 +375,7 @@ class _SubjectRankCard extends StatelessWidget {
               '#$rank',
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: badgeColor,
-                fontWeight: FontWeight.w800,
+                fontWeight: FontWeight.w700,
               ),
             ),
           ),
@@ -388,7 +388,7 @@ class _SubjectRankCard extends StatelessWidget {
                 Text(
                   data.abbr,
                   style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                    fontWeight: FontWeight.w800,
+                    fontWeight: FontWeight.w700,
                     letterSpacing: -0.2,
                   ),
                 ),
