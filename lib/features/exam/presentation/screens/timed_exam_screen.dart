@@ -6,6 +6,8 @@ import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../questions/presentation/widgets/answer_option_card.dart';
+import '../../../reports/domain/question_report.dart';
+import '../../../reports/presentation/widgets/report_question_sheet.dart';
 import '../providers/timed_exam_provider.dart';
 
 class TimedExamScreen extends ConsumerStatefulWidget {
@@ -77,11 +79,17 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      // Subject badge
+                      // Subject badge + report button
                       _ExamQuestionHeader(
                         questionNumber: exam.currentIndex + 1,
                         totalQuestions: exam.totalQuestions,
                         subjectName: question.subjectName,
+                        onReport: () => showReportQuestionSheet(
+                          context: context,
+                          ref: ref,
+                          question: question,
+                          reportContext: ReportContext.timedExam,
+                        ),
                       ),
                       const SizedBox(height: AppSpacing.md + 4),
 
@@ -335,11 +343,13 @@ class _ExamQuestionHeader extends StatelessWidget {
     required this.questionNumber,
     required this.totalQuestions,
     required this.subjectName,
+    this.onReport,
   });
 
   final int questionNumber;
   final int totalQuestions;
   final String subjectName;
+  final VoidCallback? onReport;
 
   @override
   Widget build(BuildContext context) {
@@ -379,6 +389,20 @@ class _ExamQuestionHeader extends StatelessWidget {
             ),
           ),
         ),
+        if (onReport != null) ...[
+          const SizedBox(width: AppSpacing.xs),
+          GestureDetector(
+            onTap: onReport,
+            child: Padding(
+              padding: const EdgeInsets.all(4),
+              child: Icon(
+                Icons.flag_outlined,
+                size: 18,
+                color: AppColors.textHint,
+              ),
+            ),
+          ),
+        ],
       ],
     );
   }

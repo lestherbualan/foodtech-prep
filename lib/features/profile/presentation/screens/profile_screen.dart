@@ -1,12 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:go_router/go_router.dart';
+
+import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../../exam/presentation/providers/dashboard_providers.dart';
+import '../../../reports/presentation/providers/report_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -45,6 +49,14 @@ class ProfileScreen extends ConsumerWidget {
 
                   // ── 3. Subject insight card ──
                   _SubjectInsightSection(userId: user.uid),
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // ── Admin: Reported Questions ──
+                  if (isAdminUid(user.uid))
+                    _AdminReportButton(
+                      onTap: () => context.push(RouteNames.reportList),
+                    ),
 
                   const SizedBox(height: AppSpacing.xl),
 
@@ -458,6 +470,37 @@ class _InsightRow extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Admin — Reported Questions entry point
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _AdminReportButton extends StatelessWidget {
+  const _AdminReportButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(Icons.flag_outlined, size: 18, color: AppColors.warning),
+      label: Text(
+        'Reported Questions',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.warning,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        side: const BorderSide(color: AppColors.warning),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
     );
   }
 }

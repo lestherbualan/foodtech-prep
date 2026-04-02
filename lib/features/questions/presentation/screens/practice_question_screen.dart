@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../reports/domain/question_report.dart';
+import '../../../reports/presentation/widgets/report_question_sheet.dart';
 import '../../domain/question.dart';
 import '../providers/practice_session_provider.dart';
 import '../widgets/answer_option_card.dart';
@@ -43,6 +45,19 @@ class PracticeQuestionScreen extends ConsumerWidget {
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
+        actions: [
+          IconButton(
+            onPressed: () => showReportQuestionSheet(
+              context: context,
+              ref: ref,
+              question: question,
+              reportContext: ReportContext.practice,
+            ),
+            icon: const Icon(Icons.flag_outlined, size: 20),
+            tooltip: 'Report Question',
+            color: AppColors.textHint,
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
           child: LinearProgressIndicator(

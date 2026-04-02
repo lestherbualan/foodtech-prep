@@ -28,6 +28,8 @@ import '../../features/questions/presentation/screens/question_bank_subject_scre
 import '../../features/questions/presentation/screens/question_detail_screen.dart';
 import '../../features/questions/presentation/screens/subject_practice_screen.dart';
 import '../../features/questions/presentation/screens/weak_areas_screen.dart';
+import '../../features/reports/presentation/screens/report_detail_screen.dart';
+import '../../features/reports/presentation/screens/report_list_screen.dart';
 import 'route_names.dart';
 
 /// Notifier that triggers GoRouter redirect re-evaluation when auth state changes.
@@ -192,6 +194,17 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.reportList,
+        builder: (context, state) => const ReportListScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.reportDetail,
+        builder: (context, state) {
+          final questionId = state.extra! as String;
+          return ReportDetailScreen(questionId: questionId);
+        },
       ),
     ],
   );
