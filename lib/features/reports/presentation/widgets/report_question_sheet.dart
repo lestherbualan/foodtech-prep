@@ -67,14 +67,35 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
   }
 
   Future<void> _submit() async {
-    if (_selectedIssues.isEmpty) return;
+    // Validate selection
+    if (_selectedIssues.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select at least one issue to report.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    // Ensure user is signed in before starting submit/loading state
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('You must be signed in to submit a report.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
 
     setState(() => _submitting = true);
 
     try {
-      final user = FirebaseAuth.instance.currentUser;
-      if (user == null) return;
-
+      debugPrint(
+        '[ReportSheet] Starting submit for question=${widget.question.questionId} uid=${user.uid}',
+      );
       final preview = widget.question.questionText.length > 120
           ? '${widget.question.questionText.substring(0, 120)}...'
           : widget.question.questionText;
@@ -102,7 +123,12 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
       final repo = widget.ref.read(reportRepositoryProvider);
       await repo.submitReport(report);
 
+      debugPrint(
+        '[ReportSheet] submitReport returned successfully for question=${widget.question.questionId}',
+      );
+
       if (!mounted) return;
+      // Close sheet and inform user of success
       Navigator.pop(context);
 
       ScaffoldMessenger.of(context).showSnackBar(
@@ -115,6 +141,7 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
     } catch (e) {
       if (!mounted) return;
       setState(() => _submitting = false);
+      debugPrint('[ReportSheet] Failed to submit report: $e');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text('Failed to submit report: $e'),
