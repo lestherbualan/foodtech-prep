@@ -1,9 +1,11 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../../core/constants/user_roles.dart';
+
 /// Firestore-persisted user profile at `users/{uid}`.
 ///
-/// Contains auth-derived fields, app-owned stats, and
-/// future-ready maps for preferences/activity/study summaries.
+/// Contains auth-derived fields, app-owned stats, role/permissions,
+/// and future-ready maps for preferences/activity/study summaries.
 class UserProfile {
   const UserProfile({
     required this.uid,
@@ -18,6 +20,8 @@ class UserProfile {
     this.createdAt,
     this.lastLoginAt,
     this.lastActiveAt,
+    this.role = UserRole.user,
+    this.permissions = const UserPermissions(),
     this.stats = const UserStats(),
     this.preferences = const {},
     this.activitySummary = const {},
@@ -40,11 +44,19 @@ class UserProfile {
   final DateTime? lastLoginAt;
   final DateTime? lastActiveAt;
 
+  // ── Role & permissions ──
+  final UserRole role;
+  final UserPermissions permissions;
+
   // ── App-owned summary data ──
   final UserStats stats;
   final Map<String, dynamic> preferences;
   final Map<String, dynamic> activitySummary;
   final Map<String, dynamic> studySummary;
+
+  /// Whether this user has any elevated privileges.
+  bool get isPrivileged =>
+      role == UserRole.superAdmin || role == UserRole.questionAdmin;
 
   /// Serialises for Firestore writes.
   ///
@@ -61,6 +73,8 @@ class UserProfile {
       'provider': provider,
       'providers': providers,
       if (isNewUser) 'createdAt': FieldValue.serverTimestamp(),
+      if (isNewUser) 'role': role.value,
+      if (isNewUser) 'permissions': permissions.toMap(),
       'lastLoginAt': FieldValue.serverTimestamp(),
       'lastActiveAt': FieldValue.serverTimestamp(),
       'stats': stats.toMap(),
@@ -72,6 +86,12 @@ class UserProfile {
 
   /// Constructs from a Firestore document snapshot.
   factory UserProfile.fromFirestore(Map<String, dynamic> data) {
+    final role = UserRole.fromString(data['role'] as String? ?? 'user');
+    // Derive permissions from role. If explicit permissions are stored
+    // in the doc they are ignored in favour of the role-derived set,
+    // ensuring a single source of truth.
+    final permissions = UserPermissions.fromRole(role);
+
     return UserProfile(
       uid: data['uid'] as String? ?? '',
       displayName: data['displayName'] as String?,
@@ -85,6 +105,8 @@ class UserProfile {
       createdAt: _toDateTime(data['createdAt']),
       lastLoginAt: _toDateTime(data['lastLoginAt']),
       lastActiveAt: _toDateTime(data['lastActiveAt']),
+      role: role,
+      permissions: permissions,
       stats: data['stats'] is Map<String, dynamic>
           ? UserStats.fromMap(data['stats'] as Map<String, dynamic>)
           : const UserStats(),

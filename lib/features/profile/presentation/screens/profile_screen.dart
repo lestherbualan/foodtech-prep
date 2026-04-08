@@ -5,12 +5,12 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/user_roles.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../../exam/presentation/providers/dashboard_providers.dart';
-import '../../../reports/presentation/providers/report_providers.dart';
 
 class ProfileScreen extends ConsumerWidget {
   const ProfileScreen({super.key});
@@ -19,6 +19,8 @@ class ProfileScreen extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
     final user = authState.valueOrNull;
+    final permissions = ref.watch(userPermissionsProvider);
+    final role = ref.watch(userRoleProvider);
 
     return Scaffold(
       backgroundColor: AppColors.background,
@@ -38,6 +40,7 @@ class ProfileScreen extends ConsumerWidget {
                     email: user.email ?? '',
                     photoURL: user.photoURL,
                     providerData: user.providerData,
+                    role: role,
                   ),
 
                   const SizedBox(height: AppSpacing.lg),
@@ -53,10 +56,18 @@ class ProfileScreen extends ConsumerWidget {
                   const SizedBox(height: AppSpacing.xl),
 
                   // ── Admin: Reported Questions ──
-                  if (isAdminUid(user.uid))
+                  if (permissions.canViewReports)
                     _AdminReportButton(
                       onTap: () => context.push(RouteNames.reportList),
                     ),
+
+                  // ── Super Admin: Manage Users ──
+                  if (permissions.canManageAdmins) ...[
+                    const SizedBox(height: AppSpacing.sm + 2),
+                    _AdminManageButton(
+                      onTap: () => context.push(RouteNames.adminManagement),
+                    ),
+                  ],
 
                   const SizedBox(height: AppSpacing.xl),
 
@@ -87,12 +98,14 @@ class _ProfileSummaryCard extends StatelessWidget {
     required this.email,
     required this.photoURL,
     required this.providerData,
+    required this.role,
   });
 
   final String displayName;
   final String email;
   final String? photoURL;
   final List providerData;
+  final UserRole role;
 
   @override
   Widget build(BuildContext context) {
@@ -161,23 +174,53 @@ class _ProfileSummaryCard extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: AppSpacing.sm),
-                Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: AppSpacing.sm + 2,
-                    vertical: 3,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.white.withValues(alpha: 0.15),
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                  ),
-                  child: Text(
-                    _signInMethod(providerData),
-                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                      color: Colors.white.withValues(alpha: 0.85),
-                      fontWeight: FontWeight.w500,
-                      fontSize: 10.5,
+                Row(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.sm + 2,
+                        vertical: 3,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.15),
+                        borderRadius: BorderRadius.circular(
+                          AppSpacing.radiusFull,
+                        ),
+                      ),
+                      child: Text(
+                        _signInMethod(providerData),
+                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          color: Colors.white.withValues(alpha: 0.85),
+                          fontWeight: FontWeight.w500,
+                          fontSize: 10.5,
+                        ),
+                      ),
                     ),
-                  ),
+                    if (role != UserRole.user) ...[
+                      const SizedBox(width: AppSpacing.xs + 2),
+                      Container(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.sm + 2,
+                          vertical: 3,
+                        ),
+                        decoration: BoxDecoration(
+                          color: Colors.white.withValues(alpha: 0.25),
+                          borderRadius: BorderRadius.circular(
+                            AppSpacing.radiusFull,
+                          ),
+                        ),
+                        child: Text(
+                          role.displayLabel,
+                          style: Theme.of(context).textTheme.labelSmall
+                              ?.copyWith(
+                                color: Colors.white,
+                                fontWeight: FontWeight.w600,
+                                fontSize: 10.5,
+                              ),
+                        ),
+                      ),
+                    ],
+                  ],
                 ),
               ],
             ),
@@ -497,6 +540,37 @@ class _AdminReportButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
         side: const BorderSide(color: AppColors.warning),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        ),
+      ),
+    );
+  }
+}
+
+class _AdminManageButton extends StatelessWidget {
+  const _AdminManageButton({required this.onTap});
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return OutlinedButton.icon(
+      onPressed: onTap,
+      icon: const Icon(
+        Icons.admin_panel_settings_outlined,
+        size: 18,
+        color: AppColors.tertiary,
+      ),
+      label: Text(
+        'Manage Admins',
+        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+          color: AppColors.tertiary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+      style: OutlinedButton.styleFrom(
+        minimumSize: const Size(double.infinity, 48),
+        side: const BorderSide(color: AppColors.tertiary),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),

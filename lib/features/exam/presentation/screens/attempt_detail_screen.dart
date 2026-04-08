@@ -1,18 +1,21 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/premium_card.dart';
+import '../../../questions/presentation/providers/question_providers.dart';
 import '../../domain/saved_exam_attempt.dart';
 
-/// Detailed view for a single exam attempt from Recent Activity.
-class AttemptDetailScreen extends StatelessWidget {
+/// Detailed view for a single exam attempt from Recent Activity or History.
+class AttemptDetailScreen extends ConsumerWidget {
   const AttemptDetailScreen({super.key, required this.attempt});
   final SavedExamAttempt attempt;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final passed = attempt.scorePercent >= 50;
 
     return Scaffold(
@@ -228,6 +231,12 @@ class AttemptDetailScreen extends StatelessWidget {
                       ],
                     ),
                   ),
+
+                const SizedBox(height: AppSpacing.xl),
+
+                // ── Review button ──
+                if (attempt.hasReviewData)
+                  _ReviewExamButton(attempt: attempt, ref: ref),
 
                 const SizedBox(height: AppSpacing.xxl),
               ]),
@@ -447,26 +456,74 @@ class _SubjectRow extends StatelessWidget {
             child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text(
-            '$label:',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              subject,
-              style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '$label:',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  subject,
+                  style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: AppColors.textPrimary,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── Review exam button ──────────────────────────────────────────────────────
+
+class _ReviewExamButton extends StatelessWidget {
+  const _ReviewExamButton({required this.attempt, required this.ref});
+  final SavedExamAttempt attempt;
+  final WidgetRef ref;
+
+  @override
+  Widget build(BuildContext context) {
+    final questionsAsync = ref.watch(questionsProvider);
+
+    return questionsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (allQuestions) {
+        final examResult = attempt.toExamResult(allQuestions);
+        if (examResult == null) return const SizedBox.shrink();
+
+        return SizedBox(
+          width: double.infinity,
+          child: FilledButton.icon(
+            onPressed: () =>
+                context.push(RouteNames.examReview, extra: examResult),
+            icon: const Icon(Icons.rate_review_rounded, size: 20),
+            label: const Text('Review Questions'),
+            style: FilledButton.styleFrom(
+              minimumSize: const Size(0, 54),
+              textStyle: const TextStyle(
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+              ),
+              shape: RoundedRectangleBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+              ),
+            ),
+          ),
+        );
+      },
     );
   }
 }

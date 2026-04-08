@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/screens/admin_management_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/exam/domain/exam_models.dart';
@@ -205,6 +206,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final questionId = state.extra! as String;
           return ReportDetailScreen(questionId: questionId);
         },
+      ),
+      GoRoute(
+        path: RouteNames.adminManagement,
+        builder: (context, state) => const AdminManagementScreen(),
       ),
     ],
   );

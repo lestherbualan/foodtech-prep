@@ -4,8 +4,8 @@ import 'package:cloud_firestore/cloud_firestore.dart';
 enum ReviewStatus {
   open,
   underReview,
-  fixed,
-  dismissed;
+  resolved,
+  rejected;
 
   String get label {
     switch (this) {
@@ -13,10 +13,10 @@ enum ReviewStatus {
         return 'open';
       case ReviewStatus.underReview:
         return 'under_review';
-      case ReviewStatus.fixed:
-        return 'fixed';
-      case ReviewStatus.dismissed:
-        return 'dismissed';
+      case ReviewStatus.resolved:
+        return 'resolved';
+      case ReviewStatus.rejected:
+        return 'rejected';
     }
   }
 
@@ -26,10 +26,10 @@ enum ReviewStatus {
         return 'Open';
       case ReviewStatus.underReview:
         return 'Under Review';
-      case ReviewStatus.fixed:
-        return 'Fixed';
-      case ReviewStatus.dismissed:
-        return 'Dismissed';
+      case ReviewStatus.resolved:
+        return 'Resolved';
+      case ReviewStatus.rejected:
+        return 'Rejected';
     }
   }
 
@@ -37,10 +37,12 @@ enum ReviewStatus {
     switch (value) {
       case 'under_review':
         return ReviewStatus.underReview;
-      case 'fixed':
-        return ReviewStatus.fixed;
-      case 'dismissed':
-        return ReviewStatus.dismissed;
+      case 'resolved':
+      case 'fixed': // backward compat
+        return ReviewStatus.resolved;
+      case 'rejected':
+      case 'dismissed': // backward compat
+        return ReviewStatus.rejected;
       default:
         return ReviewStatus.open;
     }
@@ -65,6 +67,7 @@ class QuestionReportSummary {
     this.isFlagged = false,
     this.adminNote,
     this.reviewedByUid,
+    this.reviewedByName,
     this.reviewedAt,
   });
 
@@ -83,6 +86,7 @@ class QuestionReportSummary {
   final bool isFlagged;
   final String? adminNote;
   final String? reviewedByUid;
+  final String? reviewedByName;
   final DateTime? reviewedAt;
 
   /// Top issue types sorted by count descending.
@@ -109,6 +113,7 @@ class QuestionReportSummary {
       'isFlagged': isFlagged,
       if (adminNote != null) 'adminNote': adminNote,
       if (reviewedByUid != null) 'reviewedByUid': reviewedByUid,
+      if (reviewedByName != null) 'reviewedByName': reviewedByName,
       if (reviewedAt != null) 'reviewedAt': Timestamp.fromDate(reviewedAt!),
     };
   }
@@ -135,6 +140,7 @@ class QuestionReportSummary {
       isFlagged: data['isFlagged'] as bool? ?? false,
       adminNote: data['adminNote'] as String?,
       reviewedByUid: data['reviewedByUid'] as String?,
+      reviewedByName: data['reviewedByName'] as String?,
       reviewedAt: data['reviewedAt'] != null
           ? _parseTimestamp(data['reviewedAt'])
           : null,
@@ -160,6 +166,7 @@ class QuestionReportSummary {
     ReviewStatus? reviewStatus,
     String? adminNote,
     String? reviewedByUid,
+    String? reviewedByName,
     DateTime? reviewedAt,
     bool? isFlagged,
   }) {
@@ -179,6 +186,7 @@ class QuestionReportSummary {
       isFlagged: isFlagged ?? this.isFlagged,
       adminNote: adminNote ?? this.adminNote,
       reviewedByUid: reviewedByUid ?? this.reviewedByUid,
+      reviewedByName: reviewedByName ?? this.reviewedByName,
       reviewedAt: reviewedAt ?? this.reviewedAt,
     );
   }

@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
+import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/empty_state_widget.dart';
@@ -69,110 +71,117 @@ class _AttemptCard extends StatelessWidget {
     final seconds = attempt.timeSpentSeconds % 60;
     final timeStr = minutes > 0 ? '${minutes}m ${seconds}s' : '${seconds}s';
 
-    return Container(
-      padding: const EdgeInsets.all(AppSpacing.md),
-      decoration: BoxDecoration(
-        color: AppColors.card,
+    return Material(
+      color: AppColors.card,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header row: date + score badge
-          Row(
+        onTap: () => context.push(RouteNames.attemptDetail, extra: attempt),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Expanded(
-                child: Text(
-                  dateStr,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+              // Header row: date + score badge
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      dateStr,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
                   ),
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs / 2,
-                ),
-                decoration: BoxDecoration(
-                  color: passed
-                      ? AppColors.success.withValues(alpha: 0.1)
-                      : AppColors.error.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                ),
-                child: Text(
-                  '${attempt.scorePercent.round()}%',
-                  style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                    fontWeight: FontWeight.w700,
-                    color: passed ? AppColors.success : AppColors.error,
+                  Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppSpacing.sm,
+                      vertical: AppSpacing.xs / 2,
+                    ),
+                    decoration: BoxDecoration(
+                      color: passed
+                          ? AppColors.success.withValues(alpha: 0.1)
+                          : AppColors.error.withValues(alpha: 0.1),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    ),
+                    child: Text(
+                      '${attempt.scorePercent.round()}%',
+                      style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: passed ? AppColors.success : AppColors.error,
+                      ),
+                    ),
                   ),
-                ),
+                ],
               ),
+              const SizedBox(height: AppSpacing.sm),
+
+              // Stats row
+              Row(
+                children: [
+                  _Chip(
+                    icon: Icons.check_circle_outline,
+                    label: '${attempt.correctCount}',
+                    color: AppColors.success,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _Chip(
+                    icon: Icons.cancel_outlined,
+                    label: '${attempt.incorrectCount}',
+                    color: AppColors.error,
+                  ),
+                  const SizedBox(width: AppSpacing.sm),
+                  _Chip(
+                    icon: Icons.remove_circle_outline,
+                    label: '${attempt.unansweredCount}',
+                    color: AppColors.warning,
+                  ),
+                  const Spacer(),
+                  Text(
+                    timeStr,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                      color: AppColors.textSecondary,
+                    ),
+                  ),
+                ],
+              ),
+
+              // Subject info
+              if (attempt.strongestSubject != null ||
+                  attempt.weakestSubject != null) ...[
+                const SizedBox(height: AppSpacing.sm),
+                const Divider(height: 1, color: AppColors.divider),
+                const SizedBox(height: AppSpacing.sm),
+                if (attempt.strongestSubject != null)
+                  _SubjectLabel(
+                    icon: Icons.arrow_upward_rounded,
+                    label: attempt.strongestSubject!,
+                    color: AppColors.success,
+                  ),
+                if (attempt.weakestSubject != null)
+                  _SubjectLabel(
+                    icon: Icons.arrow_downward_rounded,
+                    label: attempt.weakestSubject!,
+                    color: AppColors.error,
+                  ),
+              ],
+
+              if (attempt.wasAutoSubmitted) ...[
+                const SizedBox(height: AppSpacing.xs),
+                Text(
+                  'Time expired',
+                  style: Theme.of(
+                    context,
+                  ).textTheme.labelSmall?.copyWith(color: AppColors.warning),
+                ),
+              ],
             ],
           ),
-          const SizedBox(height: AppSpacing.sm),
-
-          // Stats row
-          Row(
-            children: [
-              _Chip(
-                icon: Icons.check_circle_outline,
-                label: '${attempt.correctCount}',
-                color: AppColors.success,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _Chip(
-                icon: Icons.cancel_outlined,
-                label: '${attempt.incorrectCount}',
-                color: AppColors.error,
-              ),
-              const SizedBox(width: AppSpacing.sm),
-              _Chip(
-                icon: Icons.remove_circle_outline,
-                label: '${attempt.unansweredCount}',
-                color: AppColors.warning,
-              ),
-              const Spacer(),
-              Text(
-                timeStr,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-              ),
-            ],
-          ),
-
-          // Subject info
-          if (attempt.strongestSubject != null ||
-              attempt.weakestSubject != null) ...[
-            const SizedBox(height: AppSpacing.sm),
-            const Divider(height: 1, color: AppColors.divider),
-            const SizedBox(height: AppSpacing.sm),
-            if (attempt.strongestSubject != null)
-              _SubjectLabel(
-                icon: Icons.arrow_upward_rounded,
-                label: attempt.strongestSubject!,
-                color: AppColors.success,
-              ),
-            if (attempt.weakestSubject != null)
-              _SubjectLabel(
-                icon: Icons.arrow_downward_rounded,
-                label: attempt.weakestSubject!,
-                color: AppColors.error,
-              ),
-          ],
-
-          if (attempt.wasAutoSubmitted) ...[
-            const SizedBox(height: AppSpacing.xs),
-            Text(
-              'Time expired',
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.warning),
-            ),
-          ],
-        ],
+        ),
       ),
     );
   }
@@ -250,6 +259,7 @@ class _SubjectLabel extends StatelessWidget {
               style: Theme.of(
                 context,
               ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),

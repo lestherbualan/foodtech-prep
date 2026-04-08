@@ -372,12 +372,12 @@ class _ExamQuestionHeader extends StatelessWidget {
           ),
         ),
         const SizedBox(width: AppSpacing.sm + 2),
-        Expanded(
+        Flexible(
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
               color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Text(
               subjectName,
@@ -385,6 +385,7 @@ class _ExamQuestionHeader extends StatelessWidget {
                 color: AppColors.textSecondary,
                 fontWeight: FontWeight.w600,
               ),
+              maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),
           ),

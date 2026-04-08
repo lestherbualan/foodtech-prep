@@ -181,6 +181,7 @@ class ReportRepository {
               reviewStatus: fetched.reviewStatus,
               adminNote: fetched.adminNote,
               reviewedByUid: fetched.reviewedByUid,
+              reviewedByName: fetched.reviewedByName,
               reviewedAt: fetched.reviewedAt,
               isFlagged: fetched.isFlagged,
             );
@@ -268,6 +269,7 @@ class ReportRepository {
             reviewStatus: fetched.reviewStatus,
             adminNote: fetched.adminNote,
             reviewedByUid: fetched.reviewedByUid,
+            reviewedByName: fetched.reviewedByName,
             reviewedAt: fetched.reviewedAt,
             isFlagged: fetched.isFlagged,
           );
@@ -315,6 +317,7 @@ class ReportRepository {
     required String questionId,
     required ReviewStatus status,
     required String reviewerUid,
+    String? reviewerName,
     String? adminNote,
   }) async {
     try {
@@ -326,11 +329,16 @@ class ReportRepository {
             status == ReviewStatus.open || status == ReviewStatus.underReview,
       };
 
+      if (reviewerName != null) {
+        updates['reviewedByName'] = reviewerName;
+      }
+
       if (adminNote != null) {
         updates['adminNote'] = adminNote;
       }
 
-      await _summariesRef.doc(questionId).update(updates);
+      // Use set+merge so the document is created if it doesn't exist yet.
+      await _summariesRef.doc(questionId).set(updates, SetOptions(merge: true));
       debugPrint('[ReportRepo] Updated review status for $questionId');
     } catch (e) {
       debugPrint('[ReportRepo] Failed to update review status: $e');

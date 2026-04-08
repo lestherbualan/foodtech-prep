@@ -14,16 +14,16 @@ final reportRepositoryProvider = Provider<ReportRepository>((ref) {
 
 // ---------------------------------------------------------------------------
 // Admin / reviewer access control
+//
+// Legacy helper retained for backward compatibility during migration.
+// New code should use `userPermissionsProvider` from auth_providers.dart.
 // ---------------------------------------------------------------------------
 
-/// Current admin/reviewer UIDs. Structured as a Set so additional
-/// reviewer accounts can be added later without refactoring.
-const Set<String> _adminUids = {'drRxvYrl2yfJZaggkgpxOUJeotj2'};
-
-/// Returns true if [uid] has admin/reviewer access.
+/// @deprecated – use `ref.watch(userPermissionsProvider).canViewReports`
+/// instead. Kept temporarily so existing call-sites compile during migration.
 bool isAdminUid(String? uid) {
-  if (uid == null || uid.isEmpty) return false;
-  return _adminUids.contains(uid);
+  // Stub: always returns false. Role-based checks are now authoritative.
+  return false;
 }
 
 // ---------------------------------------------------------------------------

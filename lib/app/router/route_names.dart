@@ -22,4 +22,5 @@ class RouteNames {
   static const String questionBankSubject = '/questions/subject';
   static const String reportList = '/reports';
   static const String reportDetail = '/reports/detail';
+  static const String adminManagement = '/admin/manage';
 }

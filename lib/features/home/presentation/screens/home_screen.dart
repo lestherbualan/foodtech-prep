@@ -389,7 +389,7 @@ class _HeroPerformanceCard extends StatelessWidget {
                         color: Colors.white.withValues(alpha: 0.55),
                         height: 1.3,
                       ),
-                      maxLines: 1,
+                      maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
                   ],
@@ -850,30 +850,40 @@ class _SubjectInsightRow extends StatelessWidget {
             child: Icon(icon, size: 18, color: color),
           ),
           const SizedBox(width: AppSpacing.md),
-          Text(
-            '$label:',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.titleMedium?.copyWith(
-              fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
-            ),
-          ),
-          const SizedBox(width: AppSpacing.sm),
           Expanded(
-            child: Text(
-              fullName,
-              style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: AppColors.textHint,
-                fontSize: 10,
-              ),
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  children: [
+                    Text(
+                      '$label:',
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    const SizedBox(width: AppSpacing.sm),
+                    Text(
+                      value,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        color: AppColors.textPrimary,
+                      ),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  fullName,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textHint,
+                    fontSize: 10,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],
@@ -1102,50 +1112,78 @@ class _PerformanceTrendChip extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (icon, label) = switch (trend) {
-      TrendDirection.improving => (Icons.trending_up_rounded, 'Improving'),
-      TrendDirection.steady => (Icons.trending_flat_rounded, 'Steady'),
+    final (icon, label, accent) = switch (trend) {
+      TrendDirection.improving => (
+        Icons.trending_up_rounded,
+        'Improving',
+        const Color(0xFF66BB6A),
+      ),
+      TrendDirection.steady => (
+        Icons.trending_flat_rounded,
+        'Steady',
+        const Color(0xFF90CAF9),
+      ),
       TrendDirection.declining => (
         Icons.trending_down_rounded,
         'Needs Attention',
+        const Color(0xFFEF9A9A),
       ),
-      TrendDirection.insufficient => (Icons.show_chart_rounded, 'Still Early'),
+      TrendDirection.insufficient => (
+        Icons.show_chart_rounded,
+        'Still Early',
+        Colors.white.withValues(alpha: 0.6),
+      ),
     };
 
     return Container(
       padding: const EdgeInsets.symmetric(
         horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm + 2,
+        vertical: AppSpacing.sm + 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.10),
+        color: Colors.white.withValues(alpha: 0.08),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
         children: [
-          Icon(icon, size: 16, color: Colors.white.withValues(alpha: 0.8)),
-          const SizedBox(width: AppSpacing.sm),
-          Text(
-            'Trend: $label',
-            style: TextStyle(
-              fontSize: 12,
-              fontWeight: FontWeight.w700,
-              color: Colors.white.withValues(alpha: 0.85),
-              letterSpacing: 0.1,
+          // ── Accent icon pill ──
+          Container(
+            padding: const EdgeInsets.all(6),
+            decoration: BoxDecoration(
+              color: accent.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(8),
             ),
+            child: Icon(icon, size: 18, color: accent),
           ),
-          const SizedBox(width: AppSpacing.sm),
+          const SizedBox(width: AppSpacing.md - 2),
+          // ── Label + explanation ──
           Expanded(
-            child: Text(
-              explanation,
-              style: TextStyle(
-                fontSize: 10.5,
-                fontWeight: FontWeight.w500,
-                color: Colors.white.withValues(alpha: 0.5),
-                height: 1.3,
-              ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisAlignment: MainAxisAlignment.center,
+              children: [
+                Text(
+                  label,
+                  style: TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w700,
+                    color: accent,
+                    letterSpacing: 0.2,
+                  ),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  explanation,
+                  style: TextStyle(
+                    fontSize: 11,
+                    fontWeight: FontWeight.w500,
+                    color: Colors.white.withValues(alpha: 0.55),
+                    height: 1.35,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
+                ),
+              ],
             ),
           ),
         ],

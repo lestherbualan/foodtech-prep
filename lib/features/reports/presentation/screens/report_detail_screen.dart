@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../questions/domain/question.dart';
 import '../../../questions/presentation/providers/question_providers.dart';
 import '../../domain/question_report.dart';
@@ -122,11 +123,14 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
     try {
       final repo = ref.read(reportRepositoryProvider);
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final profile = ref.read(userProfileProvider).valueOrNull;
+      final reviewerName = profile?.displayName ?? profile?.email;
 
       await repo.updateReviewStatus(
         questionId: questionId,
         status: status,
         reviewerUid: uid,
+        reviewerName: reviewerName,
         adminNote: note,
       );
 
@@ -361,6 +365,45 @@ class _QuestionContentCard extends StatelessWidget {
                   height: 1.5,
                 ),
               ),
+            ],
+
+            // Source metadata (visible in admin report detail)
+            if (q.sourceFile != null || q.sourceReference != null) ...[
+              const SizedBox(height: AppSpacing.sm),
+              const Divider(height: 1, color: AppColors.divider),
+              const SizedBox(height: AppSpacing.md),
+              Row(
+                children: [
+                  const Icon(
+                    Icons.source_rounded,
+                    size: 16,
+                    color: AppColors.textHint,
+                  ),
+                  const SizedBox(width: 6),
+                  Text(
+                    'Source',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textHint,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: AppSpacing.xs),
+              if (q.sourceFile != null)
+                Text(
+                  q.sourceFile!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
+              if (q.sourceReference != null)
+                Text(
+                  q.sourceReference!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                  ),
+                ),
             ],
           ],
         ],
@@ -688,7 +731,7 @@ class _ReviewControlCardState extends State<_ReviewControlCard> {
           if (widget.summary.reviewedByUid != null) ...[
             const SizedBox(height: AppSpacing.md),
             Text(
-              'Last reviewed by: ${widget.summary.reviewedByUid}',
+              'Last reviewed by: ${widget.summary.reviewedByName ?? widget.summary.reviewedByUid}',
               style: Theme.of(
                 context,
               ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
@@ -712,9 +755,9 @@ class _ReviewControlCardState extends State<_ReviewControlCard> {
         return AppColors.warning;
       case ReviewStatus.underReview:
         return AppColors.tertiary;
-      case ReviewStatus.fixed:
+      case ReviewStatus.resolved:
         return AppColors.success;
-      case ReviewStatus.dismissed:
+      case ReviewStatus.rejected:
         return AppColors.textHint;
     }
   }

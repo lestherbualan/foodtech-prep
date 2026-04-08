@@ -2,6 +2,7 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import '../../../../core/constants/user_roles.dart';
 import '../../data/activity_logger.dart';
 import '../../data/auth_repository.dart';
 import '../../data/user_repository.dart';
@@ -112,3 +113,19 @@ final authActionProvider =
         ref.watch(activityLoggerProvider),
       );
     });
+
+// ---------------------------------------------------------------------------
+// Role & permission helpers (derived from userProfileProvider)
+// ---------------------------------------------------------------------------
+
+/// The current user's role (defaults to `user` when profile is unavailable).
+final userRoleProvider = Provider<UserRole>((ref) {
+  final profile = ref.watch(userProfileProvider).valueOrNull;
+  return profile?.role ?? UserRole.user;
+});
+
+/// The current user's computed permissions.
+final userPermissionsProvider = Provider<UserPermissions>((ref) {
+  final role = ref.watch(userRoleProvider);
+  return UserPermissions.fromRole(role);
+});

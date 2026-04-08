@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
+import '../../questions/domain/question.dart';
 import 'exam_models.dart';
 
 /// A persisted exam attempt record for the user's history.
@@ -20,6 +21,10 @@ class SavedExamAttempt {
     required this.scorePercent,
     this.strongestSubject,
     this.weakestSubject,
+    this.questionIds,
+    this.answers,
+    this.choiceOrders,
+    this.displayCorrectAnswers,
   });
 
   final String attemptId;
@@ -37,6 +42,40 @@ class SavedExamAttempt {
   final double scorePercent;
   final String? strongestSubject;
   final String? weakestSubject;
+
+  /// Review data — stored for attempts that support question-by-question review.
+  final List<String>? questionIds;
+  final Map<String, String>? answers;
+  final Map<String, List<int>>? choiceOrders;
+  final Map<String, String>? displayCorrectAnswers;
+
+  /// Whether this attempt has stored review data.
+  bool get hasReviewData => questionIds != null && answers != null;
+
+  /// Reconstructs an [ExamResult] from stored review data and loaded questions.
+  /// Returns null if review data is missing or questions can't be matched.
+  ExamResult? toExamResult(List<Question> allQuestions) {
+    if (questionIds == null || answers == null) return null;
+
+    final questionMap = {for (final q in allQuestions) q.questionId: q};
+    final examQuestions = <Question>[];
+    for (final id in questionIds!) {
+      final q = questionMap[id];
+      if (q != null) examQuestions.add(q);
+    }
+
+    if (examQuestions.isEmpty) return null;
+
+    return ExamResult.compute(
+      questions: examQuestions,
+      answers: answers!,
+      durationSeconds: timeSpentSeconds,
+      wasAutoSubmitted: wasAutoSubmitted,
+      timeLimitSeconds: timeLimitSeconds,
+      choiceOrders: choiceOrders ?? const {},
+      displayCorrectAnswers: displayCorrectAnswers ?? const {},
+    );
+  }
 
   /// Creates a [SavedExamAttempt] from an [ExamResult] and user metadata.
   factory SavedExamAttempt.fromResult({
@@ -61,11 +100,15 @@ class SavedExamAttempt {
       scorePercent: result.scorePercent,
       strongestSubject: breakdown.strongest?.subjectName,
       weakestSubject: breakdown.weakest?.subjectName,
+      questionIds: result.questions.map((q) => q.questionId).toList(),
+      answers: result.answers,
+      choiceOrders: result.choiceOrders,
+      displayCorrectAnswers: result.displayCorrectAnswers,
     );
   }
 
   Map<String, dynamic> toFirestore() {
-    return {
+    final data = <String, dynamic>{
       'userId': userId,
       'mode': mode,
       'submittedAt': Timestamp.fromDate(submittedAt),
@@ -81,12 +124,32 @@ class SavedExamAttempt {
       'strongestSubject': strongestSubject,
       'weakestSubject': weakestSubject,
     };
+    if (questionIds != null) data['questionIds'] = questionIds;
+    if (answers != null) data['answers'] = answers;
+    if (choiceOrders != null) {
+      data['choiceOrders'] = choiceOrders!.map((k, v) => MapEntry(k, v));
+    }
+    if (displayCorrectAnswers != null) {
+      data['displayCorrectAnswers'] = displayCorrectAnswers;
+    }
+    return data;
   }
 
   factory SavedExamAttempt.fromFirestore(
     String docId,
     Map<String, dynamic> data,
   ) {
+    // Parse choiceOrders from Firestore (Map<String, dynamic> → Map<String, List<int>>).
+    Map<String, List<int>>? choiceOrders;
+    if (data['choiceOrders'] is Map) {
+      choiceOrders = (data['choiceOrders'] as Map).map(
+        (k, v) => MapEntry(
+          k as String,
+          (v as List).map((e) => (e as num).toInt()).toList(),
+        ),
+      );
+    }
+
     return SavedExamAttempt(
       attemptId: docId,
       userId: data['userId'] as String? ?? '',
@@ -104,6 +167,11 @@ class SavedExamAttempt {
       scorePercent: (data['scorePercent'] as num?)?.toDouble() ?? 0.0,
       strongestSubject: data['strongestSubject'] as String?,
       weakestSubject: data['weakestSubject'] as String?,
+      questionIds: (data['questionIds'] as List?)?.cast<String>(),
+      answers: (data['answers'] as Map?)?.cast<String, String>(),
+      choiceOrders: choiceOrders,
+      displayCorrectAnswers: (data['displayCorrectAnswers'] as Map?)
+          ?.cast<String, String>(),
     );
   }
 }

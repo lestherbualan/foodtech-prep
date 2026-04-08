@@ -1,17 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/question.dart';
 
-class QuestionDetailScreen extends StatelessWidget {
+class QuestionDetailScreen extends ConsumerWidget {
   const QuestionDetailScreen({super.key, required this.question});
 
   final Question question;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     const labels = ['A', 'B', 'C', 'D'];
+    final permissions = ref.watch(userPermissionsProvider);
 
     return Scaffold(
       appBar: AppBar(title: Text(question.questionId)),
@@ -115,9 +118,16 @@ class QuestionDetailScreen extends StatelessWidget {
               ),
             ],
 
-            if (question.sourceReference != null) ...[
+            if (question.sourceReference != null &&
+                permissions.canViewQuestionSource) ...[
               const SizedBox(height: AppSpacing.md),
               _MetaRow(label: 'Source', value: question.sourceReference!),
+            ],
+
+            if (question.sourceFile != null &&
+                permissions.canViewQuestionSource) ...[
+              const SizedBox(height: AppSpacing.xs),
+              _MetaRow(label: 'File', value: question.sourceFile!),
             ],
 
             const SizedBox(height: AppSpacing.xxl),

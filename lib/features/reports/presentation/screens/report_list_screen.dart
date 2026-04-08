@@ -189,9 +189,9 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
         return AppColors.warning;
       case ReviewStatus.underReview:
         return AppColors.tertiary;
-      case ReviewStatus.fixed:
+      case ReviewStatus.resolved:
         return AppColors.success;
-      case ReviewStatus.dismissed:
+      case ReviewStatus.rejected:
         return AppColors.textHint;
     }
   }

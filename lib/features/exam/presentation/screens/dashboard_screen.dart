@@ -362,19 +362,26 @@ class _SubjectRow extends StatelessWidget {
       children: [
         Icon(icon, size: 18, color: color),
         const SizedBox(width: AppSpacing.sm),
-        Text(
-          '$label: ',
-          style: Theme.of(
-            context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-        ),
         Expanded(
-          child: Text(
-            value,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
-            overflow: TextOverflow.ellipsis,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '$label:',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(height: 2),
+              Text(
+                value,
+                style: Theme.of(
+                  context,
+                ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w600),
+                maxLines: 2,
+                overflow: TextOverflow.ellipsis,
+              ),
+            ],
           ),
         ),
       ],
@@ -500,61 +507,74 @@ class _MiniAttemptRow extends StatelessWidget {
     final passed = attempt.scorePercent >= 50;
     final dateStr = _shortDate(attempt.submittedAt);
 
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.md,
-        vertical: AppSpacing.sm,
-      ),
-      decoration: BoxDecoration(
-        color: AppColors.card,
+    return Material(
+      color: AppColors.card,
+      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+      child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(color: AppColors.divider),
-      ),
-      child: Row(
-        children: [
-          // Score bar
-          SizedBox(
-            width: 40,
-            child: Text(
-              '${attempt.scorePercent.round()}%',
-              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                fontWeight: FontWeight.w700,
-                color: passed ? AppColors.success : AppColors.error,
-              ),
-            ),
+        onTap: () => context.push(RouteNames.attemptDetail, extra: attempt),
+        child: Container(
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppSpacing.md,
+            vertical: AppSpacing.sm,
           ),
-          const SizedBox(width: AppSpacing.sm),
-          // Mini progress bar
-          Expanded(
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(3),
-              child: LinearProgressIndicator(
-                value: (attempt.scorePercent / 100).clamp(0.0, 1.0),
-                minHeight: 6,
-                backgroundColor: AppColors.divider,
-                valueColor: AlwaysStoppedAnimation<Color>(
-                  passed ? AppColors.success : AppColors.error,
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              // Score bar
+              SizedBox(
+                width: 40,
+                child: Text(
+                  '${attempt.scorePercent.round()}%',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    fontWeight: FontWeight.w700,
+                    color: passed ? AppColors.success : AppColors.error,
+                  ),
                 ),
               ),
-            ),
+              const SizedBox(width: AppSpacing.sm),
+              // Mini progress bar
+              Expanded(
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(3),
+                  child: LinearProgressIndicator(
+                    value: (attempt.scorePercent / 100).clamp(0.0, 1.0),
+                    minHeight: 6,
+                    backgroundColor: AppColors.divider,
+                    valueColor: AlwaysStoppedAnimation<Color>(
+                      passed ? AppColors.success : AppColors.error,
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              // Stats chips
+              Text(
+                '${attempt.correctCount}/${attempt.totalQuestions}',
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              // Date
+              Text(
+                dateStr,
+                style: Theme.of(
+                  context,
+                ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+              ),
+              const SizedBox(width: AppSpacing.xs),
+              Icon(
+                Icons.chevron_right_rounded,
+                size: 16,
+                color: AppColors.textHint,
+              ),
+            ],
           ),
-          const SizedBox(width: AppSpacing.md),
-          // Stats chips
-          Text(
-            '${attempt.correctCount}/${attempt.totalQuestions}',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
-          ),
-          const SizedBox(width: AppSpacing.md),
-          // Date
-          Text(
-            dateStr,
-            style: Theme.of(
-              context,
-            ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
-          ),
-        ],
+        ),
       ),
     );
   }
