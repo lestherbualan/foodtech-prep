@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
+import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/premium_card.dart';
@@ -13,6 +14,8 @@ import '../../../exam/domain/dashboard_stats.dart';
 import '../../../exam/domain/exam_subject.dart';
 import '../../../exam/domain/saved_exam_attempt.dart';
 import '../../../exam/presentation/providers/dashboard_providers.dart';
+import '../../../exam/presentation/providers/weekly_performance_providers.dart';
+import '../../../exam/presentation/widgets/weekly_timed_exam_performance_strip.dart';
 
 class HomeScreen extends ConsumerWidget {
   const HomeScreen({super.key});
@@ -63,7 +66,7 @@ class HomeScreen extends ConsumerWidget {
                           ),
                           Builder(
                             builder: (context) {
-                              final examDate = DateTime(2026, 8, 12);
+                              final examDate = AppConstants.boardExamDate;
                               final now = DateTime.now();
                               final today = DateTime(
                                 now.year,
@@ -165,6 +168,7 @@ class _DashboardBody extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final statsAsync = ref.watch(dashboardStatsProvider(userId));
+    final weeklyAsync = ref.watch(weeklyTimedExamSummaryProvider(userId));
 
     return statsAsync.when(
       loading: () => const SliverFillRemaining(
@@ -194,6 +198,25 @@ class _DashboardBody extends ConsumerWidget {
               const SectionHeader(title: 'Performance Snapshot'),
               _PerformanceGrid(stats: stats),
               const SizedBox(height: AppSpacing.xl),
+
+              // ── 3b. Weekly timed exam performance strip ──
+              if (weeklyAsync case AsyncData(:final value)) ...[
+                SectionHeader(
+                  title: 'This Week',
+                  trailingText: 'Calendar',
+                  onTrailingTap: () =>
+                      context.push(RouteNames.performanceCalendar),
+                ),
+                GestureDetector(
+                  onTap: () => context.push(RouteNames.performanceCalendar),
+                  child: WeeklyTimedExamPerformanceStrip(
+                    summary: value,
+                    onDayTap: (_) =>
+                        context.push(RouteNames.performanceCalendar),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.xl),
+              ],
 
               // ── 4. Strength & weakness ──
               if (stats.strongestSubject != null ||

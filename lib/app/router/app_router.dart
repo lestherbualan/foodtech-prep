@@ -13,6 +13,7 @@ import '../../features/exam/presentation/screens/dashboard_screen.dart';
 import '../../features/exam/domain/saved_exam_attempt.dart';
 import '../../features/exam/presentation/screens/attempt_detail_screen.dart';
 import '../../features/exam/presentation/screens/exam_result_screen.dart';
+import '../../features/exam/presentation/screens/performance_calendar_screen.dart';
 import '../../features/exam/presentation/screens/exam_review_screen.dart';
 import '../../features/exam/presentation/screens/exam_setup_screen.dart';
 import '../../features/exam/presentation/screens/subject_breakdown_screen.dart';
@@ -191,6 +192,10 @@ final routerProvider = Provider<GoRouter>((ref) {
           final attempt = state.extra! as SavedExamAttempt;
           return AttemptDetailScreen(attempt: attempt);
         },
+      ),
+      GoRoute(
+        path: RouteNames.performanceCalendar,
+        builder: (context, state) => const PerformanceCalendarScreen(),
       ),
       GoRoute(
         path: RouteNames.profile,

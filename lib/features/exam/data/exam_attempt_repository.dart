@@ -46,4 +46,35 @@ class ExamAttemptRepository {
       rethrow;
     }
   }
+
+  /// Loads all exam attempts for a user within a date range (inclusive).
+  ///
+  /// [start] and [end] should be midnight-local dates.
+  /// Results are ordered by submission date descending.
+  Future<List<SavedExamAttempt>> getAttemptsForDateRange(
+    String userId, {
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    try {
+      final snapshot = await _attemptsRef(userId)
+          .where(
+            'submittedAt',
+            isGreaterThanOrEqualTo: Timestamp.fromDate(start),
+          )
+          .where(
+            'submittedAt',
+            isLessThan: Timestamp.fromDate(end.add(const Duration(days: 1))),
+          )
+          .orderBy('submittedAt', descending: true)
+          .get();
+
+      return snapshot.docs
+          .map((doc) => SavedExamAttempt.fromFirestore(doc.id, doc.data()))
+          .toList();
+    } catch (e) {
+      debugPrint('[ExamAttemptRepo] Failed to load date-range attempts: $e');
+      rethrow;
+    }
+  }
 }
