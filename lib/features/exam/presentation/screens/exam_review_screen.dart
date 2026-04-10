@@ -28,6 +28,12 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   List<Question> get _filteredQuestions {
     return switch (_filter) {
       _ReviewFilter.all => result.questions,
+      _ReviewFilter.correct => result.questions.where((q) {
+        final sel = result.answers[q.questionId];
+        final correct =
+            result.displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
+        return sel != null && sel == correct;
+      }).toList(),
       _ReviewFilter.incorrect => result.questions.where((q) {
         final sel = result.answers[q.questionId];
         final correct =
@@ -78,7 +84,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
       body: Column(
         children: [
           // ── Filter chips ──
-          Padding(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
               AppSpacing.sm,
@@ -90,6 +97,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 final isActive = f == _filter;
                 final count = switch (f) {
                   _ReviewFilter.all => result.totalQuestions,
+                  _ReviewFilter.correct => result.correctCount,
                   _ReviewFilter.incorrect => result.incorrectCount,
                   _ReviewFilter.unanswered => result.unansweredCount,
                 };
@@ -179,6 +187,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
 
 enum _ReviewFilter {
   all('All'),
+  correct('Correct'),
   incorrect('Incorrect'),
   unanswered('Unanswered');
 
@@ -197,6 +206,11 @@ class _EmptyFilterState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, String title, String subtitle) = switch (filter) {
+      _ReviewFilter.correct => (
+        Icons.sentiment_dissatisfied_rounded,
+        'No Correct Answers',
+        'Keep practicing — you\'ll get there!',
+      ),
       _ReviewFilter.incorrect => (
         Icons.check_circle_outline_rounded,
         'No Incorrect Answers',

@@ -61,18 +61,40 @@ class HomeScreen extends ConsumerWidget {
                                   letterSpacing: -0.5,
                                 ),
                           ),
-                          const SizedBox(height: AppSpacing.xs + 2),
-                          if (user != null)
-                            _SmartSubtitle(userId: user.uid)
-                          else
-                            Text(
-                              'Prepare for your board exam.',
-                              style: Theme.of(context).textTheme.bodyMedium
-                                  ?.copyWith(
-                                    color: AppColors.textSecondary,
-                                    height: 1.4,
-                                  ),
-                            ),
+                          Builder(
+                            builder: (context) {
+                              final examDate = DateTime(2026, 8, 12);
+                              final now = DateTime.now();
+                              final today = DateTime(
+                                now.year,
+                                now.month,
+                                now.day,
+                              );
+                              final daysLeft = examDate
+                                  .difference(today)
+                                  .inDays;
+                              if (daysLeft < 0) return const SizedBox.shrink();
+                              final text = daysLeft == 0
+                                  ? 'Board exam is today'
+                                  : '$daysLeft day${daysLeft == 1 ? '' : 's'} until the Food Technologist Board Exam';
+                              return Padding(
+                                padding: const EdgeInsets.only(
+                                  top: AppSpacing.xs + 2,
+                                ),
+                                child: Text(
+                                  text,
+                                  style: Theme.of(context).textTheme.bodySmall
+                                      ?.copyWith(
+                                        color: AppColors.textSecondary
+                                            .withValues(alpha: 0.7),
+                                        fontWeight: FontWeight.w700,
+                                        letterSpacing: 0.1,
+                                        fontSize: 12,
+                                      ),
+                                ),
+                              );
+                            },
+                          ),
                         ],
                       ),
                     ),
@@ -109,7 +131,9 @@ class HomeScreen extends ConsumerWidget {
               ),
             ),
 
-            const SliverToBoxAdapter(child: SizedBox(height: AppSpacing.lg)),
+            const SliverToBoxAdapter(
+              child: SizedBox(height: AppSpacing.md + 4),
+            ),
 
             // ── Body content ──
             if (user != null)
@@ -126,51 +150,6 @@ class HomeScreen extends ConsumerWidget {
           ],
         ),
       ),
-    );
-  }
-}
-
-// ═══════════════════════════════════════════════════════════════════════════════
-// Smart subtitle — context-aware status line
-// ═══════════════════════════════════════════════════════════════════════════════
-
-class _SmartSubtitle extends ConsumerWidget {
-  const _SmartSubtitle({required this.userId});
-  final String userId;
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final statsAsync = ref.watch(dashboardStatsProvider(userId));
-
-    final text = statsAsync.when(
-      loading: () => 'Prepare for your board exam.',
-      error: (_, _) => 'Prepare for your board exam.',
-      data: (stats) {
-        if (stats.totalAttempts == 0) {
-          return 'Start your first exam to track your progress.';
-        }
-        final parts = <String>[];
-        parts.add(
-          '${stats.totalAttempts} exam${stats.totalAttempts == 1 ? '' : 's'} taken',
-        );
-        parts.add('Best ${stats.bestScore.round()}%');
-        if (stats.weakestSubject != null) {
-          parts.add(
-            'Focus next: ${ExamSubject.abbreviate(stats.weakestSubject!)}',
-          );
-        }
-        return parts.join(' · ');
-      },
-    );
-
-    return Text(
-      text,
-      style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-        color: AppColors.textSecondary,
-        height: 1.4,
-      ),
-      maxLines: 2,
-      overflow: TextOverflow.ellipsis,
     );
   }
 }
