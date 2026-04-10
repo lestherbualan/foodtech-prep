@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/question_types.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../domain/question.dart';
@@ -38,7 +39,7 @@ class QuestionDetailScreen extends ConsumerWidget {
                   const SizedBox(width: AppSpacing.sm),
                   _MetaChip(
                     label: question.questionType!,
-                    color: AppColors.textSecondary,
+                    color: QuestionTypes.color(question.questionType),
                   ),
                 ],
               ],
