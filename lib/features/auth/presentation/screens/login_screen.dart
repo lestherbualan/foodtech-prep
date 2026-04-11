@@ -33,12 +33,12 @@ class LoginScreen extends ConsumerWidget {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                const Icon(
-                  Icons.science_rounded,
-                  size: 56,
-                  color: AppColors.primary,
+                Image.asset(
+                  'assets/icon/start_screen_logo.png',
+                  height: 200,
+                  width: 200,
+                  fit: BoxFit.contain,
                 ),
-                const SizedBox(height: AppSpacing.md),
                 Text(
                   'Welcome',
                   style: Theme.of(context).textTheme.headlineMedium,

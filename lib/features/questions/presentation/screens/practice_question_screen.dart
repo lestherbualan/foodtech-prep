@@ -3,6 +3,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
+import '../../../reports/domain/question_report.dart';
+import '../../../reports/presentation/widgets/report_question_sheet.dart';
 import '../../domain/question.dart';
 import '../providers/practice_session_provider.dart';
 import '../widgets/answer_option_card.dart';
@@ -43,6 +46,19 @@ class PracticeQuestionScreen extends ConsumerWidget {
             context,
           ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
         ),
+        actions: [
+          IconButton(
+            onPressed: () => showReportQuestionSheet(
+              context: context,
+              ref: ref,
+              question: question,
+              reportContext: ReportContext.practice,
+            ),
+            icon: const Icon(Icons.flag_outlined, size: 20),
+            tooltip: 'Report Question',
+            color: AppColors.textHint,
+          ),
+        ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
           child: LinearProgressIndicator(
@@ -110,7 +126,12 @@ class PracticeQuestionScreen extends ConsumerWidget {
                     const SizedBox(height: AppSpacing.sm),
                     _ResultBanner(isCorrect: qState.isCorrect),
                     const SizedBox(height: AppSpacing.md),
-                    _ExplanationCard(question: question),
+                    _ExplanationCard(
+                      question: question,
+                      showSource: ref
+                          .watch(userPermissionsProvider)
+                          .canViewQuestionSource,
+                    ),
                   ],
                 ],
               ),
@@ -319,8 +340,9 @@ class _ResultBanner extends StatelessWidget {
 // ===========================================================================
 
 class _ExplanationCard extends StatelessWidget {
-  const _ExplanationCard({required this.question});
+  const _ExplanationCard({required this.question, this.showSource = false});
   final Question question;
+  final bool showSource;
 
   @override
   Widget build(BuildContext context) {
@@ -395,6 +417,47 @@ class _ExplanationCard extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           height: 1.55,
                           color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (showSource &&
+              (question.sourceReference != null ||
+                  question.sourceFile != null)) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: AppColors.divider),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.source_rounded, size: 16, color: AppColors.textHint),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Source',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        [
+                          if (question.sourceReference != null)
+                            question.sourceReference!,
+                          if (question.sourceFile != null) question.sourceFile!,
+                        ].join(' - '),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          height: 1.45,
+                          color: AppColors.textHint,
                         ),
                       ),
                     ],

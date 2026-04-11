@@ -12,8 +12,8 @@ class ExamConfig {
 
   /// Default exam config for the current phase.
   static const defaultConfig = ExamConfig(
-    durationMinutes: 30,
-    questionCount: 20,
+    durationMinutes: 40,
+    questionCount: 60,
   );
 }
 

@@ -3,15 +3,20 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../features/admin/presentation/screens/admin_management_screen.dart';
 import '../../features/auth/presentation/providers/auth_providers.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/exam/domain/exam_models.dart';
 import '../../features/exam/presentation/providers/timed_exam_provider.dart';
 import '../../features/exam/presentation/screens/exam_history_screen.dart';
 import '../../features/exam/presentation/screens/dashboard_screen.dart';
+import '../../features/exam/domain/saved_exam_attempt.dart';
+import '../../features/exam/presentation/screens/attempt_detail_screen.dart';
 import '../../features/exam/presentation/screens/exam_result_screen.dart';
+import '../../features/exam/presentation/screens/performance_calendar_screen.dart';
 import '../../features/exam/presentation/screens/exam_review_screen.dart';
 import '../../features/exam/presentation/screens/exam_setup_screen.dart';
+import '../../features/exam/presentation/screens/subject_breakdown_screen.dart';
 import '../../features/exam/presentation/screens/timed_exam_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/onboarding/presentation/screens/splash_screen.dart';
@@ -21,7 +26,12 @@ import '../../features/questions/domain/question.dart';
 import '../../features/questions/presentation/providers/practice_session_provider.dart';
 import '../../features/questions/presentation/screens/practice_question_screen.dart';
 import '../../features/questions/presentation/screens/question_bank_screen.dart';
+import '../../features/questions/presentation/screens/question_bank_subject_screen.dart';
 import '../../features/questions/presentation/screens/question_detail_screen.dart';
+import '../../features/questions/presentation/screens/subject_practice_screen.dart';
+import '../../features/questions/presentation/screens/weak_areas_screen.dart';
+import '../../features/reports/presentation/screens/report_detail_screen.dart';
+import '../../features/reports/presentation/screens/report_list_screen.dart';
 import 'route_names.dart';
 
 /// Notifier that triggers GoRouter redirect re-evaluation when auth state changes.
@@ -158,8 +168,53 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const DashboardScreen(),
       ),
       GoRoute(
+        path: RouteNames.subjectPractice,
+        builder: (context, state) => const SubjectPracticeScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.weakAreas,
+        builder: (context, state) => const WeakAreasScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.subjectBreakdown,
+        builder: (context, state) => const SubjectBreakdownScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.questionBankSubject,
+        builder: (context, state) {
+          final subjectId = state.extra! as String;
+          return QuestionBankSubjectScreen(subjectId: subjectId);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.attemptDetail,
+        builder: (context, state) {
+          final attempt = state.extra! as SavedExamAttempt;
+          return AttemptDetailScreen(attempt: attempt);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.performanceCalendar,
+        builder: (context, state) => const PerformanceCalendarScreen(),
+      ),
+      GoRoute(
         path: RouteNames.profile,
         builder: (context, state) => const ProfileScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.reportList,
+        builder: (context, state) => const ReportListScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.reportDetail,
+        builder: (context, state) {
+          final questionId = state.extra! as String;
+          return ReportDetailScreen(questionId: questionId);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.adminManagement,
+        builder: (context, state) => const AdminManagementScreen(),
       ),
     ],
   );

@@ -19,12 +19,12 @@ class WelcomeScreen extends StatelessWidget {
           child: Column(
             children: [
               const Spacer(flex: 2),
-              const Icon(
-                Icons.science_rounded,
-                size: 80,
-                color: AppColors.primary,
+              Image.asset(
+                'assets/icon/start_screen_logo.png',
+                height: 200,
+                width: 200,
+                fit: BoxFit.contain,
               ),
-              const SizedBox(height: AppSpacing.lg),
               Text(
                 AppConstants.appName,
                 style: Theme.of(context).textTheme.headlineLarge,

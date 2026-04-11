@@ -1,23 +1,25 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../questions/domain/question.dart';
 import '../../../questions/presentation/widgets/answer_option_card.dart';
 import '../../domain/exam_models.dart';
 
 /// Read-only post-exam review screen.
-class ExamReviewScreen extends StatefulWidget {
+class ExamReviewScreen extends ConsumerStatefulWidget {
   const ExamReviewScreen({super.key, required this.result});
 
   final ExamResult result;
 
   @override
-  State<ExamReviewScreen> createState() => _ExamReviewScreenState();
+  ConsumerState<ExamReviewScreen> createState() => _ExamReviewScreenState();
 }
 
-class _ExamReviewScreenState extends State<ExamReviewScreen> {
+class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
   int _currentIndex = 0;
   _ReviewFilter _filter = _ReviewFilter.all;
 
@@ -26,6 +28,12 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
   List<Question> get _filteredQuestions {
     return switch (_filter) {
       _ReviewFilter.all => result.questions,
+      _ReviewFilter.correct => result.questions.where((q) {
+        final sel = result.answers[q.questionId];
+        final correct =
+            result.displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
+        return sel != null && sel == correct;
+      }).toList(),
       _ReviewFilter.incorrect => result.questions.where((q) {
         final sel = result.answers[q.questionId];
         final correct =
@@ -76,7 +84,8 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
       body: Column(
         children: [
           // ── Filter chips ──
-          Padding(
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
             padding: const EdgeInsets.fromLTRB(
               AppSpacing.md,
               AppSpacing.sm,
@@ -88,6 +97,7 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
                 final isActive = f == _filter;
                 final count = switch (f) {
                   _ReviewFilter.all => result.totalQuestions,
+                  _ReviewFilter.correct => result.correctCount,
                   _ReviewFilter.incorrect => result.incorrectCount,
                   _ReviewFilter.unanswered => result.unansweredCount,
                 };
@@ -141,6 +151,9 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
                         result.displayCorrectAnswers[questions[_currentIndex]
                             .questionId] ??
                         questions[_currentIndex].correctAnswerLabel,
+                    showSource: ref
+                        .watch(userPermissionsProvider)
+                        .canViewQuestionSource,
                   ),
           ),
 
@@ -174,6 +187,7 @@ class _ExamReviewScreenState extends State<ExamReviewScreen> {
 
 enum _ReviewFilter {
   all('All'),
+  correct('Correct'),
   incorrect('Incorrect'),
   unanswered('Unanswered');
 
@@ -192,6 +206,11 @@ class _EmptyFilterState extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (IconData icon, String title, String subtitle) = switch (filter) {
+      _ReviewFilter.correct => (
+        Icons.sentiment_dissatisfied_rounded,
+        'No Correct Answers',
+        'Keep practicing — you\'ll get there!',
+      ),
       _ReviewFilter.incorrect => (
         Icons.check_circle_outline_rounded,
         'No Incorrect Answers',
@@ -250,6 +269,7 @@ class _ReviewBody extends StatelessWidget {
     required this.selectedAnswer,
     required this.choiceOrder,
     required this.displayCorrectAnswer,
+    this.showSource = false,
   });
 
   final Question question;
@@ -258,6 +278,7 @@ class _ReviewBody extends StatelessWidget {
   final String? selectedAnswer;
   final List<int> choiceOrder;
   final String displayCorrectAnswer;
+  final bool showSource;
 
   @override
   Widget build(BuildContext context) {
@@ -305,7 +326,7 @@ class _ReviewBody extends StatelessWidget {
 
           // ── Explanation ──
           const SizedBox(height: AppSpacing.sm),
-          _ReviewExplanation(question: question),
+          _ReviewExplanation(question: question, showSource: showSource),
         ],
       ),
     );
@@ -429,8 +450,9 @@ class _DifficultyBadge extends StatelessWidget {
 // ===========================================================================
 
 class _ReviewExplanation extends StatelessWidget {
-  const _ReviewExplanation({required this.question});
+  const _ReviewExplanation({required this.question, this.showSource = false});
   final Question question;
+  final bool showSource;
 
   @override
   Widget build(BuildContext context) {
@@ -501,6 +523,47 @@ class _ReviewExplanation extends StatelessWidget {
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           height: 1.55,
                           color: AppColors.textSecondary,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+          if (showSource &&
+              (question.sourceReference != null ||
+                  question.sourceFile != null)) ...[
+            const Padding(
+              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: AppColors.divider),
+            ),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Icon(Icons.source_rounded, size: 16, color: AppColors.textHint),
+                const SizedBox(width: AppSpacing.sm),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Source',
+                        style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          color: AppColors.textSecondary,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      const SizedBox(height: AppSpacing.xs),
+                      Text(
+                        [
+                          if (question.sourceReference != null)
+                            question.sourceReference!,
+                          if (question.sourceFile != null) question.sourceFile!,
+                        ].join(' - '),
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          height: 1.45,
+                          color: AppColors.textHint,
                         ),
                       ),
                     ],

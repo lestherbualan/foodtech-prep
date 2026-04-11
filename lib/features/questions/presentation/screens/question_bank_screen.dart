@@ -7,10 +7,16 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/error_state_widget.dart';
 import '../../../../core/widgets/loading_indicator.dart';
+import '../../../../core/widgets/secondary_screen_header.dart';
+import '../../../../core/widgets/section_header.dart';
+import '../../../exam/domain/exam_subject.dart';
 import '../../domain/question.dart';
-import '../providers/practice_session_provider.dart';
 import '../providers/question_providers.dart';
 
+/// Level 1 of the Question Bank — a scalable subject explorer.
+///
+/// Shows the 4 official subject groups as distinct cards.
+/// Tapping a subject navigates to the Level 2 subtopic screen.
 class QuestionBankScreen extends ConsumerWidget {
   const QuestionBankScreen({super.key});
 
@@ -19,7 +25,7 @@ class QuestionBankScreen extends ConsumerWidget {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Question Bank')),
+      backgroundColor: AppColors.background,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) => ErrorStateWidget(
@@ -31,32 +37,151 @@ class QuestionBankScreen extends ConsumerWidget {
             return const Center(child: Text('No questions found.'));
           }
 
-          // Group by subject for a cleaner browse experience
-          final subjects = _groupBySubject(questions);
+          final counts = _countBySubjectId(questions);
 
-          return ListView.builder(
-            padding: const EdgeInsets.all(AppSpacing.md),
-            itemCount: subjects.length,
-            itemBuilder: (context, index) {
-              final subjectId = subjects.keys.elementAt(index);
-              final group = subjects[subjectId]!;
-              final subjectName = group.first.subjectName;
-
-              return _SubjectSection(
-                subjectName: subjectName,
-                questions: group,
-                onQuestionTap: (question) {
-                  final index = questions.indexOf(question);
-                  context.push(
-                    RouteNames.practice,
-                    extra: PracticeSessionArgs(
-                      questions: questions,
-                      startIndex: index >= 0 ? index : 0,
+          return Column(
+            children: [
+              SecondaryScreenHeader(
+                title: 'Question Bank',
+                subtitle: 'Browse questions by subject and topic.',
+              ),
+              Expanded(
+                child: CustomScrollView(
+                  slivers: [
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.sm),
                     ),
-                  );
-                },
-              );
-            },
+
+                    // ── Intro banner ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: AppSpacing.md + 2,
+                            vertical: AppSpacing.md,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.primarySurface.withValues(
+                              alpha: 0.5,
+                            ),
+                            borderRadius: BorderRadius.circular(
+                              AppSpacing.radiusLg,
+                            ),
+                          ),
+                          child: Row(
+                            children: [
+                              Container(
+                                padding: const EdgeInsets.all(10),
+                                decoration: BoxDecoration(
+                                  gradient: AppColors.primaryGradient,
+                                  borderRadius: BorderRadius.circular(12),
+                                ),
+                                child: const Icon(
+                                  Icons.library_books_rounded,
+                                  size: 20,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(width: AppSpacing.md),
+                              Expanded(
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    Text(
+                                      'Explore Subjects',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .titleSmall
+                                          ?.copyWith(
+                                            fontWeight: FontWeight.w700,
+                                            color: AppColors.primaryDark,
+                                          ),
+                                    ),
+                                    const SizedBox(height: 2),
+                                    Text(
+                                      'Browse by subject to start practicing',
+                                      style: Theme.of(context)
+                                          .textTheme
+                                          .bodySmall
+                                          ?.copyWith(
+                                            color: AppColors.textSecondary,
+                                          ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xl),
+                    ),
+
+                    // ── Subject group section ──
+                    SliverToBoxAdapter(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: AppSpacing.lg,
+                        ),
+                        child: SectionHeader(
+                          title: 'Subject Groups',
+                          trailingText: '${counts.length} subjects',
+                        ),
+                      ),
+                    ),
+
+                    SliverPadding(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: AppSpacing.lg,
+                      ),
+                      sliver: SliverList(
+                        delegate: SliverChildBuilderDelegate(
+                          (context, index) {
+                            final subjectOptions = ExamSubject.options
+                                .where((s) => !s.isAll)
+                                .toList();
+                            final subject = subjectOptions[index];
+                            final count = counts[subject.id] ?? 0;
+
+                            return Padding(
+                              padding: const EdgeInsets.only(
+                                bottom: AppSpacing.sm + 4,
+                              ),
+                              child: _SubjectExplorerCard(
+                                subject: subject,
+                                questionCount: count,
+                                color: _subjectColor(index),
+                                icon: _subjectIcon(index),
+                                onTap: () {
+                                  if (count == 0) return;
+                                  context.push(
+                                    RouteNames.questionBankSubject,
+                                    extra: subject.id,
+                                  );
+                                },
+                              ),
+                            );
+                          },
+                          childCount: ExamSubject.options
+                              .where((s) => !s.isAll)
+                              .length,
+                        ),
+                      ),
+                    ),
+
+                    const SliverToBoxAdapter(
+                      child: SizedBox(height: AppSpacing.xxl),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           );
         },
       ),
@@ -64,149 +189,123 @@ class QuestionBankScreen extends ConsumerWidget {
   }
 }
 
-Map<String, List<Question>> _groupBySubject(List<Question> questions) {
-  final map = <String, List<Question>>{};
+Map<String, int> _countBySubjectId(List<Question> questions) {
+  final map = <String, int>{};
   for (final q in questions) {
-    map.putIfAbsent(q.subjectId, () => []).add(q);
+    map[q.subjectId] = (map[q.subjectId] ?? 0) + 1;
   }
   return map;
 }
 
-class _SubjectSection extends StatelessWidget {
-  const _SubjectSection({
-    required this.subjectName,
-    required this.questions,
-    required this.onQuestionTap,
-  });
-
-  final String subjectName;
-  final List<Question> questions;
-  final ValueChanged<Question> onQuestionTap;
-
-  @override
-  Widget build(BuildContext context) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
-          child: Row(
-            children: [
-              Expanded(
-                child: Text(
-                  subjectName,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppSpacing.sm,
-                  vertical: AppSpacing.xs,
-                ),
-                decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
-                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-                ),
-                child: Text(
-                  '${questions.length}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelLarge?.copyWith(color: AppColors.primary),
-                ),
-              ),
-            ],
-          ),
-        ),
-        ...questions.map(
-          (q) => _QuestionTile(question: q, onTap: () => onQuestionTap(q)),
-        ),
-        const SizedBox(height: AppSpacing.md),
-      ],
-    );
-  }
+Color _subjectColor(int index) {
+  const colors = [
+    AppColors.primary,
+    AppColors.secondary,
+    AppColors.accent,
+    Color(0xFF7B68EE),
+  ];
+  return colors[index % colors.length];
 }
 
-class _QuestionTile extends StatelessWidget {
-  const _QuestionTile({required this.question, required this.onTap});
+IconData _subjectIcon(int index) {
+  const icons = [
+    Icons.science_rounded,
+    Icons.restaurant_rounded,
+    Icons.verified_rounded,
+    Icons.gavel_rounded,
+  ];
+  return icons[index % icons.length];
+}
 
-  final Question question;
+class _SubjectExplorerCard extends StatelessWidget {
+  const _SubjectExplorerCard({
+    required this.subject,
+    required this.questionCount,
+    required this.color,
+    required this.icon,
+    required this.onTap,
+  });
+
+  final ExamSubject subject;
+  final int questionCount;
+  final Color color;
+  final IconData icon;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    return Card(
-      margin: const EdgeInsets.only(bottom: AppSpacing.sm),
+    final isEmpty = questionCount == 0;
+
+    return Material(
+      color: Colors.transparent,
       child: InkWell(
-        onTap: onTap,
-        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        child: Padding(
-          padding: const EdgeInsets.all(AppSpacing.md),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  _DifficultyChip(difficulty: question.difficulty),
-                  const SizedBox(width: AppSpacing.sm),
-                  Expanded(
-                    child: Text(
-                      question.subtopicName,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: AppSpacing.sm),
-              Text(
-                question.questionText,
-                style: Theme.of(context).textTheme.bodyLarge,
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
-              ),
-              const SizedBox(height: AppSpacing.xs),
-              Text(
-                question.questionId,
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+        onTap: isEmpty ? null : onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md + 4),
+          decoration: BoxDecoration(
+            color: AppColors.card,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.divider),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
               ),
             ],
           ),
-        ),
-      ),
-    );
-  }
-}
-
-class _DifficultyChip extends StatelessWidget {
-  const _DifficultyChip({required this.difficulty});
-
-  final String difficulty;
-
-  @override
-  Widget build(BuildContext context) {
-    final color = switch (difficulty) {
-      'Easy' => AppColors.success,
-      'Medium' => AppColors.warning,
-      'Hard' => AppColors.error,
-      _ => AppColors.textSecondary,
-    };
-
-    return Container(
-      padding: const EdgeInsets.symmetric(
-        horizontal: AppSpacing.sm,
-        vertical: 2,
-      ),
-      decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.12),
-        borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-      ),
-      child: Text(
-        difficulty,
-        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: color,
-          fontWeight: FontWeight.w600,
+          child: Row(
+            children: [
+              Container(
+                width: 50,
+                height: 50,
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Icon(icon, size: 24, color: color),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      subject.label,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                        fontWeight: FontWeight.w700,
+                        letterSpacing: -0.2,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subject.subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                        height: 1.4,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm),
+              Container(
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.surface,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+                child: const Icon(
+                  Icons.chevron_right_rounded,
+                  size: 18,
+                  color: AppColors.textHint,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );

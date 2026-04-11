@@ -15,4 +15,13 @@ class RouteNames {
   static const String examHistory = '/exam/history';
   static const String dashboard = '/dashboard';
   static const String profile = '/profile';
+  static const String subjectPractice = '/subject-practice';
+  static const String weakAreas = '/weak-areas';
+  static const String subjectBreakdown = '/subject-breakdown';
+  static const String attemptDetail = '/attempt-detail';
+  static const String questionBankSubject = '/questions/subject';
+  static const String performanceCalendar = '/performance-calendar';
+  static const String reportList = '/reports';
+  static const String reportDetail = '/reports/detail';
+  static const String adminManagement = '/admin/manage';
 }

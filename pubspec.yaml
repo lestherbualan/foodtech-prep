@@ -15,6 +15,17 @@ dependencies:
   google_sign_in: ^6.2.2
   flutter_riverpod: ^2.6.1
   go_router: ^14.6.0
+  google_fonts: ^6.2.1
+  intl: ^0.20.2
+  flutter_launcher_icons: ^0.13.1
+
+flutter_launcher_icons:
+  android: true
+  ios: false
+  image_path: "assets/icon/icon.png"
+  adaptive_icon_foreground: "assets/icon/icon_foreground.png"
+  adaptive_icon_background: "#0F7C78"
+  min_sdk_android: 21
 
 dev_dependencies:
   flutter_test:
@@ -27,3 +38,4 @@ flutter:
   assets:
     - assets/data/questions/
     - assets/images/google.png
+    - assets/icon/start_screen_logo.png

@@ -1,3 +1,5 @@
+import '../../../core/constants/question_types.dart';
+
 /// A single answer option for a question.
 class QuestionOption {
   const QuestionOption({
@@ -112,7 +114,9 @@ class Question {
       explanation: json['explanation'] as String,
       conceptCluster: json['conceptCluster'] as String?,
       difficulty: json['difficulty'] as String? ?? 'Medium',
-      questionType: json['questionType'] as String?,
+      questionType: QuestionTypes.normalizeQuestionType(
+        json['questionType'] as String?,
+      ),
       studyNote: json['studyNote'] as String?,
       weaknessLabel: json['weaknessLabel'] as String?,
       recommendationText: json['recommendationText'] as String?,
@@ -184,7 +188,9 @@ class Question {
       explanation: data['explanation'] as String? ?? '',
       conceptCluster: data['conceptCluster'] as String?,
       difficulty: data['difficulty'] as String? ?? 'Medium',
-      questionType: data['questionType'] as String?,
+      questionType: QuestionTypes.normalizeQuestionType(
+        data['questionType'] as String?,
+      ),
       studyNote: data['studyNote'] as String?,
       weaknessLabel: data['weaknessLabel'] as String?,
       recommendationText: data['recommendationText'] as String?,

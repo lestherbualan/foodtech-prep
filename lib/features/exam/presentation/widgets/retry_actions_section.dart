@@ -39,9 +39,10 @@ class RetryActionsSection extends StatelessWidget {
       children: [
         Text(
           'Try Again',
-          style: Theme.of(
-            context,
-          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w600),
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.2,
+          ),
         ),
         const SizedBox(height: AppSpacing.sm),
         if (hasIncorrect)
@@ -89,11 +90,12 @@ class _RetryButton extends StatelessWidget {
         icon: Icon(icon, size: 18),
         label: Text(label),
         style: OutlinedButton.styleFrom(
-          minimumSize: const Size(0, 46),
+          minimumSize: const Size(0, 50),
           foregroundColor: AppColors.primary,
           side: const BorderSide(color: AppColors.divider),
+          textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           ),
         ),
       ),
