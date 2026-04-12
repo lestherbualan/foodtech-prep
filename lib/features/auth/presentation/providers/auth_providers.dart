@@ -2,7 +2,10 @@ import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:google_sign_in/google_sign_in.dart';
 
+import 'package:flutter/foundation.dart';
+
 import '../../../../core/constants/user_roles.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../data/activity_logger.dart';
 import '../../data/auth_repository.dart';
 import '../../data/user_repository.dart';
@@ -89,6 +92,18 @@ class AuthActionNotifier extends StateNotifier<AsyncValue<void>> {
           type: ActivityType.login,
           metadata: {'method': 'google'},
         );
+        // Persist FCM token & permission state (best-effort, non-blocking).
+        try {
+          final reg = await PushNotificationService.getRegistrationState();
+          await _userRepo.updateNotificationToken(
+            uid: user.uid,
+            token: reg.token,
+            notificationsEnabled: reg.notificationsEnabled,
+            permissionStatus: reg.permissionStatusString,
+          );
+        } catch (e) {
+          debugPrint('[Auth] FCM token sync failed (non-fatal): $e');
+        }
       }
     });
   }
