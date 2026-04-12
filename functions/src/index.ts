@@ -144,11 +144,21 @@ export const sendNotificationToUser = onCall(async (request) => {
     throw new HttpsError("unauthenticated", "Authentication is required.");
   }
 
-  if (request.auth.uid !== uid) {
-    throw new HttpsError(
-      "permission-denied",
-      "You can only send notifications for your own account.",
-    );
+  const callerUid = request.auth.uid;
+  const isSelf = callerUid === uid;
+
+  if (!isSelf) {
+    const callerDoc = await admin.firestore()
+      .collection("users").doc(callerUid).get();
+    const callerRole = callerDoc.data()?.role as string | undefined;
+
+    if (callerRole !== "super_admin") {
+      throw new HttpsError(
+        "permission-denied",
+        "You can only send notifications to your own account " +
+        "unless you are a super admin.",
+      );
+    }
   }
 
   const {fcmToken} = await getEligibleUserNotificationTarget(uid);

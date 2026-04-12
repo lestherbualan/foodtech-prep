@@ -73,8 +73,8 @@ class ProfileScreen extends ConsumerWidget {
 
                   const SizedBox(height: AppSpacing.xl),
 
-                  // ── Debug: Push notification testing (debug builds only) ──
-                  if (kDebugMode) ...[
+                  // ── Debug: Push notification testing (super_admin only) ──
+                  if (role == UserRole.superAdmin) ...[
                     _DebugNotificationSection(uid: user.uid),
                     const SizedBox(height: AppSpacing.xl),
                   ],

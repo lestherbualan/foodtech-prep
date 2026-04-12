@@ -64,3 +64,5 @@ key.properties
 # Env files
 .env
 .env.*
+
+.vscode
