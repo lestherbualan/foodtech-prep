@@ -248,4 +248,30 @@ class UserRepository {
       rethrow;
     }
   }
+
+  /// Persists FCM notification token and permission state into the user doc.
+  ///
+  /// Uses merge semantics so existing profile fields are never overwritten.
+  Future<void> updateNotificationToken({
+    required String uid,
+    required String? token,
+    required bool notificationsEnabled,
+    required String permissionStatus,
+  }) async {
+    try {
+      await _userDoc(uid).set({
+        'fcmToken': token,
+        'fcmTokenUpdatedAt': FieldValue.serverTimestamp(),
+        'notificationsEnabled': notificationsEnabled,
+        'notificationPermissionStatus': permissionStatus,
+      }, SetOptions(merge: true));
+
+      debugPrint(
+        '[UserRepo] Saved notification token for $uid '
+        '(enabled: $notificationsEnabled, status: $permissionStatus)',
+      );
+    } catch (e) {
+      debugPrint('[UserRepo] Failed to save notification token for $uid: $e');
+    }
+  }
 }

@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:flutter/foundation.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/user_roles.dart';
+import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -70,6 +72,12 @@ class ProfileScreen extends ConsumerWidget {
                   ],
 
                   const SizedBox(height: AppSpacing.xl),
+
+                  // ── Debug: Push notification testing (super_admin only) ──
+                  if (role == UserRole.superAdmin) ...[
+                    _DebugNotificationSection(uid: user.uid),
+                    const SizedBox(height: AppSpacing.xl),
+                  ],
 
                   // ── 4. Sign out — calmer treatment ──
                   _SignOutButton(
@@ -575,6 +583,162 @@ class _AdminManageButton extends StatelessWidget {
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
       ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Debug — Push notification testing (debug builds only)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _DebugNotificationSection extends StatefulWidget {
+  const _DebugNotificationSection({required this.uid});
+  final String uid;
+
+  @override
+  State<_DebugNotificationSection> createState() =>
+      _DebugNotificationSectionState();
+}
+
+class _DebugNotificationSectionState extends State<_DebugNotificationSection> {
+  bool _busy = false;
+
+  Future<void> _run(Future<void> Function() action) async {
+    if (_busy) return;
+    setState(() => _busy = true);
+    try {
+      await action();
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(const SnackBar(content: Text('Notification sent ✓')));
+      }
+    } catch (e) {
+      debugPrint('[DebugNotif] Error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(
+          context,
+        ).showSnackBar(SnackBar(content: Text('Failed: $e')));
+      }
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final textStyle = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: AppColors.tertiary,
+      fontWeight: FontWeight.w600,
+    );
+    final buttonStyle = OutlinedButton.styleFrom(
+      minimumSize: const Size(double.infinity, 48),
+      side: const BorderSide(color: AppColors.tertiary),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+      ),
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Text(
+          'Debug · Push Notifications',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSecondary,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _run(
+                  () => PushNotificationService.sendNotificationToUser(
+                    uid: widget.uid,
+                    title: 'FoodTech Prep',
+                    body: 'Send-by-uid backend pattern is working! 🎉',
+                  ),
+                ),
+          icon: Icon(Icons.send_rounded, size: 18, color: AppColors.tertiary),
+          label: Text('Test Send-by-UID', style: textStyle),
+          style: buttonStyle,
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _run(
+                  () => PushNotificationService.sendCountdownReminder(
+                    uid: widget.uid,
+                  ),
+                ),
+          icon: Icon(
+            Icons.calendar_today_rounded,
+            size: 18,
+            color: AppColors.tertiary,
+          ),
+          label: Text('Test Countdown Reminder', style: textStyle),
+          style: buttonStyle,
+        ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Broadcast · All Users',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSecondary,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _run(() async {
+                  final result =
+                      await PushNotificationService.sendNotificationToAllUsers(
+                    title: 'FoodTech Prep',
+                    body:
+                        'Keep studying! Your board exam is getting closer. 📚',
+                  );
+                  if (mounted) {
+                    final sent = result['sent'] ?? 0;
+                    final skipped = result['skipped'] ?? 0;
+                    final failed = result['failed'] ?? 0;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Broadcast: $sent sent, $skipped skipped, $failed failed',
+                        ),
+                      ),
+                    );
+                  }
+                }),
+          icon: Icon(
+            Icons.campaign_rounded,
+            size: 18,
+            color: AppColors.warning,
+          ),
+          label: Text(
+            'Broadcast to All Users',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.warning,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            side: const BorderSide(color: AppColors.warning),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+          ),
+        ),
+        if (_busy)
+          const Padding(
+            padding: EdgeInsets.only(top: AppSpacing.sm),
+            child: Center(child: CircularProgressIndicator(strokeWidth: 2)),
+          ),
+      ],
     );
   }
 }
