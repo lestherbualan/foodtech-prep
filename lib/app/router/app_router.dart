@@ -12,6 +12,8 @@ import '../../features/exam/presentation/screens/exam_history_screen.dart';
 import '../../features/exam/presentation/screens/dashboard_screen.dart';
 import '../../features/exam/domain/saved_exam_attempt.dart';
 import '../../features/exam/presentation/screens/attempt_detail_screen.dart';
+import '../../features/exam/presentation/screens/board_exam_setup_screen.dart';
+import '../../features/exam/presentation/screens/full_mock_setup_screen.dart';
 import '../../features/exam/presentation/screens/exam_result_screen.dart';
 import '../../features/exam/presentation/screens/performance_calendar_screen.dart';
 import '../../features/exam/presentation/screens/exam_review_screen.dart';
@@ -131,14 +133,25 @@ final routerProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const ExamSetupScreen(),
       ),
       GoRoute(
+        path: RouteNames.boardExamSetup,
+        builder: (context, state) => const BoardExamSetupScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.fullMockSetup,
+        builder: (context, state) => const FullMockSetupScreen(),
+      ),
+      GoRoute(
         path: RouteNames.timedExam,
         builder: (context, state) {
           final args = state.extra! as TimedExamArgs;
           return ProviderScope(
             overrides: [
               timedExamProvider.overrideWith(
-                (ref) =>
-                    TimedExamNotifier(args.questions, args.durationMinutes),
+                (ref) => TimedExamNotifier(
+                  args.questions,
+                  args.durationMinutes,
+                  mode: args.mode,
+                ),
               ),
             ],
             child: const TimedExamScreen(),

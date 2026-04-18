@@ -184,6 +184,17 @@ class ReportRepository {
               reviewedByName: fetched.reviewedByName,
               reviewedAt: fetched.reviewedAt,
               isFlagged: fetched.isFlagged,
+              assignedReviewerUid: fetched.assignedReviewerUid,
+              assignedReviewerName: fetched.assignedReviewerName,
+              assignedAt: fetched.assignedAt,
+              resolvedByUid: fetched.resolvedByUid,
+              resolvedByName: fetched.resolvedByName,
+              resolvedAt: fetched.resolvedAt,
+              resolutionNote: fetched.resolutionNote,
+              rejectedByUid: fetched.rejectedByUid,
+              rejectedByName: fetched.rejectedByName,
+              rejectedAt: fetched.rejectedAt,
+              rejectionReason: fetched.rejectionReason,
             );
           } catch (_) {
             // ignore overlay errors
@@ -272,6 +283,17 @@ class ReportRepository {
             reviewedByName: fetched.reviewedByName,
             reviewedAt: fetched.reviewedAt,
             isFlagged: fetched.isFlagged,
+            assignedReviewerUid: fetched.assignedReviewerUid,
+            assignedReviewerName: fetched.assignedReviewerName,
+            assignedAt: fetched.assignedAt,
+            resolvedByUid: fetched.resolvedByUid,
+            resolvedByName: fetched.resolvedByName,
+            resolvedAt: fetched.resolvedAt,
+            resolutionNote: fetched.resolutionNote,
+            rejectedByUid: fetched.rejectedByUid,
+            rejectedByName: fetched.rejectedByName,
+            rejectedAt: fetched.rejectedAt,
+            rejectionReason: fetched.rejectionReason,
           );
         } catch (_) {}
       }
@@ -342,6 +364,108 @@ class ReportRepository {
       debugPrint('[ReportRepo] Updated review status for $questionId');
     } catch (e) {
       debugPrint('[ReportRepo] Failed to update review status: $e');
+      rethrow;
+    }
+  }
+
+  /// Marks a report as under review and records the reviewer assignment.
+  Future<void> markUnderReview({
+    required String questionId,
+    required String reviewerUid,
+    required String reviewerName,
+    String? adminNote,
+  }) async {
+    try {
+      final updates = <String, dynamic>{
+        'reviewStatus': ReviewStatus.underReview.label,
+        'assignedReviewerUid': reviewerUid,
+        'assignedReviewerName': reviewerName,
+        'assignedAt': FieldValue.serverTimestamp(),
+        'reviewedByUid': reviewerUid,
+        'reviewedByName': reviewerName,
+        'reviewedAt': FieldValue.serverTimestamp(),
+        'isFlagged': true,
+      };
+      if (adminNote != null) updates['adminNote'] = adminNote;
+
+      await _summariesRef.doc(questionId).set(updates, SetOptions(merge: true));
+      debugPrint('[ReportRepo] Marked under review: $questionId');
+    } catch (e) {
+      debugPrint('[ReportRepo] Failed to mark under review: $e');
+      rethrow;
+    }
+  }
+
+  /// Resolves a report by saving the corrected question and updating the
+  /// summary in a single batch write for consistency.
+  Future<void> resolveReport({
+    required String questionId,
+    required String bankId,
+    required Map<String, dynamic> updatedQuestionData,
+    required String resolvedByUid,
+    required String resolvedByName,
+    String? resolutionNote,
+  }) async {
+    try {
+      final batch = _firestore.batch();
+
+      // 1. Update question in active bank
+      final questionRef = _firestore
+          .collection('questionBanks')
+          .doc(bankId)
+          .collection('questions')
+          .doc(questionId);
+      batch.update(questionRef, updatedQuestionData);
+
+      // 2. Update report summary to resolved
+      final summaryRef = _summariesRef.doc(questionId);
+      final summaryUpdates = <String, dynamic>{
+        'reviewStatus': ReviewStatus.resolved.label,
+        'resolvedByUid': resolvedByUid,
+        'resolvedByName': resolvedByName,
+        'resolvedAt': FieldValue.serverTimestamp(),
+        'reviewedByUid': resolvedByUid,
+        'reviewedByName': resolvedByName,
+        'reviewedAt': FieldValue.serverTimestamp(),
+        'isFlagged': false,
+      };
+      if (resolutionNote != null) {
+        summaryUpdates['resolutionNote'] = resolutionNote;
+      }
+      batch.set(summaryRef, summaryUpdates, SetOptions(merge: true));
+
+      await batch.commit();
+      debugPrint('[ReportRepo] Resolved report: $questionId');
+    } catch (e) {
+      debugPrint('[ReportRepo] Failed to resolve report: $e');
+      rethrow;
+    }
+  }
+
+  /// Rejects a report with a required reason. Does not modify the question.
+  Future<void> rejectReport({
+    required String questionId,
+    required String rejectedByUid,
+    required String rejectedByName,
+    required String rejectionReason,
+  }) async {
+    try {
+      final updates = <String, dynamic>{
+        'reviewStatus': ReviewStatus.rejected.label,
+        'rejectedByUid': rejectedByUid,
+        'rejectedByName': rejectedByName,
+        'rejectedAt': FieldValue.serverTimestamp(),
+        'rejectionReason': rejectionReason,
+        'reviewedByUid': rejectedByUid,
+        'reviewedByName': rejectedByName,
+        'reviewedAt': FieldValue.serverTimestamp(),
+        'isFlagged': false,
+      };
+
+      await _summariesRef.doc(questionId).set(updates, SetOptions(merge: true));
+      debugPrint('[ReportRepo] Rejected report: $questionId');
+    } catch (e) {
+      debugPrint('[ReportRepo] Failed to reject report: $e');
       rethrow;
     }
   }

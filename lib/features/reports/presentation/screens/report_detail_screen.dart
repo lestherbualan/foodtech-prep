@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/constants/app_spacing.dart';
+import '../../../../core/constants/question_types.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
@@ -78,11 +79,15 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                     _ReportSummaryCard(summary: summary),
                     const SizedBox(height: AppSpacing.lg),
 
-                    _SectionLabel(label: 'Review'),
-                    _ReviewControlCard(
+                    _SectionLabel(label: 'Moderation'),
+                    _ModerationCard(
                       summary: summary,
-                      onUpdate: (status, note) =>
-                          _updateStatus(summary.questionId, status, note),
+                      fullQuestion: fullQuestion,
+                      onMarkUnderReview: () =>
+                          _markUnderReview(summary.questionId),
+                      onResolve: () =>
+                          _openEditAndResolve(summary.questionId, fullQuestion),
+                      onReject: () => _openRejectDialog(summary.questionId),
                     ),
                     const SizedBox(height: AppSpacing.lg),
 
@@ -115,23 +120,17 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
     );
   }
 
-  Future<void> _updateStatus(
-    String questionId,
-    ReviewStatus status,
-    String? note,
-  ) async {
+  Future<void> _markUnderReview(String questionId) async {
     try {
       final repo = ref.read(reportRepositoryProvider);
       final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
       final profile = ref.read(userProfileProvider).valueOrNull;
-      final reviewerName = profile?.displayName ?? profile?.email;
+      final name = profile?.displayName ?? profile?.email ?? '';
 
-      await repo.updateReviewStatus(
+      await repo.markUnderReview(
         questionId: questionId,
-        status: status,
         reviewerUid: uid,
-        reviewerName: reviewerName,
-        adminNote: note,
+        reviewerName: name,
       );
 
       ref.invalidate(reportDetailProvider(questionId));
@@ -139,17 +138,125 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
 
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text('Status updated to ${status.displayLabel}'),
+        const SnackBar(
+          content: Text('Report marked as Under Review'),
           behavior: SnackBarBehavior.floating,
-          duration: const Duration(seconds: 2),
+          duration: Duration(seconds: 2),
         ),
       );
     } catch (e) {
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
-          content: Text('Failed to update: $e'),
+          content: Text('Failed: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _openEditAndResolve(
+    String questionId,
+    Question? question,
+  ) async {
+    if (question == null) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Question data not loaded yet.'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+      return;
+    }
+
+    final result = await showModalBottomSheet<Map<String, dynamic>>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (ctx) => _QuestionEditSheet(question: question),
+    );
+
+    if (result == null || !mounted) return;
+
+    try {
+      final repo = ref.read(reportRepositoryProvider);
+      final firestoreRepo = ref.read(firestoreQuestionRepositoryProvider);
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final profile = ref.read(userProfileProvider).valueOrNull;
+      final name = profile?.displayName ?? profile?.email ?? '';
+
+      final bankId = await firestoreRepo.getActiveBankId();
+
+      await repo.resolveReport(
+        questionId: questionId,
+        bankId: bankId,
+        updatedQuestionData: result,
+        resolvedByUid: uid,
+        resolvedByName: name,
+      );
+
+      // Invalidate caches so the corrected question is reflected everywhere.
+      firestoreRepo.clearCache();
+      ref.invalidate(questionsProvider);
+      ref.invalidate(reportDetailProvider(questionId));
+      ref.invalidate(reportSummariesProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Question corrected and report resolved'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to resolve: $e'),
+          behavior: SnackBarBehavior.floating,
+        ),
+      );
+    }
+  }
+
+  Future<void> _openRejectDialog(String questionId) async {
+    final reason = await showDialog<String>(
+      context: context,
+      builder: (ctx) => const _RejectDialog(),
+    );
+
+    if (reason == null || reason.trim().isEmpty || !mounted) return;
+
+    try {
+      final repo = ref.read(reportRepositoryProvider);
+      final uid = FirebaseAuth.instance.currentUser?.uid ?? '';
+      final profile = ref.read(userProfileProvider).valueOrNull;
+      final name = profile?.displayName ?? profile?.email ?? '';
+
+      await repo.rejectReport(
+        questionId: questionId,
+        rejectedByUid: uid,
+        rejectedByName: name,
+        rejectionReason: reason.trim(),
+      );
+
+      ref.invalidate(reportDetailProvider(questionId));
+      ref.invalidate(reportSummariesProvider);
+
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Report rejected'),
+          behavior: SnackBarBehavior.floating,
+          duration: Duration(seconds: 2),
+        ),
+      );
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text('Failed to reject: $e'),
           behavior: SnackBarBehavior.floating,
         ),
       );
@@ -559,52 +666,29 @@ class _MiniStat extends StatelessWidget {
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
-// C. Review control card
+// C. Moderation card (replaces legacy _ReviewControlCard)
 // ═══════════════════════════════════════════════════════════════════════════════
 
-class _ReviewControlCard extends StatefulWidget {
-  const _ReviewControlCard({required this.summary, required this.onUpdate});
+class _ModerationCard extends ConsumerWidget {
+  const _ModerationCard({
+    required this.summary,
+    required this.fullQuestion,
+    required this.onMarkUnderReview,
+    required this.onResolve,
+    required this.onReject,
+  });
 
   final QuestionReportSummary summary;
-  final void Function(ReviewStatus status, String? note) onUpdate;
+  final Question? fullQuestion;
+  final VoidCallback onMarkUnderReview;
+  final VoidCallback onResolve;
+  final VoidCallback onReject;
 
   @override
-  State<_ReviewControlCard> createState() => _ReviewControlCardState();
-}
+  Widget build(BuildContext context, WidgetRef ref) {
+    final permissions = ref.watch(userPermissionsProvider);
+    final canModerate = permissions.canModerateReports;
 
-class _ReviewControlCardState extends State<_ReviewControlCard> {
-  late ReviewStatus _selectedStatus;
-  late TextEditingController _noteController;
-  bool _saving = false;
-
-  @override
-  void initState() {
-    super.initState();
-    _selectedStatus = widget.summary.reviewStatus;
-    _noteController = TextEditingController(
-      text: widget.summary.adminNote ?? '',
-    );
-  }
-
-  @override
-  void didUpdateWidget(covariant _ReviewControlCard oldWidget) {
-    super.didUpdateWidget(oldWidget);
-    if (oldWidget.summary.reviewStatus != widget.summary.reviewStatus) {
-      _selectedStatus = widget.summary.reviewStatus;
-    }
-    if (oldWidget.summary.adminNote != widget.summary.adminNote) {
-      _noteController.text = widget.summary.adminNote ?? '';
-    }
-  }
-
-  @override
-  void dispose() {
-    _noteController.dispose();
-    super.dispose();
-  }
-
-  @override
-  Widget build(BuildContext context) {
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
@@ -622,127 +706,179 @@ class _ReviewControlCardState extends State<_ReviewControlCard> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Set Status',
-            style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.textSecondary,
-              fontWeight: FontWeight.w600,
-            ),
-          ),
-          const SizedBox(height: AppSpacing.sm),
-
-          Wrap(
-            spacing: 8,
-            runSpacing: 8,
-            children: ReviewStatus.values.map((status) {
-              final isSelected = _selectedStatus == status;
-              final color = _statusColor(status);
-              return GestureDetector(
-                onTap: () => setState(() => _selectedStatus = status),
-                child: AnimatedContainer(
-                  duration: const Duration(milliseconds: 150),
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 14,
-                    vertical: 8,
-                  ),
-                  decoration: BoxDecoration(
-                    color: isSelected
-                        ? color.withValues(alpha: 0.15)
-                        : AppColors.surface,
-                    borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-                    border: Border.all(
-                      color: isSelected
-                          ? color.withValues(alpha: 0.5)
-                          : AppColors.divider,
-                      width: isSelected ? 1.5 : 1,
-                    ),
-                  ),
-                  child: Text(
-                    status.displayLabel,
-                    style: TextStyle(
-                      fontSize: 13,
-                      fontWeight: isSelected
-                          ? FontWeight.w600
-                          : FontWeight.w500,
-                      color: isSelected ? color : AppColors.textSecondary,
-                    ),
+          // Current status badge
+          Row(
+            children: [
+              Text(
+                'Status: ',
+                style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                  color: AppColors.textSecondary,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+              Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 10,
+                  vertical: 4,
+                ),
+                decoration: BoxDecoration(
+                  color: _statusColor(
+                    summary.reviewStatus,
+                  ).withValues(alpha: 0.12),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+                child: Text(
+                  summary.reviewStatus.displayLabel,
+                  style: TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: _statusColor(summary.reviewStatus),
                   ),
                 ),
-              );
-            }).toList(),
-          ),
-
-          const SizedBox(height: AppSpacing.md),
-
-          TextField(
-            controller: _noteController,
-            maxLines: 3,
-            decoration: InputDecoration(
-              hintText: 'Admin note (optional)',
-              hintStyle: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
-              filled: true,
-              fillColor: AppColors.surface,
-              border: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.divider),
               ),
-              enabledBorder: OutlineInputBorder(
-                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.divider),
+            ],
+          ),
+
+          // Assignment info
+          if (summary.assignedReviewerName != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MetaRow(
+              icon: Icons.person_outline_rounded,
+              text: 'Assigned to: ${summary.assignedReviewerName}',
+            ),
+            if (summary.assignedAt != null)
+              _MetaRow(
+                icon: Icons.schedule_rounded,
+                text: 'Assigned: ${_formatDate(summary.assignedAt!)}',
               ),
-              contentPadding: const EdgeInsets.all(AppSpacing.md),
+          ],
+
+          // Resolution info
+          if (summary.resolvedByName != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MetaRow(
+              icon: Icons.check_circle_outline_rounded,
+              text: 'Resolved by: ${summary.resolvedByName}',
+              color: AppColors.success,
             ),
-          ),
+            if (summary.resolvedAt != null)
+              _MetaRow(
+                icon: Icons.schedule_rounded,
+                text: 'Resolved: ${_formatDate(summary.resolvedAt!)}',
+              ),
+            if (summary.resolutionNote != null &&
+                summary.resolutionNote!.isNotEmpty)
+              _MetaRow(
+                icon: Icons.notes_rounded,
+                text: 'Note: ${summary.resolutionNote}',
+              ),
+          ],
 
-          const SizedBox(height: AppSpacing.md),
-
-          SizedBox(
-            width: double.infinity,
-            child: FilledButton(
-              onPressed: _saving
-                  ? null
-                  : () async {
-                      setState(() => _saving = true);
-                      widget.onUpdate(
-                        _selectedStatus,
-                        _noteController.text.trim().isNotEmpty
-                            ? _noteController.text.trim()
-                            : null,
-                      );
-                      await Future.delayed(const Duration(milliseconds: 500));
-                      if (mounted) setState(() => _saving = false);
-                    },
-              style: FilledButton.styleFrom(minimumSize: const Size(0, 48)),
-              child: _saving
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                  : const Text('Save Review'),
+          // Rejection info
+          if (summary.rejectedByName != null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MetaRow(
+              icon: Icons.block_rounded,
+              text: 'Rejected by: ${summary.rejectedByName}',
+              color: AppColors.error,
             ),
-          ),
+            if (summary.rejectedAt != null)
+              _MetaRow(
+                icon: Icons.schedule_rounded,
+                text: 'Rejected: ${_formatDate(summary.rejectedAt!)}',
+              ),
+            if (summary.rejectionReason != null &&
+                summary.rejectionReason!.isNotEmpty) ...[
+              const SizedBox(height: AppSpacing.xs),
+              Container(
+                width: double.infinity,
+                padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                decoration: BoxDecoration(
+                  color: AppColors.error.withValues(alpha: 0.06),
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                ),
+                child: Text(
+                  summary.rejectionReason!,
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                    color: AppColors.textSecondary,
+                    fontStyle: FontStyle.italic,
+                    height: 1.4,
+                  ),
+                ),
+              ),
+            ],
+          ],
 
-          if (widget.summary.reviewedByUid != null) ...[
+          // Legacy reviewer info fallback
+          if (summary.reviewedByUid != null &&
+              summary.assignedReviewerUid == null &&
+              summary.resolvedByUid == null &&
+              summary.rejectedByUid == null) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MetaRow(
+              icon: Icons.person_outline_rounded,
+              text:
+                  'Reviewed by: ${summary.reviewedByName ?? summary.reviewedByUid}',
+            ),
+            if (summary.reviewedAt != null)
+              _MetaRow(
+                icon: Icons.schedule_rounded,
+                text: 'Reviewed: ${_formatDate(summary.reviewedAt!)}',
+              ),
+          ],
+
+          // Admin note
+          if (summary.adminNote != null && summary.adminNote!.isNotEmpty) ...[
+            const SizedBox(height: AppSpacing.sm),
+            _MetaRow(
+              icon: Icons.sticky_note_2_outlined,
+              text: 'Note: ${summary.adminNote}',
+            ),
+          ],
+
+          // Action buttons (only for moderators)
+          if (canModerate) ...[
             const SizedBox(height: AppSpacing.md),
+            const Divider(height: 1, color: AppColors.divider),
+            const SizedBox(height: AppSpacing.md),
+
             Text(
-              'Last reviewed by: ${widget.summary.reviewedByName ?? widget.summary.reviewedByUid}',
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
-            ),
-            if (widget.summary.reviewedAt != null)
-              Text(
-                'Reviewed at: ${_formatDate(widget.summary.reviewedAt!)}',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+              'Actions',
+              style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                color: AppColors.textSecondary,
+                fontWeight: FontWeight.w600,
               ),
+            ),
+            const SizedBox(height: AppSpacing.sm),
+
+            Wrap(
+              spacing: 8,
+              runSpacing: 8,
+              children: [
+                if (summary.reviewStatus == ReviewStatus.open ||
+                    summary.reviewStatus == ReviewStatus.underReview)
+                  _ActionButton(
+                    label: 'Mark Under Review',
+                    icon: Icons.visibility_rounded,
+                    color: AppColors.tertiary,
+                    onTap: onMarkUnderReview,
+                  ),
+                if (summary.reviewStatus != ReviewStatus.resolved)
+                  _ActionButton(
+                    label: 'Edit & Resolve',
+                    icon: Icons.edit_rounded,
+                    color: AppColors.success,
+                    onTap: onResolve,
+                  ),
+                if (summary.reviewStatus != ReviewStatus.rejected)
+                  _ActionButton(
+                    label: 'Reject',
+                    icon: Icons.block_rounded,
+                    color: AppColors.error,
+                    onTap: onReject,
+                  ),
+              ],
+            ),
           ],
         ],
       ),
@@ -780,6 +916,579 @@ class _ReviewControlCardState extends State<_ReviewControlCard> {
     return '${months[dt.month - 1]} ${dt.day}, ${dt.year} '
         '${dt.hour.toString().padLeft(2, '0')}:'
         '${dt.minute.toString().padLeft(2, '0')}';
+  }
+}
+
+class _MetaRow extends StatelessWidget {
+  const _MetaRow({required this.icon, required this.text, this.color});
+  final IconData icon;
+  final String text;
+  final Color? color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 3),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Icon(icon, size: 14, color: color ?? AppColors.textHint),
+          const SizedBox(width: 6),
+          Expanded(
+            child: Text(
+              text,
+              style: Theme.of(
+                context,
+              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _ActionButton extends StatelessWidget {
+  const _ActionButton({
+    required this.label,
+    required this.icon,
+    required this.color,
+    required this.onTap,
+  });
+  final String label;
+  final IconData icon;
+  final Color color;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: color.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 9),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon, size: 16, color: color),
+              const SizedBox(width: 6),
+              Text(
+                label,
+                style: TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                  color: color,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// E. Question edit sheet (modal bottom sheet for resolve flow)
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _QuestionEditSheet extends StatefulWidget {
+  const _QuestionEditSheet({required this.question});
+  final Question question;
+
+  @override
+  State<_QuestionEditSheet> createState() => _QuestionEditSheetState();
+}
+
+class _QuestionEditSheetState extends State<_QuestionEditSheet> {
+  late TextEditingController _questionTextCtrl;
+  late List<TextEditingController> _optionCtrls;
+  late int _correctIndex;
+  late TextEditingController _explanationCtrl;
+  late TextEditingController _difficultyCtrl;
+  late TextEditingController _questionTypeCtrl;
+  late TextEditingController _studyNoteCtrl;
+  late TextEditingController _weaknessLabelCtrl;
+  late TextEditingController _recommendationCtrl;
+  late TextEditingController _sourceRefCtrl;
+
+  String? _errorText;
+
+  @override
+  void initState() {
+    super.initState();
+    final q = widget.question;
+    _questionTextCtrl = TextEditingController(text: q.questionText);
+    _optionCtrls = List.generate(
+      4,
+      (i) => TextEditingController(
+        text: i < q.options.length ? q.options[i].text : '',
+      ),
+    );
+    _correctIndex = q.correctOptionIndex < 0 ? 0 : q.correctOptionIndex;
+    _explanationCtrl = TextEditingController(text: q.explanation);
+    _difficultyCtrl = TextEditingController(text: q.difficulty);
+    _questionTypeCtrl = TextEditingController(text: q.questionType ?? '');
+    _studyNoteCtrl = TextEditingController(text: q.studyNote ?? '');
+    _weaknessLabelCtrl = TextEditingController(text: q.weaknessLabel ?? '');
+    _recommendationCtrl = TextEditingController(
+      text: q.recommendationText ?? '',
+    );
+    _sourceRefCtrl = TextEditingController(text: q.sourceReference ?? '');
+  }
+
+  @override
+  void dispose() {
+    _questionTextCtrl.dispose();
+    for (final c in _optionCtrls) {
+      c.dispose();
+    }
+    _explanationCtrl.dispose();
+    _difficultyCtrl.dispose();
+    _questionTypeCtrl.dispose();
+    _studyNoteCtrl.dispose();
+    _weaknessLabelCtrl.dispose();
+    _recommendationCtrl.dispose();
+    _sourceRefCtrl.dispose();
+    super.dispose();
+  }
+
+  String? _validate() {
+    if (_questionTextCtrl.text.trim().isEmpty) {
+      return 'Question text cannot be empty.';
+    }
+    if (_explanationCtrl.text.trim().isEmpty) {
+      return 'Explanation cannot be empty.';
+    }
+    for (int i = 0; i < 4; i++) {
+      if (_optionCtrls[i].text.trim().isEmpty) {
+        return 'Option ${['A', 'B', 'C', 'D'][i]} cannot be empty.';
+      }
+    }
+    if (_correctIndex < 0 || _correctIndex > 3) {
+      return 'Exactly one correct option must be selected.';
+    }
+    return null;
+  }
+
+  void _submit() {
+    final error = _validate();
+    if (error != null) {
+      setState(() => _errorText = error);
+      return;
+    }
+
+    const labels = ['A', 'B', 'C', 'D'];
+    final q = widget.question;
+
+    final updatedData = <String, dynamic>{
+      'questionText': _questionTextCtrl.text.trim(),
+      'options': List.generate(4, (i) {
+        final existingId = i < q.options.length
+            ? q.options[i].optionId
+            : labels[i];
+        return {
+          'optionId': existingId,
+          'text': _optionCtrls[i].text.trim(),
+          'isCorrect': i == _correctIndex,
+        };
+      }),
+      'explanation': _explanationCtrl.text.trim(),
+      'difficulty': _difficultyCtrl.text.trim().isNotEmpty
+          ? _difficultyCtrl.text.trim()
+          : 'Medium',
+      'lastUpdated': DateTime.now().toIso8601String(),
+      'needsManualReview': false,
+    };
+
+    // Optional fields — only include if non-empty
+    final qType = _questionTypeCtrl.text.trim();
+    if (qType.isNotEmpty) updatedData['questionType'] = qType;
+
+    final studyNote = _studyNoteCtrl.text.trim();
+    if (studyNote.isNotEmpty) updatedData['studyNote'] = studyNote;
+
+    final weakness = _weaknessLabelCtrl.text.trim();
+    if (weakness.isNotEmpty) updatedData['weaknessLabel'] = weakness;
+
+    final recommendation = _recommendationCtrl.text.trim();
+    if (recommendation.isNotEmpty) {
+      updatedData['recommendationText'] = recommendation;
+    }
+
+    final sourceRef = _sourceRefCtrl.text.trim();
+    if (sourceRef.isNotEmpty) updatedData['sourceReference'] = sourceRef;
+
+    Navigator.of(context).pop(updatedData);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.of(context).viewInsets.bottom;
+
+    return Container(
+      constraints: BoxConstraints(
+        maxHeight: MediaQuery.of(context).size.height * 0.92,
+      ),
+      decoration: const BoxDecoration(
+        color: AppColors.background,
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      child: Column(
+        children: [
+          // Handle bar
+          const SizedBox(height: AppSpacing.sm),
+          Center(
+            child: Container(
+              width: 40,
+              height: 4,
+              decoration: BoxDecoration(
+                color: AppColors.disabled,
+                borderRadius: BorderRadius.circular(2),
+              ),
+            ),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+
+          // Header
+          Padding(
+            padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    'Edit & Resolve Question',
+                    style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.textPrimary,
+                    ),
+                  ),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.close_rounded),
+                  onPressed: () => Navigator.of(context).pop(),
+                ),
+              ],
+            ),
+          ),
+          const Divider(height: 1, color: AppColors.divider),
+
+          // Scrollable form
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.fromLTRB(
+                AppSpacing.lg,
+                AppSpacing.md,
+                AppSpacing.lg,
+                AppSpacing.lg + bottomInset,
+              ),
+              children: [
+                if (_errorText != null) ...[
+                  Container(
+                    width: double.infinity,
+                    padding: const EdgeInsets.all(AppSpacing.sm + 2),
+                    decoration: BoxDecoration(
+                      color: AppColors.error.withValues(alpha: 0.08),
+                      borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
+                    ),
+                    child: Text(
+                      _errorText!,
+                      style: const TextStyle(
+                        fontSize: 13,
+                        color: AppColors.error,
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.md),
+                ],
+
+                _buildLabel(context, 'Question Text'),
+                _buildTextField(_questionTextCtrl, maxLines: 4),
+                const SizedBox(height: AppSpacing.md),
+
+                _buildLabel(context, 'Options'),
+                ...List.generate(4, (i) {
+                  const labels = ['A', 'B', 'C', 'D'];
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        GestureDetector(
+                          onTap: () => setState(() => _correctIndex = i),
+                          child: Container(
+                            width: 32,
+                            height: 32,
+                            margin: const EdgeInsets.only(top: 8),
+                            alignment: Alignment.center,
+                            decoration: BoxDecoration(
+                              color: _correctIndex == i
+                                  ? AppColors.success.withValues(alpha: 0.15)
+                                  : AppColors.surface,
+                              borderRadius: BorderRadius.circular(8),
+                              border: Border.all(
+                                color: _correctIndex == i
+                                    ? AppColors.success
+                                    : AppColors.divider,
+                                width: _correctIndex == i ? 1.5 : 1,
+                              ),
+                            ),
+                            child: Text(
+                              labels[i],
+                              style: TextStyle(
+                                fontSize: 13,
+                                fontWeight: FontWeight.w700,
+                                color: _correctIndex == i
+                                    ? AppColors.success
+                                    : AppColors.textSecondary,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Expanded(
+                          child: _buildTextField(
+                            _optionCtrls[i],
+                            hint: 'Option ${labels[i]}',
+                          ),
+                        ),
+                      ],
+                    ),
+                  );
+                }),
+                Padding(
+                  padding: const EdgeInsets.only(bottom: AppSpacing.sm),
+                  child: Text(
+                    'Tap the letter to mark the correct option.',
+                    style: Theme.of(
+                      context,
+                    ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.sm),
+
+                _buildLabel(context, 'Explanation'),
+                _buildTextField(_explanationCtrl, maxLines: 4),
+                const SizedBox(height: AppSpacing.md),
+
+                // Collapsible extra fields
+                ExpansionTile(
+                  tilePadding: EdgeInsets.zero,
+                  title: Text(
+                    'Additional Fields',
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                      color: AppColors.textSecondary,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  children: [
+                    _buildLabel(context, 'Difficulty'),
+                    _buildDropdown(_difficultyCtrl, ['Easy', 'Medium', 'Hard']),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildLabel(context, 'Question Type'),
+                    _buildDropdown(_questionTypeCtrl, QuestionTypes.canonical),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildLabel(context, 'Study Note'),
+                    _buildTextField(_studyNoteCtrl, maxLines: 2),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildLabel(context, 'Weakness Label'),
+                    _buildTextField(_weaknessLabelCtrl),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildLabel(context, 'Recommendation'),
+                    _buildTextField(_recommendationCtrl, maxLines: 2),
+                    const SizedBox(height: AppSpacing.sm),
+                    _buildLabel(context, 'Source Reference'),
+                    _buildTextField(_sourceRefCtrl),
+                    const SizedBox(height: AppSpacing.md),
+                  ],
+                ),
+
+                const SizedBox(height: AppSpacing.md),
+
+                SizedBox(
+                  width: double.infinity,
+                  child: FilledButton.icon(
+                    onPressed: _submit,
+                    icon: const Icon(Icons.check_rounded, size: 18),
+                    label: const Text('Save & Resolve'),
+                    style: FilledButton.styleFrom(
+                      minimumSize: const Size(0, 48),
+                      backgroundColor: AppColors.success,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildLabel(BuildContext context, String text) {
+    return Padding(
+      padding: const EdgeInsets.only(bottom: 6),
+      child: Text(
+        text,
+        style: Theme.of(context).textTheme.labelMedium?.copyWith(
+          color: AppColors.textSecondary,
+          fontWeight: FontWeight.w600,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildTextField(
+    TextEditingController controller, {
+    int maxLines = 1,
+    String? hint,
+  }) {
+    return TextField(
+      controller: controller,
+      maxLines: maxLines,
+      style: Theme.of(
+        context,
+      ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+      decoration: InputDecoration(
+        hintText: hint,
+        hintStyle: Theme.of(
+          context,
+        ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+        filled: true,
+        fillColor: AppColors.surface,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+          borderSide: const BorderSide(color: AppColors.divider),
+        ),
+        contentPadding: const EdgeInsets.all(AppSpacing.md),
+      ),
+    );
+  }
+
+  Widget _buildDropdown(TextEditingController controller, List<String> values) {
+    final current = controller.text;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: AppColors.divider),
+      ),
+      child: DropdownButtonHideUnderline(
+        child: DropdownButton<String>(
+          isExpanded: true,
+          value: values.contains(current) ? current : null,
+          hint: Text(
+            current.isNotEmpty ? current : 'Select…',
+            style: Theme.of(
+              context,
+            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+          ),
+          items: values
+              .map((v) => DropdownMenuItem(value: v, child: Text(v)))
+              .toList(),
+          onChanged: (v) {
+            if (v != null) {
+              setState(() => controller.text = v);
+            }
+          },
+        ),
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// F. Reject dialog
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _RejectDialog extends StatefulWidget {
+  const _RejectDialog();
+
+  @override
+  State<_RejectDialog> createState() => _RejectDialogState();
+}
+
+class _RejectDialogState extends State<_RejectDialog> {
+  final _controller = TextEditingController();
+  String? _error;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AlertDialog(
+      backgroundColor: AppColors.card,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+      ),
+      title: const Text('Reject Report'),
+      content: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Please provide a reason for rejection:',
+            style: Theme.of(
+              context,
+            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ),
+          const SizedBox(height: AppSpacing.sm),
+          TextField(
+            controller: _controller,
+            maxLines: 3,
+            autofocus: true,
+            decoration: InputDecoration(
+              hintText: 'Rejection reason…',
+              hintStyle: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+              filled: true,
+              fillColor: AppColors.surface,
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.divider),
+              ),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                borderSide: const BorderSide(color: AppColors.divider),
+              ),
+              contentPadding: const EdgeInsets.all(AppSpacing.md),
+              errorText: _error,
+            ),
+          ),
+        ],
+      ),
+      actions: [
+        TextButton(
+          onPressed: () => Navigator.of(context).pop(),
+          child: const Text('Cancel'),
+        ),
+        FilledButton(
+          onPressed: () {
+            if (_controller.text.trim().isEmpty) {
+              setState(() => _error = 'Reason is required');
+              return;
+            }
+            Navigator.of(context).pop(_controller.text.trim());
+          },
+          style: FilledButton.styleFrom(backgroundColor: AppColors.error),
+          child: const Text('Reject'),
+        ),
+      ],
+    );
   }
 }
 

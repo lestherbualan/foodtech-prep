@@ -70,4 +70,26 @@ class FirestoreQuestionRepository implements QuestionRepository {
     _cachedQuestions = null;
     _cachedBank = null;
   }
+
+  /// Returns the active bank ID (loading it first if needed).
+  Future<String> getActiveBankId() async {
+    final bank = await loadActiveBank();
+    return bank.id;
+  }
+
+  /// Updates a question document in the active bank.
+  Future<void> updateQuestion(
+    String questionId,
+    Map<String, dynamic> data,
+  ) async {
+    final bank = await loadActiveBank();
+    await _bankCollection
+        .doc(bank.id)
+        .collection('questions')
+        .doc(questionId)
+        .update(data);
+    // Invalidate cache so next load picks up the change.
+    _cachedQuestions = null;
+    debugPrint('Updated question $questionId in bank ${bank.id}');
+  }
 }

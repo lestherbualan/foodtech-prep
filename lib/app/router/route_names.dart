@@ -24,4 +24,6 @@ class RouteNames {
   static const String reportList = '/reports';
   static const String reportDetail = '/reports/detail';
   static const String adminManagement = '/admin/manage';
+  static const String boardExamSetup = '/board-exam-setup';
+  static const String fullMockSetup = '/full-mock-setup';
 }
