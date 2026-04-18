@@ -251,6 +251,100 @@ export const sendCountdownReminder = onCall(async (request) => {
 });
 
 // ---------------------------------------------------------------------------
+// sendNotificationToAllUsers — super_admin broadcast
+// ---------------------------------------------------------------------------
+
+/**
+ * Sends a notification to all eligible users.
+ * Only callable by a super_admin.
+ *
+ * Input: { title, body }
+ * Returns: { success, sent, skipped, failed }
+ */
+export const sendNotificationToAllUsers = onCall(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError(
+      "unauthenticated",
+      "Authentication is required.",
+    );
+  }
+
+  const callerUid = request.auth.uid;
+  const callerDoc = await admin.firestore()
+    .collection("users").doc(callerUid).get();
+  const callerRole = callerDoc.data()?.role as string | undefined;
+
+  if (callerRole !== "super_admin") {
+    throw new HttpsError(
+      "permission-denied",
+      "Only super admins can broadcast notifications.",
+    );
+  }
+
+  const data = request.data as {
+    title?: string;
+    body?: string;
+  };
+
+  const title = data?.title?.trim();
+  const body = data?.body?.trim();
+
+  if (!title || !body) {
+    throw new HttpsError(
+      "invalid-argument",
+      "title and body are required.",
+    );
+  }
+
+  const snapshot = await admin.firestore()
+    .collection("users")
+    .where("notificationsEnabled", "==", true)
+    .get();
+
+  let sent = 0;
+  let skipped = 0;
+  let failed = 0;
+
+  for (const doc of snapshot.docs) {
+    const userData = doc.data();
+    const fcmToken = userData.fcmToken as string | undefined;
+
+    if (!fcmToken || fcmToken.trim().length === 0) {
+      skipped++;
+      continue;
+    }
+
+    try {
+      await admin.messaging().send({
+        token: fcmToken,
+        notification: {title, body},
+        data: {
+          type: "broadcast",
+          click_action: "FLUTTER_NOTIFICATION_CLICK",
+        },
+        android: {priority: "high"},
+      });
+      sent++;
+    } catch (error) {
+      logger.warn("Failed to send to user", {
+        uid: doc.id,
+        error,
+      });
+      failed++;
+    }
+  }
+
+  logger.info("Broadcast complete", {
+    callerUid,
+    sent,
+    skipped,
+    failed,
+  });
+
+  return {success: true, sent, skipped, failed};
+});
+
+// ---------------------------------------------------------------------------
 // sendTestNotification — original raw-token test function (kept for debugging)
 // ---------------------------------------------------------------------------
 

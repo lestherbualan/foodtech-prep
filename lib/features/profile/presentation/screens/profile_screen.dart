@@ -681,6 +681,58 @@ class _DebugNotificationSectionState extends State<_DebugNotificationSection> {
           label: Text('Test Countdown Reminder', style: textStyle),
           style: buttonStyle,
         ),
+        const SizedBox(height: AppSpacing.md),
+        Text(
+          'Broadcast · All Users',
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: AppColors.textSecondary,
+            letterSpacing: 0.8,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.sm),
+        OutlinedButton.icon(
+          onPressed: _busy
+              ? null
+              : () => _run(() async {
+                  final result =
+                      await PushNotificationService.sendNotificationToAllUsers(
+                    title: 'FoodTech Prep',
+                    body:
+                        'Keep studying! Your board exam is getting closer. 📚',
+                  );
+                  if (mounted) {
+                    final sent = result['sent'] ?? 0;
+                    final skipped = result['skipped'] ?? 0;
+                    final failed = result['failed'] ?? 0;
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                          'Broadcast: $sent sent, $skipped skipped, $failed failed',
+                        ),
+                      ),
+                    );
+                  }
+                }),
+          icon: Icon(
+            Icons.campaign_rounded,
+            size: 18,
+            color: AppColors.warning,
+          ),
+          label: Text(
+            'Broadcast to All Users',
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: AppColors.warning,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
+          style: OutlinedButton.styleFrom(
+            minimumSize: const Size(double.infinity, 48),
+            side: const BorderSide(color: AppColors.warning),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+            ),
+          ),
+        ),
         if (_busy)
           const Padding(
             padding: EdgeInsets.only(top: AppSpacing.sm),
