@@ -31,6 +31,8 @@ import '../../features/questions/presentation/screens/question_bank_screen.dart'
 import '../../features/questions/presentation/screens/question_bank_subject_screen.dart';
 import '../../features/questions/presentation/screens/question_detail_screen.dart';
 import '../../features/questions/presentation/screens/subject_practice_screen.dart';
+import '../../features/questions/presentation/screens/admin_question_player_screen.dart';
+import '../../features/questions/presentation/screens/subtopic_review_screen.dart';
 import '../../features/questions/presentation/screens/weak_areas_screen.dart';
 import '../../features/reports/presentation/screens/report_detail_screen.dart';
 import '../../features/reports/presentation/screens/report_list_screen.dart';
@@ -228,6 +230,20 @@ final routerProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: RouteNames.adminManagement,
         builder: (context, state) => const AdminManagementScreen(),
+      ),
+      GoRoute(
+        path: RouteNames.subtopicReview,
+        builder: (context, state) {
+          final args = state.extra! as SubtopicReviewArgs;
+          return SubtopicReviewScreen(args: args);
+        },
+      ),
+      GoRoute(
+        path: RouteNames.adminQuestionPlayer,
+        builder: (context, state) {
+          final args = state.extra! as AdminQuestionPlayerArgs;
+          return AdminQuestionPlayerScreen(args: args);
+        },
       ),
     ],
   );
