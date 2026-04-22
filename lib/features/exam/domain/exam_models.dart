@@ -15,14 +15,29 @@ class ExamConfig {
     durationMinutes: 40,
     questionCount: 60,
   );
+
+  /// Board Exam Style config — 100 questions, 100 minutes.
+  static const boardExamConfig = ExamConfig(
+    durationMinutes: 100,
+    questionCount: 100,
+  );
 }
 
 /// Arguments passed when navigating to the timed exam screen.
 class TimedExamArgs {
-  const TimedExamArgs({required this.questions, required this.durationMinutes});
+  const TimedExamArgs({
+    required this.questions,
+    required this.durationMinutes,
+    this.mode = 'timed',
+  });
 
   final List<Question> questions;
   final int durationMinutes;
+
+  /// Exam mode identifier stored in the attempt record.
+  /// Values: `'timed'`, `'subject_tos_mock'`, `'full_mock_exam'`.
+  /// Legacy: `'board_exam_style'` (mapped to Subject TOS Mock in UI).
+  final String mode;
 }
 
 /// The result of a completed timed exam.
@@ -41,6 +56,7 @@ class ExamResult {
     this.timeLimitSeconds,
     this.choiceOrders = const {},
     this.displayCorrectAnswers = const {},
+    this.mode = 'timed',
   });
 
   final int totalQuestions;
@@ -57,6 +73,9 @@ class ExamResult {
   final Map<String, List<int>> choiceOrders;
   final Map<String, String> displayCorrectAnswers;
 
+  /// Exam mode identifier: `'timed'`, `'subject_tos_mock'`, or `'full_mock_exam'`.
+  final String mode;
+
   factory ExamResult.compute({
     required List<Question> questions,
     required Map<String, String> answers,
@@ -65,6 +84,7 @@ class ExamResult {
     int? timeLimitSeconds,
     Map<String, List<int>> choiceOrders = const {},
     Map<String, String> displayCorrectAnswers = const {},
+    String mode = 'timed',
   }) {
     int correct = 0;
     int incorrect = 0;
@@ -100,6 +120,7 @@ class ExamResult {
       timeLimitSeconds: timeLimitSeconds,
       choiceOrders: choiceOrders,
       displayCorrectAnswers: displayCorrectAnswers,
+      mode: mode,
     );
   }
 

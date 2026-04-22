@@ -42,6 +42,7 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
       userId: user.uid,
       timeLimitSeconds:
           widget.result.timeLimitSeconds ?? widget.result.durationSeconds,
+      mode: widget.result.mode,
     );
 
     try {

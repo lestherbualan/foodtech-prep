@@ -49,11 +49,13 @@ class UserPermissions {
     this.canViewReports = false,
     this.canViewQuestionSource = false,
     this.canManageAdmins = false,
+    this.canModerateReports = false,
   });
 
   final bool canViewReports;
   final bool canViewQuestionSource;
   final bool canManageAdmins;
+  final bool canModerateReports;
 
   /// Derive permissions from a [UserRole].
   factory UserPermissions.fromRole(UserRole role) {
@@ -63,18 +65,21 @@ class UserPermissions {
           canViewReports: true,
           canViewQuestionSource: true,
           canManageAdmins: true,
+          canModerateReports: true,
         );
       case UserRole.questionAdmin:
         return const UserPermissions(
           canViewReports: true,
           canViewQuestionSource: true,
           canManageAdmins: false,
+          canModerateReports: true,
         );
       case UserRole.user:
         return const UserPermissions(
           canViewReports: false,
           canViewQuestionSource: false,
           canManageAdmins: false,
+          canModerateReports: false,
         );
     }
   }
@@ -84,6 +89,7 @@ class UserPermissions {
       'canViewReports': canViewReports,
       'canViewQuestionSource': canViewQuestionSource,
       'canManageAdmins': canManageAdmins,
+      'canModerateReports': canModerateReports,
     };
   }
 
@@ -92,6 +98,7 @@ class UserPermissions {
       canViewReports: data['canViewReports'] as bool? ?? false,
       canViewQuestionSource: data['canViewQuestionSource'] as bool? ?? false,
       canManageAdmins: data['canManageAdmins'] as bool? ?? false,
+      canModerateReports: data['canModerateReports'] as bool? ?? false,
     );
   }
 }

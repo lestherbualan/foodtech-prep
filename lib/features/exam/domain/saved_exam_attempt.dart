@@ -82,12 +82,13 @@ class SavedExamAttempt {
     required ExamResult result,
     required String userId,
     required int timeLimitSeconds,
+    String mode = 'timed',
   }) {
     final breakdown = result.performanceBreakdown;
     return SavedExamAttempt(
       attemptId: '', // assigned by Firestore
       userId: userId,
-      mode: 'timed',
+      mode: mode,
       submittedAt: DateTime.now(),
       timeLimitSeconds: timeLimitSeconds,
       timeSpentSeconds: result.durationSeconds,

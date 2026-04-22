@@ -103,7 +103,7 @@ class AttemptDetailScreen extends ConsumerWidget {
                       _DetailRow(
                         icon: Icons.category_rounded,
                         label: 'Mode',
-                        value: _capitalize(attempt.mode),
+                        value: _modeDisplayName(attempt.mode),
                       ),
                       const _DetailDivider(),
                       _DetailRow(
@@ -275,6 +275,20 @@ class AttemptDetailScreen extends ConsumerWidget {
   static String _capitalize(String s) {
     if (s.isEmpty) return s;
     return s[0].toUpperCase() + s.substring(1);
+  }
+
+  static String _modeDisplayName(String mode) {
+    switch (mode) {
+      case 'subject_tos_mock':
+      case 'board_exam_style': // legacy
+        return 'Subject TOS Mock';
+      case 'full_mock_exam':
+        return 'Full Mock Exam';
+      case 'timed':
+        return 'Timed Exam';
+      default:
+        return _capitalize(mode);
+    }
   }
 }
 

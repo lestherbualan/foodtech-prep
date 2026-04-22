@@ -79,6 +79,89 @@ class Question {
     return _labels[idx];
   }
 
+  /// Serialises the question to Firestore v2 format (options array).
+  Map<String, dynamic> toFirestore() {
+    return {
+      'questionId': questionId,
+      'subjectId': subjectId,
+      'subjectName': subjectName,
+      'subtopicId': subtopicId,
+      'subtopicName': subtopicName,
+      'questionText': questionText,
+      'options': options
+          .map(
+            (o) => {
+              'optionId': o.optionId,
+              'text': o.text,
+              'isCorrect': o.isCorrect,
+            },
+          )
+          .toList(),
+      'explanation': explanation,
+      if (conceptCluster != null) 'conceptCluster': conceptCluster,
+      'difficulty': difficulty,
+      if (questionType != null) 'questionType': questionType,
+      if (studyNote != null) 'studyNote': studyNote,
+      if (weaknessLabel != null) 'weaknessLabel': weaknessLabel,
+      if (recommendationText != null) 'recommendationText': recommendationText,
+      if (sourceType != null) 'sourceType': sourceType,
+      if (sourceFile != null) 'sourceFile': sourceFile,
+      if (sourceReference != null) 'sourceReference': sourceReference,
+      if (confidenceLevel != null) 'confidenceLevel': confidenceLevel,
+      'needsManualReview': needsManualReview,
+      'isOfficiallyVerified': isOfficiallyVerified,
+      'status': status,
+      if (createdBy != null) 'createdBy': createdBy,
+      if (reviewedBy != null) 'reviewedBy': reviewedBy,
+      if (version != null) 'version': version,
+      if (lastUpdated != null) 'lastUpdated': lastUpdated,
+    };
+  }
+
+  /// Creates a copy with the given fields replaced.
+  Question copyWith({
+    String? questionText,
+    List<QuestionOption>? options,
+    String? explanation,
+    String? difficulty,
+    String? questionType,
+    String? studyNote,
+    String? weaknessLabel,
+    String? recommendationText,
+    String? sourceReference,
+    String? status,
+    String? reviewedBy,
+    String? lastUpdated,
+  }) {
+    return Question(
+      questionId: questionId,
+      subjectId: subjectId,
+      subjectName: subjectName,
+      subtopicId: subtopicId,
+      subtopicName: subtopicName,
+      questionText: questionText ?? this.questionText,
+      options: options ?? this.options,
+      explanation: explanation ?? this.explanation,
+      conceptCluster: conceptCluster,
+      difficulty: difficulty ?? this.difficulty,
+      questionType: questionType ?? this.questionType,
+      studyNote: studyNote ?? this.studyNote,
+      weaknessLabel: weaknessLabel ?? this.weaknessLabel,
+      recommendationText: recommendationText ?? this.recommendationText,
+      sourceType: sourceType,
+      sourceFile: sourceFile,
+      sourceReference: sourceReference ?? this.sourceReference,
+      confidenceLevel: confidenceLevel,
+      needsManualReview: needsManualReview,
+      isOfficiallyVerified: isOfficiallyVerified,
+      status: status ?? this.status,
+      createdBy: createdBy,
+      reviewedBy: reviewedBy ?? this.reviewedBy,
+      version: version,
+      lastUpdated: lastUpdated ?? this.lastUpdated,
+    );
+  }
+
   /// Parses v1 local JSON (choiceA/B/C/D + correctAnswer).
   factory Question.fromJson(Map<String, dynamic> json) {
     final String correctLetter = json['correctAnswer'] as String;

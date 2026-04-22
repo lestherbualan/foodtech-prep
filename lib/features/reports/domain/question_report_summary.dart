@@ -69,6 +69,20 @@ class QuestionReportSummary {
     this.reviewedByUid,
     this.reviewedByName,
     this.reviewedAt,
+    // Assignment / under review
+    this.assignedReviewerUid,
+    this.assignedReviewerName,
+    this.assignedAt,
+    // Resolution
+    this.resolvedByUid,
+    this.resolvedByName,
+    this.resolvedAt,
+    this.resolutionNote,
+    // Rejection
+    this.rejectedByUid,
+    this.rejectedByName,
+    this.rejectedAt,
+    this.rejectionReason,
   });
 
   final String questionId;
@@ -88,6 +102,23 @@ class QuestionReportSummary {
   final String? reviewedByUid;
   final String? reviewedByName;
   final DateTime? reviewedAt;
+
+  // Assignment / under review
+  final String? assignedReviewerUid;
+  final String? assignedReviewerName;
+  final DateTime? assignedAt;
+
+  // Resolution
+  final String? resolvedByUid;
+  final String? resolvedByName;
+  final DateTime? resolvedAt;
+  final String? resolutionNote;
+
+  // Rejection
+  final String? rejectedByUid;
+  final String? rejectedByName;
+  final DateTime? rejectedAt;
+  final String? rejectionReason;
 
   /// Top issue types sorted by count descending.
   List<String> get topIssueTypes {
@@ -115,6 +146,19 @@ class QuestionReportSummary {
       if (reviewedByUid != null) 'reviewedByUid': reviewedByUid,
       if (reviewedByName != null) 'reviewedByName': reviewedByName,
       if (reviewedAt != null) 'reviewedAt': Timestamp.fromDate(reviewedAt!),
+      if (assignedReviewerUid != null)
+        'assignedReviewerUid': assignedReviewerUid,
+      if (assignedReviewerName != null)
+        'assignedReviewerName': assignedReviewerName,
+      if (assignedAt != null) 'assignedAt': Timestamp.fromDate(assignedAt!),
+      if (resolvedByUid != null) 'resolvedByUid': resolvedByUid,
+      if (resolvedByName != null) 'resolvedByName': resolvedByName,
+      if (resolvedAt != null) 'resolvedAt': Timestamp.fromDate(resolvedAt!),
+      if (resolutionNote != null) 'resolutionNote': resolutionNote,
+      if (rejectedByUid != null) 'rejectedByUid': rejectedByUid,
+      if (rejectedByName != null) 'rejectedByName': rejectedByName,
+      if (rejectedAt != null) 'rejectedAt': Timestamp.fromDate(rejectedAt!),
+      if (rejectionReason != null) 'rejectionReason': rejectionReason,
     };
   }
 
@@ -144,6 +188,23 @@ class QuestionReportSummary {
       reviewedAt: data['reviewedAt'] != null
           ? _parseTimestamp(data['reviewedAt'])
           : null,
+      assignedReviewerUid: data['assignedReviewerUid'] as String?,
+      assignedReviewerName: data['assignedReviewerName'] as String?,
+      assignedAt: data['assignedAt'] != null
+          ? _parseTimestamp(data['assignedAt'])
+          : null,
+      resolvedByUid: data['resolvedByUid'] as String?,
+      resolvedByName: data['resolvedByName'] as String?,
+      resolvedAt: data['resolvedAt'] != null
+          ? _parseTimestamp(data['resolvedAt'])
+          : null,
+      resolutionNote: data['resolutionNote'] as String?,
+      rejectedByUid: data['rejectedByUid'] as String?,
+      rejectedByName: data['rejectedByName'] as String?,
+      rejectedAt: data['rejectedAt'] != null
+          ? _parseTimestamp(data['rejectedAt'])
+          : null,
+      rejectionReason: data['rejectionReason'] as String?,
     );
   }
 
@@ -169,6 +230,17 @@ class QuestionReportSummary {
     String? reviewedByName,
     DateTime? reviewedAt,
     bool? isFlagged,
+    String? assignedReviewerUid,
+    String? assignedReviewerName,
+    DateTime? assignedAt,
+    String? resolvedByUid,
+    String? resolvedByName,
+    DateTime? resolvedAt,
+    String? resolutionNote,
+    String? rejectedByUid,
+    String? rejectedByName,
+    DateTime? rejectedAt,
+    String? rejectionReason,
   }) {
     return QuestionReportSummary(
       questionId: questionId,
@@ -188,6 +260,17 @@ class QuestionReportSummary {
       reviewedByUid: reviewedByUid ?? this.reviewedByUid,
       reviewedByName: reviewedByName ?? this.reviewedByName,
       reviewedAt: reviewedAt ?? this.reviewedAt,
+      assignedReviewerUid: assignedReviewerUid ?? this.assignedReviewerUid,
+      assignedReviewerName: assignedReviewerName ?? this.assignedReviewerName,
+      assignedAt: assignedAt ?? this.assignedAt,
+      resolvedByUid: resolvedByUid ?? this.resolvedByUid,
+      resolvedByName: resolvedByName ?? this.resolvedByName,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      resolutionNote: resolutionNote ?? this.resolutionNote,
+      rejectedByUid: rejectedByUid ?? this.rejectedByUid,
+      rejectedByName: rejectedByName ?? this.rejectedByName,
+      rejectedAt: rejectedAt ?? this.rejectedAt,
+      rejectionReason: rejectionReason ?? this.rejectionReason,
     );
   }
 }

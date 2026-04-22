@@ -319,6 +319,22 @@ class _EmptyDashboard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.sm + 2),
           QuickActionCard(
+            icon: Icons.assignment_rounded,
+            title: 'Full Mock Exam',
+            subtitle: '100 questions • All subjects • Simulation',
+            iconColor: const Color(0xFF0D9488),
+            onTap: () => context.push(RouteNames.fullMockSetup),
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          QuickActionCard(
+            icon: Icons.school_rounded,
+            title: 'Subject TOS Mock',
+            subtitle: '100 questions • 1 subject • TOS-based',
+            iconColor: const Color(0xFF6D28D9),
+            onTap: () => context.push(RouteNames.boardExamSetup),
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          QuickActionCard(
             icon: Icons.menu_book_rounded,
             title: 'Question Bank',
             subtitle: 'Browse and practice by subject',
@@ -561,6 +577,22 @@ class _QuickActionsSection extends StatelessWidget {
           subtitle: '60 questions • 40 minutes',
           iconColor: AppColors.secondary,
           onTap: () => context.push(RouteNames.examSetup),
+        ),
+        const SizedBox(height: AppSpacing.sm + 2),
+        QuickActionCard(
+          icon: Icons.assignment_rounded,
+          title: 'Full Mock Exam',
+          subtitle: '100 questions • All subjects • Simulation',
+          iconColor: const Color(0xFF0D9488),
+          onTap: () => context.push(RouteNames.fullMockSetup),
+        ),
+        const SizedBox(height: AppSpacing.sm + 2),
+        QuickActionCard(
+          icon: Icons.school_rounded,
+          title: 'Subject TOS Mock',
+          subtitle: '100 questions • 1 subject • TOS-based',
+          iconColor: const Color(0xFF6D28D9),
+          onTap: () => context.push(RouteNames.boardExamSetup),
         ),
         const SizedBox(height: AppSpacing.sm + 2),
         QuickActionCard(
@@ -1054,7 +1086,13 @@ class _RecentActivityRow extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Timed Exam',
+                      attempt.mode == 'board_exam_style'
+                          ? 'Subject TOS Mock'
+                          : attempt.mode == 'subject_tos_mock'
+                          ? 'Subject TOS Mock'
+                          : attempt.mode == 'full_mock_exam'
+                          ? 'Full Mock Exam'
+                          : 'Timed Exam',
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
                         fontWeight: FontWeight.w700,
                       ),

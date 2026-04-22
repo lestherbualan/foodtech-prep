@@ -22,6 +22,7 @@ class TimedExamState {
     this.result,
     this.choiceOrders = const {},
     this.displayCorrectAnswers = const {},
+    this.mode = 'timed',
   });
 
   final List<Question> questions;
@@ -36,6 +37,7 @@ class TimedExamState {
   choiceOrders; // questionId → [origOptionIndex0, ...]
   final Map<String, String>
   displayCorrectAnswers; // questionId → display correct label
+  final String mode;
 
   Question get currentQuestion => questions[currentIndex];
   int get totalQuestions => questions.length;
@@ -80,18 +82,23 @@ class TimedExamState {
       choiceOrders: choiceOrders ?? this.choiceOrders,
       displayCorrectAnswers:
           displayCorrectAnswers ?? this.displayCorrectAnswers,
+      mode: mode,
     );
   }
 }
 
 /// Notifier for a timed exam session with countdown timer.
 class TimedExamNotifier extends StateNotifier<TimedExamState> {
-  TimedExamNotifier(List<Question> questions, int durationMinutes)
-    : super(_initialState(questions, durationMinutes));
+  TimedExamNotifier(
+    List<Question> questions,
+    int durationMinutes, {
+    String mode = 'timed',
+  }) : super(_initialState(questions, durationMinutes, mode));
 
   static TimedExamState _initialState(
     List<Question> questions,
     int durationMinutes,
+    String mode,
   ) {
     final mappings = generateChoiceMappings(questions);
     return TimedExamState(
@@ -100,6 +107,7 @@ class TimedExamNotifier extends StateNotifier<TimedExamState> {
       totalDurationSeconds: durationMinutes * 60,
       choiceOrders: mappings.choiceOrders,
       displayCorrectAnswers: mappings.displayCorrectAnswers,
+      mode: mode,
     );
   }
 
@@ -166,6 +174,7 @@ class TimedExamNotifier extends StateNotifier<TimedExamState> {
       timeLimitSeconds: state.totalDurationSeconds,
       choiceOrders: state.choiceOrders,
       displayCorrectAnswers: state.displayCorrectAnswers,
+      mode: state.mode,
     );
 
     state = state.copyWith(
