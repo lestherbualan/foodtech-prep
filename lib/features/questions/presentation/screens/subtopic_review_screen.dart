@@ -110,8 +110,15 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
 
   // ── Actions ─────────────────────────────────────────────────────────────────
 
-  /// Session key used to identify this subtopic's saved admin review session.
-  String get _sessionKey => widget.args.subtopicName;
+  /// Stable session key for this subtopic's persisted resume state.
+  ///
+  /// Uses `{subjectId}|{subtopicId}` from the question bank so the key
+  /// remains valid even if the subtopic display name changes.
+  String get _sessionKey {
+    final qs = widget.args.questions;
+    if (qs.isEmpty) return widget.args.subtopicName;
+    return '${qs.first.subjectId}|${qs.first.subtopicId}';
+  }
 
   void _launchPractice(List<Question> questions) {
     if (questions.isEmpty) return;
@@ -128,13 +135,14 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
   }) {
     if (questions.isEmpty) return;
     final storeNotifier = ref.read(adminReviewSessionStoreProvider.notifier);
+    final existing = storeNotifier.load(_sessionKey);
     final AdminReviewSession session;
-    if (clearPrevious || storeNotifier.load(_sessionKey) == null) {
+    // Create a fresh session when explicitly requested, when no session exists,
+    // or when only a skeleton (disk-loaded, empty questions) session is present.
+    if (clearPrevious || existing == null || existing.questions.isEmpty) {
       session = AdminReviewSession.create(questions, startIndex);
     } else {
-      session = storeNotifier
-          .load(_sessionKey)!
-          .copyWith(currentIndex: startIndex);
+      session = existing.copyWith(currentIndex: startIndex);
     }
     storeNotifier.save(_sessionKey, session);
     context.push(
@@ -211,9 +219,17 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
                       },
                       onResume: (isAdmin && hasResumeSession)
                           ? () {
-                              final session = ref.read(
-                                adminReviewSessionStoreProvider,
-                              )[_sessionKey]!;
+                              // Reconstruct from the lightweight payload if
+                              // this is a skeleton loaded after app restart.
+                              final session = ref
+                                  .read(
+                                    adminReviewSessionStoreProvider.notifier,
+                                  )
+                                  .resolveForResume(
+                                    _sessionKey,
+                                    widget.args.questions,
+                                  );
+                              if (session == null) return;
                               _launchAdminPlayer(
                                 session.questions,
                                 session.currentIndex,
