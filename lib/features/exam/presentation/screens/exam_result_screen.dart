@@ -16,6 +16,7 @@ import '../widgets/performance_insight_card.dart';
 import '../widgets/retry_actions_section.dart';
 import '../widgets/study_guidance_card.dart';
 import '../widgets/subject_performance_card.dart';
+import '../widgets/tos_subtopic_breakdown_section.dart';
 
 class ExamResultScreen extends ConsumerStatefulWidget {
   const ExamResultScreen({super.key, required this.result});
@@ -313,8 +314,11 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
 
               const SizedBox(height: AppSpacing.xl),
 
-              // ── Subject breakdown ──
-              if (breakdown.subjects.isNotEmpty) ...[
+              // ── Subtopic breakdown (subject_tos_mock) or subject breakdown (other modes) ──
+              if (result.mode == 'subject_tos_mock' ||
+                  result.mode == 'board_exam_style')
+                TosSubtopicBreakdownSection(subtopics: result.subtopicBreakdown)
+              else if (breakdown.subjects.isNotEmpty) ...[
                 Row(
                   children: [
                     Container(

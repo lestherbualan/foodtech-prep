@@ -36,7 +36,7 @@ class SubjectPracticeScreen extends ConsumerWidget {
             children: [
               const SecondaryScreenHeader(
                 title: 'Subject Practice',
-                subtitle: 'Choose what you want to study.',
+                subtitle: 'Pick a subject to get started.',
               ),
               Expanded(
                 child: CustomScrollView(
@@ -78,7 +78,7 @@ class SubjectPracticeScreen extends ConsumerWidget {
                               const SizedBox(width: AppSpacing.md),
                               Expanded(
                                 child: Text(
-                                  'Select a subject group below to practice questions at your own pace.',
+                                  'Choose a subject, then pick your study mode.',
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
                                         color: AppColors.textSecondary,
@@ -121,9 +121,10 @@ class SubjectPracticeScreen extends ConsumerWidget {
                                 icon: _subjectIcon(index),
                                 onTap: () {
                                   if (qs.isEmpty) return;
-                                  context.push(
-                                    RouteNames.questionBankSubject,
-                                    extra: subject.id,
+                                  _showSubjectModeSheet(
+                                    context,
+                                    subject,
+                                    qs.length,
                                   );
                                 },
                               ),
@@ -275,4 +276,158 @@ IconData _subjectIcon(int index) {
     Icons.gavel_rounded,
   ];
   return icons[index % icons.length];
+}
+
+// ─── Subject mode chooser ─────────────────────────────────────────────────────
+
+void _showSubjectModeSheet(
+  BuildContext context,
+  ExamSubject subject,
+  int questionCount,
+) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: AppColors.card,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AppSpacing.radiusXl),
+      ),
+    ),
+    builder: (sheetCtx) => SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              subject.label,
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Pick a study mode to begin.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _StudyModeOption(
+              icon: Icons.menu_book_rounded,
+              color: AppColors.primary,
+              title: 'Practice Mode',
+              subtitle: 'Browse questions at your own pace',
+              onTap: () {
+                Navigator.of(sheetCtx).pop();
+                context.push(RouteNames.questionBankSubject, extra: subject.id);
+              },
+            ),
+            const SizedBox(height: AppSpacing.sm + 2),
+            _StudyModeOption(
+              icon: Icons.school_rounded,
+              color: const Color(0xFF6D28D9),
+              title: 'TOS Mock',
+              subtitle: '100 questions · official TOS format',
+              onTap: () {
+                Navigator.of(sheetCtx).pop();
+                context.push(RouteNames.boardExamSetup, extra: subject.id);
+              },
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    ),
+  );
+}
+
+class _StudyModeOption extends StatelessWidget {
+  const _StudyModeOption({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md + 2),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 22, color: color),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textHint,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
 }

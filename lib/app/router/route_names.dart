@@ -26,4 +26,6 @@ class RouteNames {
   static const String adminManagement = '/admin/manage';
   static const String boardExamSetup = '/board-exam-setup';
   static const String fullMockSetup = '/full-mock-setup';
+  static const String subtopicReview = '/questions/subtopic-review';
+  static const String adminQuestionPlayer = '/admin/question-player';
 }

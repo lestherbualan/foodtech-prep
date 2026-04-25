@@ -13,6 +13,7 @@ import '../../../exam/domain/exam_subject.dart';
 import '../../domain/question.dart';
 import '../providers/practice_session_provider.dart';
 import '../providers/question_providers.dart';
+import 'subtopic_review_screen.dart';
 
 /// Level 2 of the Question Bank explorer.
 ///
@@ -130,10 +131,11 @@ class QuestionBankSubjectScreen extends ConsumerWidget {
                               color: _subtopicColor(index),
                               onTap: () {
                                 context.push(
-                                  RouteNames.practice,
-                                  extra: PracticeSessionArgs(
+                                  RouteNames.subtopicReview,
+                                  extra: SubtopicReviewArgs(
                                     questions: qs,
-                                    startIndex: 0,
+                                    subtopicName: subtopicName,
+                                    subjectName: subjectOpt.label,
                                   ),
                                 );
                               },
