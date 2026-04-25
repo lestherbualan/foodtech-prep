@@ -27,6 +27,15 @@ class HomeScreen extends ConsumerWidget {
     return 'Good evening';
   }
 
+  static Color _countdownColor(int daysLeft) {
+    if (daysLeft == 0) return const Color(0xFFB71C1C); // strong red — today
+    if (daysLeft <= 7) return AppColors.error; // red — urgent
+    if (daysLeft <= 30) return const Color(0xFFD35400); // deep orange — close
+    if (daysLeft <= 90)
+      return AppColors.warning; // warning orange — getting serious
+    return AppColors.primaryLight; // teal — calm preparation
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final authState = ref.watch(authStateProvider);
@@ -88,8 +97,7 @@ class HomeScreen extends ConsumerWidget {
                                   text,
                                   style: Theme.of(context).textTheme.bodySmall
                                       ?.copyWith(
-                                        color: AppColors.textSecondary
-                                            .withValues(alpha: 0.7),
+                                        color: _countdownColor(daysLeft),
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.1,
                                         fontSize: 12,
@@ -313,32 +321,24 @@ class _EmptyDashboard extends StatelessWidget {
           QuickActionCard(
             icon: Icons.timer_rounded,
             title: 'Timed Exam',
-            subtitle: '60 questions • 40 minutes',
+            subtitle: 'Start a quick exam or full mock',
             iconColor: AppColors.secondary,
-            onTap: () => context.push(RouteNames.examSetup),
-          ),
-          const SizedBox(height: AppSpacing.sm + 2),
-          QuickActionCard(
-            icon: Icons.assignment_rounded,
-            title: 'Full Mock Exam',
-            subtitle: '100 questions • All subjects • Simulation',
-            iconColor: const Color(0xFF0D9488),
-            onTap: () => context.push(RouteNames.fullMockSetup),
-          ),
-          const SizedBox(height: AppSpacing.sm + 2),
-          QuickActionCard(
-            icon: Icons.school_rounded,
-            title: 'Subject TOS Mock',
-            subtitle: '100 questions • 1 subject • TOS-based',
-            iconColor: const Color(0xFF6D28D9),
-            onTap: () => context.push(RouteNames.boardExamSetup),
+            onTap: () => _showTimedExamChooserSheet(context),
           ),
           const SizedBox(height: AppSpacing.sm + 2),
           QuickActionCard(
             icon: Icons.menu_book_rounded,
-            title: 'Question Bank',
-            subtitle: 'Browse and practice by subject',
+            title: 'Subject Practice',
+            subtitle: 'Study a specific subject your way',
             iconColor: AppColors.primary,
+            onTap: () => context.push(RouteNames.subjectPractice),
+          ),
+          const SizedBox(height: AppSpacing.sm + 2),
+          QuickActionCard(
+            icon: Icons.grid_view_rounded,
+            title: 'Question Bank',
+            subtitle: 'Browse questions by subject',
+            iconColor: AppColors.accent,
             onTap: () => context.push(RouteNames.questionBank),
           ),
           const SizedBox(height: AppSpacing.xxl),
@@ -574,31 +574,15 @@ class _QuickActionsSection extends StatelessWidget {
         QuickActionCard(
           icon: Icons.timer_rounded,
           title: 'Timed Exam',
-          subtitle: '60 questions • 40 minutes',
+          subtitle: 'Start a quick exam or full mock',
           iconColor: AppColors.secondary,
-          onTap: () => context.push(RouteNames.examSetup),
-        ),
-        const SizedBox(height: AppSpacing.sm + 2),
-        QuickActionCard(
-          icon: Icons.assignment_rounded,
-          title: 'Full Mock Exam',
-          subtitle: '100 questions • All subjects • Simulation',
-          iconColor: const Color(0xFF0D9488),
-          onTap: () => context.push(RouteNames.fullMockSetup),
-        ),
-        const SizedBox(height: AppSpacing.sm + 2),
-        QuickActionCard(
-          icon: Icons.school_rounded,
-          title: 'Subject TOS Mock',
-          subtitle: '100 questions • 1 subject • TOS-based',
-          iconColor: const Color(0xFF6D28D9),
-          onTap: () => context.push(RouteNames.boardExamSetup),
+          onTap: () => _showTimedExamChooserSheet(context),
         ),
         const SizedBox(height: AppSpacing.sm + 2),
         QuickActionCard(
           icon: Icons.menu_book_rounded,
           title: 'Subject Practice',
-          subtitle: 'Choose what you want to study',
+          subtitle: 'Study a specific subject your way',
           iconColor: AppColors.primary,
           onTap: () => context.push(RouteNames.subjectPractice),
         ),
@@ -608,7 +592,7 @@ class _QuickActionsSection extends StatelessWidget {
           title: 'Weak Areas',
           subtitle: stats.weakestSubject != null
               ? 'Focus: ${ExamSubject.abbreviate(stats.weakestSubject!)}'
-              : 'Personalised recommendations',
+              : 'Focus on your weakest topics',
           iconColor: AppColors.warning,
           onTap: () => context.push(RouteNames.weakAreas),
         ),
@@ -616,7 +600,7 @@ class _QuickActionsSection extends StatelessWidget {
         QuickActionCard(
           icon: Icons.insights_rounded,
           title: 'Progress',
-          subtitle: 'Scores, trends & insights',
+          subtitle: 'Track your scores and trends',
           iconColor: AppColors.accent,
           onTap: () => context.push(RouteNames.dashboard),
         ),
@@ -1227,6 +1211,176 @@ class _PerformanceTrendChip extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Timed Exam mode chooser — bottom sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+void _showTimedExamChooserSheet(BuildContext context) {
+  showModalBottomSheet<void>(
+    context: context,
+    backgroundColor: AppColors.card,
+    shape: const RoundedRectangleBorder(
+      borderRadius: BorderRadius.vertical(
+        top: Radius.circular(AppSpacing.radiusXl),
+      ),
+    ),
+    builder: (sheetCtx) => _TimedExamChooserSheet(
+      onQuickExam: () {
+        Navigator.of(sheetCtx).pop();
+        context.push(RouteNames.examSetup);
+      },
+      onFullMock: () {
+        Navigator.of(sheetCtx).pop();
+        context.push(RouteNames.fullMockSetup);
+      },
+    ),
+  );
+}
+
+class _TimedExamChooserSheet extends StatelessWidget {
+  const _TimedExamChooserSheet({
+    required this.onQuickExam,
+    required this.onFullMock,
+  });
+
+  final VoidCallback onQuickExam;
+  final VoidCallback onFullMock;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.lg,
+          AppSpacing.md,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                decoration: BoxDecoration(
+                  color: AppColors.divider,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            Text(
+              'Choose Exam Format',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: AppSpacing.xs),
+            Text(
+              'Pick a format to get started.',
+              style: Theme.of(
+                context,
+              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            ),
+            const SizedBox(height: AppSpacing.lg),
+            _ExamTypeOption(
+              icon: Icons.timer_rounded,
+              color: AppColors.secondary,
+              title: 'Quick Timed Exam',
+              subtitle: '60 questions · 40 minutes',
+              onTap: onQuickExam,
+            ),
+            const SizedBox(height: AppSpacing.sm + 2),
+            _ExamTypeOption(
+              icon: Icons.assignment_rounded,
+              color: const Color(0xFF0D9488),
+              title: 'Full Mock Exam',
+              subtitle: '100 questions · full board simulation',
+              onTap: onFullMock,
+            ),
+            const SizedBox(height: AppSpacing.md),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _ExamTypeOption extends StatelessWidget {
+  const _ExamTypeOption({
+    required this.icon,
+    required this.color,
+    required this.title,
+    required this.subtitle,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color color;
+  final String title;
+  final String subtitle;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md + 2),
+          decoration: BoxDecoration(
+            color: AppColors.surface,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(color: AppColors.divider),
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  color: color.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Icon(icon, size: 22, color: color),
+              ),
+              const SizedBox(width: AppSpacing.md),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      title,
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w700,
+                      ),
+                    ),
+                    const SizedBox(height: 3),
+                    Text(
+                      subtitle,
+                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: AppColors.textSecondary,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.arrow_forward_ios_rounded,
+                size: 14,
+                color: AppColors.textHint,
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

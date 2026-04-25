@@ -128,6 +128,15 @@ class ExamResult {
   ExamPerformanceBreakdown get performanceBreakdown =>
       ExamPerformanceBreakdown.fromResult(this);
 
+  /// Computes a subtopic-level breakdown from this result.
+  /// Use this for [mode] == `'subject_tos_mock'` / `'board_exam_style'`.
+  List<SubtopicPerformance> get subtopicBreakdown =>
+      SubtopicPerformance.fromQuestionsAndAnswers(
+        questions: questions,
+        answers: answers,
+        displayCorrectAnswers: displayCorrectAnswers,
+      );
+
   /// Questions the user answered incorrectly.
   List<Question> get incorrectQuestions => questions.where((q) {
     final sel = answers[q.questionId];
@@ -227,6 +236,77 @@ class ExamPerformanceBreakdown {
 class _SubjectAccumulator {
   _SubjectAccumulator(this.subjectName);
   final String subjectName;
+  int correct = 0;
+  int incorrect = 0;
+  int unanswered = 0;
+}
+
+// ─── Subtopic-level performance ──────────────────────────────────────────────
+
+/// Performance statistics for a single subtopic within an exam attempt.
+/// Used for Subject TOS Mock mode breakdowns.
+class SubtopicPerformance {
+  const SubtopicPerformance({
+    required this.subtopicId,
+    required this.subtopicName,
+    required this.total,
+    required this.correct,
+    required this.incorrect,
+    required this.unanswered,
+  });
+
+  final String subtopicId;
+  final String subtopicName;
+  final int total;
+  final int correct;
+  final int incorrect;
+  final int unanswered;
+
+  double get scorePercent => total > 0 ? (correct / total) * 100 : 0.0;
+
+  /// Computes per-subtopic performance from actual attempt questions and answers.
+  static List<SubtopicPerformance> fromQuestionsAndAnswers({
+    required List<Question> questions,
+    required Map<String, String> answers,
+    Map<String, String> displayCorrectAnswers = const {},
+  }) {
+    final Map<String, _SubtopicAccumulator> accumulators = {};
+    for (final q in questions) {
+      final acc = accumulators.putIfAbsent(
+        q.subtopicId,
+        () => _SubtopicAccumulator(q.subtopicId, q.subtopicName),
+      );
+      final selected = answers[q.questionId];
+      final correctAnswer =
+          displayCorrectAnswers[q.questionId] ?? q.correctAnswerLabel;
+      if (selected == null) {
+        acc.unanswered++;
+      } else if (selected == correctAnswer) {
+        acc.correct++;
+      } else {
+        acc.incorrect++;
+      }
+    }
+    return accumulators.values
+        .map(
+          (a) => SubtopicPerformance(
+            subtopicId: a.subtopicId,
+            subtopicName: a.subtopicName,
+            total: a.correct + a.incorrect + a.unanswered,
+            correct: a.correct,
+            incorrect: a.incorrect,
+            unanswered: a.unanswered,
+          ),
+        )
+        .toList()
+      ..sort((a, b) => a.subtopicName.compareTo(b.subtopicName));
+  }
+}
+
+class _SubtopicAccumulator {
+  _SubtopicAccumulator(this.subtopicId, this.subtopicName);
+  final String subtopicId;
+  final String subtopicName;
   int correct = 0;
   int incorrect = 0;
   int unanswered = 0;

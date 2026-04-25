@@ -136,7 +136,8 @@ final routerProvider = Provider<GoRouter>((ref) {
       ),
       GoRoute(
         path: RouteNames.boardExamSetup,
-        builder: (context, state) => const BoardExamSetupScreen(),
+        builder: (context, state) =>
+            BoardExamSetupScreen(initialSubjectId: state.extra as String?),
       ),
       GoRoute(
         path: RouteNames.fullMockSetup,

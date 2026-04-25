@@ -20,7 +20,9 @@ import '../../domain/exam_models.dart';
 /// TOS-based simulation for that subject. Each subject is a separate
 /// 100-item exam in the actual board exam (TOS-grounded).
 class BoardExamSetupScreen extends ConsumerStatefulWidget {
-  const BoardExamSetupScreen({super.key});
+  const BoardExamSetupScreen({super.key, this.initialSubjectId});
+
+  final String? initialSubjectId;
 
   @override
   ConsumerState<BoardExamSetupScreen> createState() =>
@@ -29,6 +31,12 @@ class BoardExamSetupScreen extends ConsumerStatefulWidget {
 
 class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
   String? _selectedSubjectId;
+
+  @override
+  void initState() {
+    super.initState();
+    _selectedSubjectId = widget.initialSubjectId;
+  }
 
   @override
   Widget build(BuildContext context) {

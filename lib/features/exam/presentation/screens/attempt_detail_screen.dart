@@ -7,7 +7,9 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/premium_card.dart';
 import '../../../questions/presentation/providers/question_providers.dart';
+import '../../domain/exam_models.dart';
 import '../../domain/saved_exam_attempt.dart';
+import '../widgets/tos_subtopic_breakdown_section.dart';
 
 /// Detailed view for a single exam attempt from Recent Activity or History.
 class AttemptDetailScreen extends ConsumerWidget {
@@ -197,8 +199,11 @@ class AttemptDetailScreen extends ConsumerWidget {
 
                 const SizedBox(height: AppSpacing.md + 4),
 
-                // ── Subject performance (if available) ──
-                if (attempt.strongestSubject != null ||
+                // ── Subtopic breakdown (subject_tos_mock) or subject performance (other modes) ──
+                if (attempt.mode == 'subject_tos_mock' ||
+                    attempt.mode == 'board_exam_style')
+                  _TosSubtopicBreakdownLoader(attempt: attempt)
+                else if (attempt.strongestSubject != null ||
                     attempt.weakestSubject != null)
                   PremiumCard(
                     padding: const EdgeInsets.all(AppSpacing.md + 4),
@@ -496,6 +501,44 @@ class _SubjectRow extends StatelessWidget {
           ),
         ],
       ),
+    );
+  }
+}
+
+// ─── TOS subtopic breakdown loader ──────────────────────────────────────────
+
+/// Watches [questionsProvider], reconstructs per-subtopic performance from
+/// the stored attempt data, and renders [TosSubtopicBreakdownSection].
+class _TosSubtopicBreakdownLoader extends ConsumerWidget {
+  const _TosSubtopicBreakdownLoader({required this.attempt});
+  final SavedExamAttempt attempt;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (!attempt.hasReviewData) return const SizedBox.shrink();
+
+    final questionsAsync = ref.watch(questionsProvider);
+
+    return questionsAsync.when(
+      loading: () => const SizedBox.shrink(),
+      error: (_, _) => const SizedBox.shrink(),
+      data: (allQuestions) {
+        final questionMap = {for (final q in allQuestions) q.questionId: q};
+        final examQuestions = [
+          for (final id in attempt.questionIds!)
+            if (questionMap.containsKey(id)) questionMap[id]!,
+        ];
+
+        if (examQuestions.isEmpty) return const SizedBox.shrink();
+
+        final subtopics = SubtopicPerformance.fromQuestionsAndAnswers(
+          questions: examQuestions,
+          answers: attempt.answers!,
+          displayCorrectAnswers: attempt.displayCorrectAnswers ?? const {},
+        );
+
+        return TosSubtopicBreakdownSection(subtopics: subtopics);
+      },
     );
   }
 }
