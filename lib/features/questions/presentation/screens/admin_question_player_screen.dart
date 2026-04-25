@@ -393,8 +393,8 @@ class _ResultBanner extends StatelessWidget {
         : 'Review the explanation below.';
     final color = isCorrect ? AppColors.success : AppColors.error;
     final bgColor = isCorrect
-        ? const Color(0xFFF0F9F1)
-        : const Color(0xFFFDF0F0);
+        ? context.appSuccessLightColor
+        : context.appErrorLightColor;
 
     return Container(
       width: double.infinity,
@@ -405,7 +405,7 @@ class _ResultBanner extends StatelessWidget {
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: color.withValues(alpha: 0.25)),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         children: [
@@ -692,14 +692,15 @@ class _BottomActionBar extends StatelessWidget {
 
     final color = isCorrect ? AppColors.success : AppColors.error;
     final bgColor = isCorrect
-        ? const Color(0xFFF0F9F1)
-        : const Color(0xFFFDF0F0);
+        ? context.appSuccessLightColor
+        : context.appErrorLightColor;
     return Container(
       height: 46,
       alignment: Alignment.center,
       decoration: BoxDecoration(
         color: bgColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+        border: Border.all(color: color.withValues(alpha: 0.35)),
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.center,
