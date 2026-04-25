@@ -72,7 +72,7 @@ class _AttemptCard extends StatelessWidget {
     final timeStr = minutes > 0 ? '${minutes}m ${seconds}s' : '${seconds}s';
 
     return Material(
-      color: AppColors.card,
+      color: context.appCardColor,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -81,7 +81,7 @@ class _AttemptCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -93,7 +93,7 @@ class _AttemptCard extends StatelessWidget {
                     child: Text(
                       dateStr,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                       ),
                     ),
                   ),
@@ -144,7 +144,7 @@ class _AttemptCard extends StatelessWidget {
                   Text(
                     timeStr,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondaryColor,
                     ),
                   ),
                 ],
@@ -154,7 +154,7 @@ class _AttemptCard extends StatelessWidget {
               if (attempt.strongestSubject != null ||
                   attempt.weakestSubject != null) ...[
                 const SizedBox(height: AppSpacing.sm),
-                const Divider(height: 1, color: AppColors.divider),
+                Divider(height: 1, color: context.appDividerColor),
                 const SizedBox(height: AppSpacing.sm),
                 if (attempt.strongestSubject != null)
                   _SubjectLabel(
@@ -256,9 +256,9 @@ class _SubjectLabel extends StatelessWidget {
           Expanded(
             child: Text(
               label,
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                color: context.appTextSecondaryColor,
+              ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
             ),

@@ -25,7 +25,7 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
     final summariesAsync = ref.watch(reportSummariesProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: Column(
         children: [
           const SecondaryScreenHeader(title: 'Reported Questions'),
@@ -51,7 +51,11 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
                     ),
                   ),
                   const SizedBox(width: AppSpacing.sm),
-                  Container(width: 1, height: 24, color: AppColors.divider),
+                  Container(
+                    width: 1,
+                    height: 24,
+                    color: context.appDividerColor,
+                  ),
                   const SizedBox(width: AppSpacing.sm),
                   _FilterChip(
                     label: 'Latest',
@@ -94,7 +98,7 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
                       Text(
                         e.toString(),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -126,7 +130,7 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
                         Icon(
                           Icons.check_circle_outline_rounded,
                           size: 56,
-                          color: AppColors.disabled,
+                          color: context.appDisabledColor,
                         ),
                         const SizedBox(height: AppSpacing.md),
                         Text(
@@ -134,7 +138,7 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
                           style: Theme.of(context).textTheme.titleMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textSecondary,
+                                color: context.appTextSecondaryColor,
                               ),
                         ),
                         const SizedBox(height: AppSpacing.xs),
@@ -143,7 +147,7 @@ class _ReportListScreenState extends ConsumerState<ReportListScreen> {
                               ? 'No reports with status "${_statusFilter!.displayLabel}"'
                               : 'All questions look good.',
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textHint),
+                              ?.copyWith(color: context.appTextHintColor),
                         ),
                       ],
                     ),
@@ -221,7 +225,7 @@ class _ReportSummaryCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             boxShadow: [
               BoxShadow(
@@ -243,7 +247,7 @@ class _ReportSummaryCard extends StatelessWidget {
                       vertical: 3,
                     ),
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: context.appPrimarySurfaceColor,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     child: Text(
@@ -281,7 +285,7 @@ class _ReportSummaryCard extends StatelessWidget {
               Text(
                 summary.questionTextPreview,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimaryColor,
                   fontWeight: FontWeight.w500,
                 ),
                 maxLines: 2,
@@ -292,9 +296,9 @@ class _ReportSummaryCard extends StatelessWidget {
               // Subject / subtopic
               Text(
                 '${summary.subjectName} • ${summary.subtopicName}',
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: context.appTextHintColor,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -315,14 +319,14 @@ class _ReportSummaryCard extends StatelessWidget {
                     icon: Icons.people_outline_rounded,
                     text:
                         '${summary.uniqueReporterCount} ${summary.uniqueReporterCount == 1 ? "user" : "users"}',
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                   const Spacer(),
                   Text(
                     _formatDate(summary.latestReportedAt),
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: context.appTextHintColor,
+                    ),
                   ),
                 ],
               ),
@@ -342,7 +346,7 @@ class _ReportSummaryCard extends StatelessWidget {
                             vertical: 3,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.surface,
+                            color: context.appSurfaceColor,
                             borderRadius: BorderRadius.circular(6),
                           ),
                           child: Text(
@@ -350,7 +354,7 @@ class _ReportSummaryCard extends StatelessWidget {
                             style: TextStyle(
                               fontSize: 11,
                               fontWeight: FontWeight.w500,
-                              color: AppColors.textSecondary,
+                              color: context.appTextSecondaryColor,
                             ),
                           ),
                         ),
@@ -442,12 +446,12 @@ class _FilterChip extends StatelessWidget {
           decoration: BoxDecoration(
             color: isSelected
                 ? activeColor.withValues(alpha: 0.1)
-                : AppColors.card,
+                : context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             border: Border.all(
               color: isSelected
                   ? activeColor.withValues(alpha: 0.4)
-                  : AppColors.divider,
+                  : context.appDividerColor,
             ),
           ),
           child: Text(
@@ -455,7 +459,7 @@ class _FilterChip extends StatelessWidget {
             style: TextStyle(
               fontSize: 12,
               fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? activeColor : AppColors.textSecondary,
+              color: isSelected ? activeColor : context.appTextSecondaryColor,
             ),
           ),
         ),

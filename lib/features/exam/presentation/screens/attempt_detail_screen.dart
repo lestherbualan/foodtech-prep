@@ -21,13 +21,13 @@ class AttemptDetailScreen extends ConsumerWidget {
     final passed = attempt.scorePercent >= 50;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: CustomScrollView(
         slivers: [
           // ── App bar ──
           SliverAppBar(
             pinned: true,
-            backgroundColor: AppColors.background,
+            backgroundColor: context.appBackgroundColor,
             surfaceTintColor: Colors.transparent,
             leading: IconButton(
               icon: const Icon(Icons.arrow_back_rounded),
@@ -51,7 +51,7 @@ class AttemptDetailScreen extends ConsumerWidget {
                 // ── Score hero ──
                 PremiumCard(
                   elevated: true,
-                  gradient: AppColors.heroGradient,
+                  gradient: context.appHeroGradient,
                   padding: const EdgeInsets.symmetric(
                     vertical: AppSpacing.xl,
                     horizontal: AppSpacing.lg,
@@ -158,7 +158,7 @@ class AttemptDetailScreen extends ConsumerWidget {
                           _StatChip(
                             label: 'Unanswered',
                             value: '${attempt.unansweredCount}',
-                            color: AppColors.textHint,
+                            color: context.appTextHintColor,
                           ),
                         ],
                       ),
@@ -184,7 +184,7 @@ class AttemptDetailScreen extends ConsumerWidget {
                                 Flexible(
                                   flex: attempt.unansweredCount,
                                   child: Container(
-                                    color: AppColors.textHint.withValues(
+                                    color: context.appTextHintColor.withValues(
                                       alpha: 0.3,
                                     ),
                                   ),
@@ -358,20 +358,20 @@ class _DetailRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Row(
         children: [
-          Icon(icon, size: 18, color: AppColors.textSecondary),
+          Icon(icon, size: 18, color: context.appTextSecondaryColor),
           const SizedBox(width: AppSpacing.md),
           Text(
             label,
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
           const Spacer(),
           Text(
             value,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               fontWeight: FontWeight.w700,
-              color: valueColor ?? AppColors.textPrimary,
+              color: valueColor ?? context.appTextPrimaryColor,
             ),
           ),
         ],
@@ -384,7 +384,10 @@ class _DetailDivider extends StatelessWidget {
   const _DetailDivider();
   @override
   Widget build(BuildContext context) {
-    return Divider(height: 1, color: AppColors.divider.withValues(alpha: 0.5));
+    return Divider(
+      height: 1,
+      color: context.appDividerColor.withValues(alpha: 0.5),
+    );
   }
 }
 
@@ -426,7 +429,7 @@ class _StatChip extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.appTextSecondaryColor,
                 fontWeight: FontWeight.w500,
                 fontSize: 10.5,
               ),
@@ -482,7 +485,7 @@ class _SubjectRow extends StatelessWidget {
                 Text(
                   '$label:',
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                     fontWeight: FontWeight.w500,
                   ),
                 ),
@@ -491,7 +494,7 @@ class _SubjectRow extends StatelessWidget {
                   subject,
                   style: Theme.of(context).textTheme.titleSmall?.copyWith(
                     fontWeight: FontWeight.w700,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimaryColor,
                   ),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,

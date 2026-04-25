@@ -38,7 +38,7 @@ class PracticeQuestionScreen extends ConsumerWidget {
     final qState = session.currentQuestionState;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.appSurfaceColor,
       appBar: AppBar(
         title: Text(
           'Practice Mode',
@@ -56,14 +56,14 @@ class PracticeQuestionScreen extends ConsumerWidget {
             ),
             icon: const Icon(Icons.flag_outlined, size: 20),
             tooltip: 'Report Question',
-            color: AppColors.textHint,
+            color: context.appTextHintColor,
           ),
         ],
         bottom: PreferredSize(
           preferredSize: const Size.fromHeight(3),
           child: LinearProgressIndicator(
             value: (session.currentIndex + 1) / session.totalQuestions,
-            backgroundColor: AppColors.divider,
+            backgroundColor: context.appDividerColor,
             color: AppColors.primary,
             minHeight: 3,
           ),
@@ -192,9 +192,9 @@ class _QuestionHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -229,7 +229,7 @@ class _QuestionHeader extends StatelessWidget {
           Text(
             subjectName,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -237,9 +237,9 @@ class _QuestionHeader extends StatelessWidget {
           // Subtopic
           Text(
             subtopicName,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
         ],
       ),
@@ -253,10 +253,15 @@ class _DifficultyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final (Color bg, Color fg) = switch (difficulty) {
-      'Easy' => (const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
-      'Hard' => (const Color(0xFFFFEBEE), const Color(0xFFC62828)),
-      _ => (const Color(0xFFFFF3E0), const Color(0xFFE65100)), // Medium
+    final bg = switch (difficulty) {
+      'Easy' => context.appSuccessLightColor,
+      'Hard' => context.appErrorLightColor,
+      _ => context.appWarningLightColor, // Medium
+    };
+    final fg = switch (difficulty) {
+      'Easy' => const Color(0xFF2E7D32),
+      'Hard' => const Color(0xFFC62828),
+      _ => const Color(0xFFE65100), // Medium
     };
 
     return Container(
@@ -290,8 +295,8 @@ class _ResultBanner extends StatelessWidget {
         : 'Review the explanation below.';
     final color = isCorrect ? AppColors.success : AppColors.error;
     final bgColor = isCorrect
-        ? const Color(0xFFF0F9F1)
-        : const Color(0xFFFDF0F0);
+        ? context.appSuccessLightColor
+        : context.appErrorLightColor;
 
     return Container(
       width: double.infinity,
@@ -350,9 +355,9 @@ class _ExplanationCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -381,15 +386,15 @@ class _ExplanationCard extends StatelessWidget {
             question.explanation,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               height: 1.6,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
             ),
           ),
 
           // Study note (if present)
           if (question.studyNote != null) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -407,7 +412,7 @@ class _ExplanationCard extends StatelessWidget {
                       Text(
                         'Study Tip',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -416,7 +421,7 @@ class _ExplanationCard extends StatelessWidget {
                         question.studyNote!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           height: 1.55,
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                         ),
                       ),
                     ],
@@ -428,14 +433,18 @@ class _ExplanationCard extends StatelessWidget {
           if (showSource &&
               (question.sourceReference != null ||
                   question.sourceFile != null)) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.source_rounded, size: 16, color: AppColors.textHint),
+                Icon(
+                  Icons.source_rounded,
+                  size: 16,
+                  color: context.appTextHintColor,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -444,7 +453,7 @@ class _ExplanationCard extends StatelessWidget {
                       Text(
                         'Source',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -457,7 +466,7 @@ class _ExplanationCard extends StatelessWidget {
                         ].join(' - '),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           height: 1.45,
-                          color: AppColors.textHint,
+                          color: context.appTextHintColor,
                         ),
                       ),
                     ],
@@ -499,7 +508,7 @@ class _BottomActionBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -559,7 +568,9 @@ class _BottomActionBar extends StatelessWidget {
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: isCorrect ? const Color(0xFFF0F9F1) : const Color(0xFFFDF0F0),
+        color: isCorrect
+            ? context.appSuccessLightColor
+            : context.appErrorLightColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
@@ -602,8 +613,8 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onPressed != null
-        ? AppColors.textSecondary
-        : AppColors.disabled;
+        ? context.appTextSecondaryColor
+        : context.appDisabledColor;
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,

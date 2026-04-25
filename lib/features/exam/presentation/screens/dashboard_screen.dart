@@ -24,7 +24,6 @@ class DashboardScreen extends ConsumerWidget {
 
     if (user == null) {
       return Scaffold(
-        backgroundColor: AppColors.background,
         body: Column(
           children: [
             const SecondaryScreenHeader(title: 'Progress'),
@@ -39,13 +38,13 @@ class DashboardScreen extends ConsumerWidget {
     final statsAsync = ref.watch(dashboardStatsProvider(user.uid));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: Column(
         children: [
           SecondaryScreenHeader(
             title: 'Progress',
             subtitle: 'Scores, trends, and insights.',
             trailing: SecondaryScreenHeader.trailingIconButton(
+              context: context,
               icon: Icons.history_rounded,
               onTap: () => context.push(RouteNames.examHistory),
               tooltip: 'Full History',
@@ -127,9 +126,9 @@ class _ScoreSummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -167,7 +166,7 @@ class _ScoreSummaryCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: (stats.averageScore / 100).clamp(0.0, 1.0),
               minHeight: 8,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDividerColor,
               valueColor: AlwaysStoppedAnimation<Color>(
                 _scoreColor(stats.averageScore),
               ),
@@ -176,9 +175,9 @@ class _ScoreSummaryCard extends StatelessWidget {
           const SizedBox(height: AppSpacing.sm),
           Text(
             '${stats.totalAttempts} exam${stats.totalAttempts != 1 ? 's' : ''} recently',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
         ],
       ),
@@ -207,7 +206,7 @@ class _ScoreIndicator extends StatelessWidget {
           label,
           style: Theme.of(
             context,
-          ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+          ).textTheme.bodySmall?.copyWith(color: context.appTextSecondaryColor),
         ),
       ],
     );
@@ -222,6 +221,7 @@ class _TrendCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     final (icon, color, label) = switch (stats.trend) {
       TrendDirection.improving => (
         Icons.trending_up_rounded,
@@ -240,7 +240,7 @@ class _TrendCard extends StatelessWidget {
       ),
       TrendDirection.insufficient => (
         Icons.show_chart_rounded,
-        AppColors.textHint,
+        context.appTextHintColor,
         'Not Enough Data',
       ),
     };
@@ -249,9 +249,9 @@ class _TrendCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.06),
+        color: isDark ? context.appCardColor : color.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: color.withValues(alpha: 0.2)),
+        border: Border.all(color: color.withValues(alpha: isDark ? 0.5 : 0.2)),
       ),
       child: Row(
         children: [
@@ -279,7 +279,7 @@ class _TrendCard extends StatelessWidget {
                 Text(
                   stats.trendExplanation,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                 ),
               ],
@@ -307,9 +307,9 @@ class _SubjectSummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -368,9 +368,9 @@ class _SubjectRow extends StatelessWidget {
             children: [
               Text(
                 '$label:',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.appTextSecondaryColor,
+                ),
               ),
               const SizedBox(height: 2),
               Text(
@@ -398,15 +398,18 @@ class _FocusAdviceCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     if (tips.isEmpty) return const SizedBox.shrink();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
 
     return Container(
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primaryLight.withValues(alpha: 0.06),
+        color: isDark
+            ? context.appCardColor
+            : context.appPrimaryColor.withValues(alpha: 0.06),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         border: Border.all(
-          color: AppColors.primaryLight.withValues(alpha: 0.2),
+          color: context.appPrimaryColor.withValues(alpha: isDark ? 0.4 : 0.2),
         ),
       ),
       child: Column(
@@ -417,14 +420,14 @@ class _FocusAdviceCard extends StatelessWidget {
               Icon(
                 Icons.lightbulb_outline_rounded,
                 size: 18,
-                color: AppColors.primary,
+                color: context.appPrimaryColor,
               ),
               const SizedBox(width: AppSpacing.sm),
               Text(
                 'What to Focus On',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.primary,
+                  color: context.appPrimaryColor,
                 ),
               ),
             ],
@@ -452,7 +455,7 @@ class _FocusAdviceCard extends StatelessWidget {
                     child: Text(
                       tip,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimaryColor,
                         height: 1.4,
                       ),
                     ),
@@ -508,7 +511,7 @@ class _MiniAttemptRow extends StatelessWidget {
     final dateStr = _shortDate(attempt.submittedAt);
 
     return Material(
-      color: AppColors.card,
+      color: context.appCardColor,
       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
@@ -520,7 +523,7 @@ class _MiniAttemptRow extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
           ),
           child: Row(
             children: [
@@ -543,7 +546,7 @@ class _MiniAttemptRow extends StatelessWidget {
                   child: LinearProgressIndicator(
                     value: (attempt.scorePercent / 100).clamp(0.0, 1.0),
                     minHeight: 6,
-                    backgroundColor: AppColors.divider,
+                    backgroundColor: context.appDividerColor,
                     valueColor: AlwaysStoppedAnimation<Color>(
                       passed ? AppColors.success : AppColors.error,
                     ),
@@ -554,23 +557,23 @@ class _MiniAttemptRow extends StatelessWidget {
               // Stats chips
               Text(
                 '${attempt.correctCount}/${attempt.totalQuestions}',
-                style: Theme.of(
-                  context,
-                ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+                style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                  color: context.appTextSecondaryColor,
+                ),
               ),
               const SizedBox(width: AppSpacing.md),
               // Date
               Text(
                 dateStr,
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: context.appTextHintColor,
+                ),
               ),
               const SizedBox(width: AppSpacing.xs),
               Icon(
                 Icons.chevron_right_rounded,
                 size: 16,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),

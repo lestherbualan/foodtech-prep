@@ -63,10 +63,10 @@ class SecondaryScreenHeader extends StatelessWidget {
                   width: _btnSize,
                   height: _btnSize,
                   decoration: BoxDecoration(
-                    color: AppColors.card,
+                    color: context.appCardColor,
                     borderRadius: BorderRadius.circular(_btnRadius),
                     border: Border.all(
-                      color: AppColors.divider.withValues(alpha: 0.6),
+                      color: context.appDividerColor.withValues(alpha: 0.6),
                     ),
                     boxShadow: [
                       BoxShadow(
@@ -76,10 +76,10 @@ class SecondaryScreenHeader extends StatelessWidget {
                       ),
                     ],
                   ),
-                  child: const Icon(
+                  child: Icon(
                     Icons.arrow_back_ios_new_rounded,
                     size: _iconSize,
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimaryColor,
                   ),
                 ),
               ),
@@ -104,7 +104,7 @@ class SecondaryScreenHeader extends StatelessWidget {
                     Text(
                       subtitle!,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                         height: 1.3,
                       ),
                     ),
@@ -127,6 +127,7 @@ class SecondaryScreenHeader extends StatelessWidget {
   /// Convenience factory for a trailing icon button that matches the header's
   /// back-button visual language (same container size, radius, shadow).
   static Widget trailingIconButton({
+    required BuildContext context,
     required IconData icon,
     required VoidCallback onTap,
     String? tooltip,
@@ -139,9 +140,11 @@ class SecondaryScreenHeader extends StatelessWidget {
           width: _btnSize,
           height: _btnSize,
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(_btnRadius),
-            border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+            border: Border.all(
+              color: context.appDividerColor.withValues(alpha: 0.6),
+            ),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.04),
@@ -150,7 +153,7 @@ class SecondaryScreenHeader extends StatelessWidget {
               ),
             ],
           ),
-          child: Icon(icon, size: 18, color: AppColors.textPrimary),
+          child: Icon(icon, size: 18, color: context.appTextPrimaryColor),
         ),
       ),
     );

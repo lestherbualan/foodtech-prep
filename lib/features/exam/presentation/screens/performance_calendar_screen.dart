@@ -82,7 +82,7 @@ class _PerformanceCalendarScreenState
     final monthAsync = ref.watch(monthlyTimedExamSummaryProvider(monthKey));
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: Column(
         children: [
           // ── Header ──
@@ -101,7 +101,7 @@ class _PerformanceCalendarScreenState
                 child: Text(
                   'Unable to load calendar data.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                 ),
               ),
@@ -242,11 +242,13 @@ class _NavButton extends StatelessWidget {
         width: 36,
         height: 36,
         decoration: BoxDecoration(
-          color: AppColors.card,
+          color: context.appCardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-          border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+          border: Border.all(
+            color: context.appDividerColor.withValues(alpha: 0.6),
+          ),
         ),
-        child: Icon(icon, size: 20, color: AppColors.textSecondary),
+        child: Icon(icon, size: 20, color: context.appTextSecondaryColor),
       ),
     );
   }
@@ -291,7 +293,7 @@ class _CalendarGrid extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -315,7 +317,7 @@ class _CalendarGrid extends StatelessWidget {
                           label,
                           style: Theme.of(context).textTheme.labelSmall
                               ?.copyWith(
-                                color: AppColors.textSecondary,
+                                color: context.appTextSecondaryColor,
                                 fontWeight: FontWeight.w600,
                                 fontSize: 11,
                               ),
@@ -326,7 +328,10 @@ class _CalendarGrid extends StatelessWidget {
                   .toList(),
             ),
           ),
-          Divider(height: 1, color: AppColors.divider.withValues(alpha: 0.5)),
+          Divider(
+            height: 1,
+            color: context.appDividerColor.withValues(alpha: 0.5),
+          ),
           const SizedBox(height: AppSpacing.sm),
 
           // ── Date cells ──
@@ -422,14 +427,14 @@ class _CalendarDayCell extends StatelessWidget {
       bg = AppColors.primary;
       fg = AppColors.textOnPrimary;
     } else if (hasAttempt) {
-      bg = ScoreBand.surface(score);
+      bg = ScoreBand.surfaceFor(context, score);
       fg = ScoreBand.foregroundOnSurface(score);
     } else if (isToday) {
-      bg = AppColors.primarySurface;
-      fg = AppColors.primary;
+      bg = context.appPrimarySurfaceColor;
+      fg = context.appPrimaryColor;
     } else {
       bg = Colors.transparent;
-      fg = AppColors.textHint; // emptier dates recede
+      fg = context.appTextHintColor; // emptier dates recede
     }
 
     return GestureDetector(
@@ -448,7 +453,7 @@ class _CalendarDayCell extends StatelessWidget {
                 color: bg,
                 shape: BoxShape.circle,
                 border: isToday && !isSelected
-                    ? Border.all(color: AppColors.primary, width: 2)
+                    ? Border.all(color: context.appPrimaryColor, width: 2)
                     : hasAttempt && !isSelected
                     ? Border.all(
                         color: ScoreBand.color(score).withValues(alpha: 0.3),
@@ -489,7 +494,7 @@ class _CalendarDayCell extends StatelessWidget {
                   decoration: BoxDecoration(
                     color: isSelected
                         ? AppColors.secondaryLight.withValues(alpha: 0.3)
-                        : AppColors.secondarySurface,
+                        : context.appSecondarySurfaceColor,
                     shape: BoxShape.circle,
                   ),
                   alignment: Alignment.center,
@@ -541,7 +546,7 @@ class _DailySummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md + 4),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -573,7 +578,7 @@ class _DailySummaryCard extends StatelessWidget {
                     vertical: AppSpacing.xs,
                   ),
                   decoration: BoxDecoration(
-                    color: AppColors.secondarySurface,
+                    color: context.appSecondarySurfaceColor,
                     borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                   ),
                   child: Row(
@@ -624,14 +629,14 @@ class _EmptyDayState extends StatelessWidget {
               width: 44,
               height: 44,
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.appSurfaceColor,
                 shape: BoxShape.circle,
               ),
               alignment: Alignment.center,
               child: Icon(
                 Icons.event_busy_rounded,
                 size: 22,
-                color: AppColors.textHint.withValues(alpha: 0.5),
+                color: context.appTextHintColor.withValues(alpha: 0.5),
               ),
             ),
             const SizedBox(height: AppSpacing.sm + 2),
@@ -639,7 +644,7 @@ class _EmptyDayState extends StatelessWidget {
               'No timed exams on this day',
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+              ).textTheme.bodySmall?.copyWith(color: context.appTextHintColor),
             ),
           ],
         ),
@@ -667,7 +672,7 @@ class _PopulatedDaySummary extends StatelessWidget {
             vertical: AppSpacing.md + 2,
           ),
           decoration: BoxDecoration(
-            color: ScoreBand.surface(detail.averageScore),
+            color: ScoreBand.surfaceFor(context, detail.averageScore),
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(
               color: ScoreBand.color(
@@ -703,7 +708,7 @@ class _PopulatedDaySummary extends StatelessWidget {
                     Text(
                       'Average Score',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -797,7 +802,7 @@ class _MetricChip extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.appTextSecondaryColor,
                 fontWeight: FontWeight.w500,
                 fontSize: 10,
               ),
@@ -840,13 +845,13 @@ class _DailyAttemptsSection extends StatelessWidget {
                 vertical: AppSpacing.xxs,
               ),
               decoration: BoxDecoration(
-                color: AppColors.primarySurface,
+                color: context.appPrimarySurfaceColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
               child: Text(
                 '${attempts.length}',
                 style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                  color: AppColors.primary,
+                  color: context.appPrimaryColor,
                   fontWeight: FontWeight.w700,
                 ),
               ),
@@ -883,7 +888,7 @@ class _AttemptRow extends StatelessWidget {
     final durationStr = minutes > 0 ? '${minutes}m ${seconds}s' : '${seconds}s';
 
     return Material(
-      color: AppColors.card,
+      color: context.appCardColor,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -895,7 +900,9 @@ class _AttemptRow extends StatelessWidget {
           ),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: AppColors.divider.withValues(alpha: 0.7)),
+            border: Border.all(
+              color: context.appDividerColor.withValues(alpha: 0.7),
+            ),
           ),
           child: Row(
             children: [
@@ -934,20 +941,20 @@ class _AttemptRow extends StatelessWidget {
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
                                 fontWeight: FontWeight.w600,
-                                color: AppColors.textPrimary,
+                                color: context.appTextPrimaryColor,
                               ),
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           '·',
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.textHint),
+                              ?.copyWith(color: context.appTextHintColor),
                         ),
                         const SizedBox(width: AppSpacing.sm),
                         Text(
                           durationStr,
                           style: Theme.of(context).textTheme.bodySmall
-                              ?.copyWith(color: AppColors.textSecondary),
+                              ?.copyWith(color: context.appTextSecondaryColor),
                         ),
                       ],
                     ),
@@ -955,7 +962,7 @@ class _AttemptRow extends StatelessWidget {
                     Text(
                       '${attempt.correctCount}/${attempt.totalQuestions} correct',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                       ),
                     ),
                   ],
@@ -966,7 +973,7 @@ class _AttemptRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),

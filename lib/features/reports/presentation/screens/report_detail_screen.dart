@@ -32,7 +32,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: Column(
         children: [
           const SecondaryScreenHeader(title: 'Report Detail'),
@@ -103,7 +103,7 @@ class _ReportDetailScreenState extends ConsumerState<ReportDetailScreen> {
                         child: Text(
                           'No individual reports found.',
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.textHint),
+                              ?.copyWith(color: context.appTextHintColor),
                         ),
                       )
                     else
@@ -291,7 +291,7 @@ class _SectionLabel extends StatelessWidget {
             label,
             style: Theme.of(context).textTheme.titleSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
             ),
           ),
         ],
@@ -318,7 +318,7 @@ class _QuestionContentCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -336,7 +336,7 @@ class _QuestionContentCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: context.appPrimarySurfaceColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
@@ -352,9 +352,9 @@ class _QuestionContentCard extends StatelessWidget {
               Expanded(
                 child: Text(
                   '${summary.subjectName} • ${summary.subtopicName}',
-                  style: Theme.of(
-                    context,
-                  ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                  style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                    color: context.appTextHintColor,
+                  ),
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
@@ -365,7 +365,7 @@ class _QuestionContentCard extends StatelessWidget {
           Text(
             q?.questionText ?? summary.questionTextPreview,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
               fontWeight: FontWeight.w500,
               height: 1.55,
             ),
@@ -373,7 +373,7 @@ class _QuestionContentCard extends StatelessWidget {
 
           if (q != null) ...[
             const SizedBox(height: AppSpacing.md),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.appDividerColor),
             const SizedBox(height: AppSpacing.md),
 
             ...List.generate(q.options.length, (i) {
@@ -392,12 +392,12 @@ class _QuestionContentCard extends StatelessWidget {
                       decoration: BoxDecoration(
                         color: isCorrect
                             ? AppColors.success.withValues(alpha: 0.1)
-                            : AppColors.surface,
+                            : context.appSurfaceColor,
                         borderRadius: BorderRadius.circular(6),
                         border: Border.all(
                           color: isCorrect
                               ? AppColors.success.withValues(alpha: 0.3)
-                              : AppColors.divider,
+                              : context.appDividerColor,
                         ),
                       ),
                       child: Text(
@@ -407,7 +407,7 @@ class _QuestionContentCard extends StatelessWidget {
                           fontWeight: FontWeight.w600,
                           color: isCorrect
                               ? AppColors.success
-                              : AppColors.textSecondary,
+                              : context.appTextSecondaryColor,
                         ),
                       ),
                     ),
@@ -421,7 +421,7 @@ class _QuestionContentCard extends StatelessWidget {
                               ?.copyWith(
                                 color: isCorrect
                                     ? AppColors.success
-                                    : AppColors.textPrimary,
+                                    : context.appTextPrimaryColor,
                                 fontWeight: isCorrect
                                     ? FontWeight.w600
                                     : FontWeight.w400,
@@ -445,7 +445,7 @@ class _QuestionContentCard extends StatelessWidget {
 
             if (q.explanation.isNotEmpty) ...[
               const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1, color: AppColors.divider),
+              Divider(height: 1, color: context.appDividerColor),
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
@@ -468,7 +468,7 @@ class _QuestionContentCard extends StatelessWidget {
               Text(
                 q.explanation,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                   height: 1.5,
                 ),
               ),
@@ -477,20 +477,20 @@ class _QuestionContentCard extends StatelessWidget {
             // Source metadata (visible in admin report detail)
             if (q.sourceFile != null || q.sourceReference != null) ...[
               const SizedBox(height: AppSpacing.sm),
-              const Divider(height: 1, color: AppColors.divider),
+              Divider(height: 1, color: context.appDividerColor),
               const SizedBox(height: AppSpacing.md),
               Row(
                 children: [
-                  const Icon(
+                  Icon(
                     Icons.source_rounded,
                     size: 16,
-                    color: AppColors.textHint,
+                    color: context.appTextHintColor,
                   ),
                   const SizedBox(width: 6),
                   Text(
                     'Source',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textHint,
+                      color: context.appTextHintColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -501,14 +501,14 @@ class _QuestionContentCard extends StatelessWidget {
                 Text(
                   q.sourceFile!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                 ),
               if (q.sourceReference != null)
                 Text(
                   q.sourceReference!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                 ),
             ],
@@ -533,7 +533,7 @@ class _ReportSummaryCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -564,13 +564,13 @@ class _ReportSummaryCard extends StatelessWidget {
             ],
           ),
           const SizedBox(height: AppSpacing.md),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDividerColor),
           const SizedBox(height: AppSpacing.md),
 
           Text(
             'Issue Breakdown',
             style: Theme.of(context).textTheme.labelMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               fontWeight: FontWeight.w600,
             ),
           ),
@@ -584,7 +584,7 @@ class _ReportSummaryCard extends StatelessWidget {
                     child: Text(
                       entry.key,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimaryColor,
                       ),
                     ),
                   ),
@@ -649,14 +649,14 @@ class _MiniStat extends StatelessWidget {
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
               ),
             ),
             Text(
               label,
               style: Theme.of(
                 context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+              ).textTheme.labelSmall?.copyWith(color: context.appTextHintColor),
             ),
           ],
         ),
@@ -693,7 +693,7 @@ class _ModerationCard extends ConsumerWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -712,7 +712,7 @@ class _ModerationCard extends ConsumerWidget {
               Text(
                 'Status: ',
                 style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                   fontWeight: FontWeight.w600,
                 ),
               ),
@@ -800,7 +800,7 @@ class _ModerationCard extends ConsumerWidget {
                 child: Text(
                   summary.rejectionReason!,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                     fontStyle: FontStyle.italic,
                     height: 1.4,
                   ),
@@ -839,13 +839,13 @@ class _ModerationCard extends ConsumerWidget {
           // Action buttons (only for moderators)
           if (canModerate) ...[
             const SizedBox(height: AppSpacing.md),
-            const Divider(height: 1, color: AppColors.divider),
+            Divider(height: 1, color: context.appDividerColor),
             const SizedBox(height: AppSpacing.md),
 
             Text(
               'Actions',
               style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.appTextSecondaryColor,
                 fontWeight: FontWeight.w600,
               ),
             ),
@@ -932,14 +932,14 @@ class _MetaRow extends StatelessWidget {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(icon, size: 14, color: color ?? AppColors.textHint),
+          Icon(icon, size: 14, color: color ?? context.appTextHintColor),
           const SizedBox(width: 6),
           Expanded(
             child: Text(
               text,
-              style: Theme.of(
-                context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                color: context.appTextSecondaryColor,
+              ),
             ),
           ),
         ],
@@ -1133,8 +1133,8 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
       constraints: BoxConstraints(
         maxHeight: MediaQuery.of(context).size.height * 0.92,
       ),
-      decoration: const BoxDecoration(
-        color: AppColors.background,
+      decoration: BoxDecoration(
+        color: context.appBackgroundColor,
         borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
       ),
       child: Column(
@@ -1146,7 +1146,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
               width: 40,
               height: 4,
               decoration: BoxDecoration(
-                color: AppColors.disabled,
+                color: context.appDisabledColor,
                 borderRadius: BorderRadius.circular(2),
               ),
             ),
@@ -1163,7 +1163,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
                     'Edit & Resolve Question',
                     style: Theme.of(context).textTheme.titleMedium?.copyWith(
                       fontWeight: FontWeight.w700,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimaryColor,
                     ),
                   ),
                 ),
@@ -1174,7 +1174,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
               ],
             ),
           ),
-          const Divider(height: 1, color: AppColors.divider),
+          Divider(height: 1, color: context.appDividerColor),
 
           // Scrollable form
           Expanded(
@@ -1228,12 +1228,12 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
                             decoration: BoxDecoration(
                               color: _correctIndex == i
                                   ? AppColors.success.withValues(alpha: 0.15)
-                                  : AppColors.surface,
+                                  : context.appSurfaceColor,
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(
                                 color: _correctIndex == i
                                     ? AppColors.success
-                                    : AppColors.divider,
+                                    : context.appDividerColor,
                                 width: _correctIndex == i ? 1.5 : 1,
                               ),
                             ),
@@ -1244,7 +1244,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
                                 fontWeight: FontWeight.w700,
                                 color: _correctIndex == i
                                     ? AppColors.success
-                                    : AppColors.textSecondary,
+                                    : context.appTextSecondaryColor,
                               ),
                             ),
                           ),
@@ -1264,9 +1264,9 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
                   padding: const EdgeInsets.only(bottom: AppSpacing.sm),
                   child: Text(
                     'Tap the letter to mark the correct option.',
-                    style: Theme.of(
-                      context,
-                    ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                      color: context.appTextHintColor,
+                    ),
                   ),
                 ),
                 const SizedBox(height: AppSpacing.sm),
@@ -1281,7 +1281,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
                   title: Text(
                     'Additional Fields',
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                      color: AppColors.textSecondary,
+                      color: context.appTextSecondaryColor,
                       fontWeight: FontWeight.w600,
                     ),
                   ),
@@ -1335,7 +1335,7 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
       child: Text(
         text,
         style: Theme.of(context).textTheme.labelMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: context.appTextSecondaryColor,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -1352,21 +1352,21 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
       maxLines: maxLines,
       style: Theme.of(
         context,
-      ).textTheme.bodyMedium?.copyWith(color: AppColors.textPrimary),
+      ).textTheme.bodyMedium?.copyWith(color: context.appTextPrimaryColor),
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+        ).textTheme.bodySmall?.copyWith(color: context.appTextHintColor),
         filled: true,
-        fillColor: AppColors.surface,
+        fillColor: context.appSurfaceColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: context.appDividerColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: context.appDividerColor),
         ),
         contentPadding: const EdgeInsets.all(AppSpacing.md),
       ),
@@ -1378,9 +1378,9 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: DropdownButtonHideUnderline(
         child: DropdownButton<String>(
@@ -1388,9 +1388,9 @@ class _QuestionEditSheetState extends State<_QuestionEditSheet> {
           value: values.contains(current) ? current : null,
           hint: Text(
             current.isNotEmpty ? current : 'Select…',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
           items: values
               .map((v) => DropdownMenuItem(value: v, child: Text(v)))
@@ -1430,7 +1430,7 @@ class _RejectDialogState extends State<_RejectDialog> {
   @override
   Widget build(BuildContext context) {
     return AlertDialog(
-      backgroundColor: AppColors.card,
+      backgroundColor: context.appCardColor,
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
@@ -1441,9 +1441,9 @@ class _RejectDialogState extends State<_RejectDialog> {
         children: [
           Text(
             'Please provide a reason for rejection:',
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
           const SizedBox(height: AppSpacing.sm),
           TextField(
@@ -1454,16 +1454,16 @@ class _RejectDialogState extends State<_RejectDialog> {
               hintText: 'Rejection reason…',
               hintStyle: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+              ).textTheme.bodySmall?.copyWith(color: context.appTextHintColor),
               filled: true,
-              fillColor: AppColors.surface,
+              fillColor: context.appSurfaceColor,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.divider),
+                borderSide: BorderSide(color: context.appDividerColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.divider),
+                borderSide: BorderSide(color: context.appDividerColor),
               ),
               contentPadding: const EdgeInsets.all(AppSpacing.md),
               errorText: _error,
@@ -1507,19 +1507,21 @@ class _IndividualReportCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+        border: Border.all(
+          color: context.appDividerColor.withValues(alpha: 0.6),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Row(
             children: [
-              const Icon(
+              Icon(
                 Icons.person_outline_rounded,
                 size: 16,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
               const SizedBox(width: 6),
               Expanded(
@@ -1528,7 +1530,7 @@ class _IndividualReportCard extends StatelessWidget {
                       ? report.reportedByDisplayName
                       : report.reportedByEmail,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textPrimary,
+                    color: context.appTextPrimaryColor,
                     fontWeight: FontWeight.w600,
                   ),
                   overflow: TextOverflow.ellipsis,
@@ -1536,9 +1538,9 @@ class _IndividualReportCard extends StatelessWidget {
               ),
               Text(
                 _formatDate(report.reportedAt),
-                style: Theme.of(
-                  context,
-                ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+                style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                  color: context.appTextHintColor,
+                ),
               ),
             ],
           ),
@@ -1547,7 +1549,7 @@ class _IndividualReportCard extends StatelessWidget {
           Text(
             '${report.reportedByEmail} • ${report.reportedByUid.substring(0, 8)}…',
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textHint,
+              color: context.appTextHintColor,
               fontSize: 10,
             ),
           ),
@@ -1558,17 +1560,17 @@ class _IndividualReportCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Text(
                   report.context == ReportContext.timedExam
                       ? 'Timed Exam'
                       : 'Practice',
-                  style: const TextStyle(
+                  style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                   ),
                 ),
               ),
@@ -1609,13 +1611,13 @@ class _IndividualReportCard extends StatelessWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.sm + 2),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: context.appSurfaceColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
               ),
               child: Text(
                 report.note!,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                   fontStyle: FontStyle.italic,
                   height: 1.4,
                 ),

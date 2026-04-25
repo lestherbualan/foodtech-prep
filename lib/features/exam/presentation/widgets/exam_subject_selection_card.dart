@@ -33,12 +33,14 @@ class ExamSubjectSelectionCard extends StatelessWidget {
             vertical: AppSpacing.md - 2,
           ),
           decoration: BoxDecoration(
-            color: isSelected ? AppColors.primarySurface : AppColors.card,
+            color: isSelected
+                ? context.appPrimarySurfaceColor
+                : context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             border: Border.all(
               color: isSelected
                   ? AppColors.primary.withValues(alpha: 0.6)
-                  : AppColors.divider,
+                  : context.appDividerColor,
               width: isSelected ? 1.5 : 1,
             ),
             boxShadow: isSelected
@@ -68,7 +70,9 @@ class ExamSubjectSelectionCard extends StatelessWidget {
                   shape: BoxShape.circle,
                   color: isSelected ? AppColors.primary : Colors.transparent,
                   border: Border.all(
-                    color: isSelected ? AppColors.primary : AppColors.disabled,
+                    color: isSelected
+                        ? AppColors.primary
+                        : context.appDisabledColor,
                     width: isSelected ? 2 : 1.5,
                   ),
                   boxShadow: isSelected
@@ -103,8 +107,8 @@ class ExamSubjectSelectionCard extends StatelessWidget {
                             ? FontWeight.w700
                             : FontWeight.w600,
                         color: isSelected
-                            ? AppColors.primary
-                            : AppColors.textPrimary,
+                            ? context.appPrimaryColor
+                            : context.appTextPrimaryColor,
                         letterSpacing: -0.1,
                       ),
                     ),
@@ -114,8 +118,8 @@ class ExamSubjectSelectionCard extends StatelessWidget {
                       style: TextStyle(
                         fontSize: 12.5,
                         color: isSelected
-                            ? AppColors.primaryDark.withValues(alpha: 0.7)
-                            : AppColors.textSecondary,
+                            ? context.appPrimaryColor.withValues(alpha: 0.75)
+                            : context.appTextSecondaryColor,
                         height: 1.35,
                       ),
                     ),

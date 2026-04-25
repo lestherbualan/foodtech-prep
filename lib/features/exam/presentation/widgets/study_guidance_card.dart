@@ -17,9 +17,11 @@ class StudyGuidanceCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.primary.withValues(alpha: 0.04),
+        color: context.appPrimarySurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.2)),
+        border: Border.all(
+          color: context.appPrimaryColor.withValues(alpha: 0.2),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -30,14 +32,14 @@ class StudyGuidanceCard extends StatelessWidget {
                 width: 32,
                 height: 32,
                 decoration: BoxDecoration(
-                  color: AppColors.primary.withValues(alpha: 0.1),
+                  color: context.appPrimaryColor.withValues(alpha: 0.12),
                   borderRadius: BorderRadius.circular(10),
                 ),
                 alignment: Alignment.center,
-                child: const Icon(
+                child: Icon(
                   Icons.lightbulb_outline_rounded,
                   size: 16,
-                  color: AppColors.primary,
+                  color: context.appPrimaryColor,
                 ),
               ),
               const SizedBox(width: AppSpacing.sm),
@@ -45,7 +47,7 @@ class StudyGuidanceCard extends StatelessWidget {
                 'What to Focus On',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primary,
+                  color: context.appPrimaryColor,
                   letterSpacing: -0.2,
                 ),
               ),
@@ -63,8 +65,8 @@ class StudyGuidanceCard extends StatelessWidget {
                     child: Container(
                       width: 5,
                       height: 5,
-                      decoration: const BoxDecoration(
-                        color: AppColors.primary,
+                      decoration: BoxDecoration(
+                        color: context.appPrimaryColor,
                         shape: BoxShape.circle,
                       ),
                     ),
@@ -75,7 +77,7 @@ class StudyGuidanceCard extends StatelessWidget {
                       tip,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         height: 1.5,
-                        color: AppColors.textPrimary,
+                        color: context.appTextPrimaryColor,
                       ),
                     ),
                   ),

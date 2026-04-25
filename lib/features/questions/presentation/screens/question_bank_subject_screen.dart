@@ -35,7 +35,7 @@ class QuestionBankSubjectScreen extends ConsumerWidget {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) =>
@@ -178,7 +178,7 @@ class _PracticeAllCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       padding: const EdgeInsets.all(AppSpacing.md + 4),
-      gradient: AppColors.heroGradient,
+      gradient: context.appHeroGradient,
       onTap: onTap,
       child: Row(
         children: [
@@ -254,9 +254,9 @@ class _SubtopicCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 2),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.02),
@@ -295,13 +295,13 @@ class _SubtopicCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: AppColors.textHint,
+                  color: context.appTextHintColor,
                 ),
               ),
             ],

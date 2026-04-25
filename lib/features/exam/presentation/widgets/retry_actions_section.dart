@@ -91,8 +91,8 @@ class _RetryButton extends StatelessWidget {
         label: Text(label),
         style: OutlinedButton.styleFrom(
           minimumSize: const Size(0, 50),
-          foregroundColor: AppColors.primary,
-          side: const BorderSide(color: AppColors.divider),
+          foregroundColor: context.appPrimaryColor,
+          side: BorderSide(color: context.appDividerColor),
           textStyle: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600),
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),

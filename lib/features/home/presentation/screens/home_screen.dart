@@ -46,7 +46,6 @@ class HomeScreen extends ConsumerWidget {
         'Student';
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: SafeArea(
         child: CustomScrollView(
           slivers: [
@@ -123,7 +122,7 @@ class HomeScreen extends ConsumerWidget {
                         ),
                         child: CircleAvatar(
                           radius: 22,
-                          backgroundColor: AppColors.primarySurface,
+                          backgroundColor: context.appPrimarySurfaceColor,
                           backgroundImage: user?.photoURL != null
                               ? NetworkImage(user!.photoURL!)
                               : null,
@@ -180,9 +179,7 @@ class _DashboardBody extends ConsumerWidget {
 
     return statsAsync.when(
       loading: () => const SliverFillRemaining(
-        child: Center(
-          child: CircularProgressIndicator(color: AppColors.primary),
-        ),
+        child: Center(child: CircularProgressIndicator()),
       ),
       error: (_, _) => SliverToBoxAdapter(child: _EmptyDashboard()),
       data: (stats) {
@@ -285,7 +282,7 @@ class _EmptyDashboard extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md + 4),
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    gradient: context.appPrimaryGradient,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -305,10 +302,9 @@ class _EmptyDashboard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Text(
                   'Start your first exam to begin tracking your progress and get personalized study recommendations.',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                    color: AppColors.textSecondary,
-                    height: 1.5,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodyMedium?.copyWith(height: 1.5),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -365,7 +361,7 @@ class _HeroPerformanceCard extends StatelessWidget {
     return PremiumCard(
       padding: const EdgeInsets.all(AppSpacing.lg + 4),
       elevated: true,
-      gradient: AppColors.heroGradient,
+      gradient: context.appHeroGradient,
       child: Column(
         children: [
           // ── Top: score ring + dominant score + context ──
@@ -423,7 +419,7 @@ class _HeroPerformanceCard extends StatelessWidget {
               vertical: AppSpacing.sm + 6,
             ),
             decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.10),
+              color: Colors.white.withValues(alpha: 0.07),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Row(
@@ -631,7 +627,7 @@ class _PerformanceGrid extends StatelessWidget {
               horizontal: AppSpacing.md,
             ),
             decoration: BoxDecoration(
-              color: AppColors.primarySurface.withValues(alpha: 0.5),
+              color: context.appPrimarySurfaceColor.withValues(alpha: 0.5),
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Row(
@@ -639,7 +635,7 @@ class _PerformanceGrid extends StatelessWidget {
                 Container(
                   padding: const EdgeInsets.all(10),
                   decoration: BoxDecoration(
-                    gradient: AppColors.primaryGradient,
+                    gradient: context.appPrimaryGradient,
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: const Icon(
@@ -656,10 +652,7 @@ class _PerformanceGrid extends StatelessWidget {
                       Text(
                         'Average Score',
                         style: Theme.of(context).textTheme.labelMedium
-                            ?.copyWith(
-                              color: AppColors.textSecondary,
-                              fontWeight: FontWeight.w500,
-                            ),
+                            ?.copyWith(fontWeight: FontWeight.w500),
                       ),
                       const SizedBox(height: 2),
                       Text(
@@ -667,7 +660,7 @@ class _PerformanceGrid extends StatelessWidget {
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
                               fontWeight: FontWeight.w700,
-                              color: AppColors.primary,
+                              color: context.appPrimaryColor,
                               letterSpacing: -0.5,
                             ),
                       ),
@@ -742,7 +735,6 @@ class _SnapshotMetric extends StatelessWidget {
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
                 letterSpacing: -0.3,
               ),
             ),
@@ -750,7 +742,6 @@ class _SnapshotMetric extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
                 fontWeight: FontWeight.w500,
                 fontSize: 10.5,
               ),
@@ -811,7 +802,7 @@ class _SubjectInsightsCard extends StatelessWidget {
                 Text(
                   'View Subject Breakdown',
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.primary,
+                    color: context.appPrimaryColor,
                     fontWeight: FontWeight.w600,
                     letterSpacing: 0.2,
                   ),
@@ -820,7 +811,7 @@ class _SubjectInsightsCard extends StatelessWidget {
                 Icon(
                   Icons.arrow_forward_rounded,
                   size: 14,
-                  color: AppColors.primary,
+                  color: context.appPrimaryColor,
                 ),
               ],
             ),
@@ -877,7 +868,6 @@ class _SubjectInsightRow extends StatelessWidget {
                     Text(
                       '$label:',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -886,7 +876,6 @@ class _SubjectInsightRow extends StatelessWidget {
                       value,
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                         fontWeight: FontWeight.w700,
-                        color: AppColors.textPrimary,
                       ),
                     ),
                   ],
@@ -895,7 +884,7 @@ class _SubjectInsightRow extends StatelessWidget {
                 Text(
                   fullName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textHint,
+                    color: context.appTextHintColor,
                     fontSize: 10,
                   ),
                   maxLines: 2,
@@ -922,7 +911,7 @@ class _FocusRecommendations extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       padding: const EdgeInsets.all(AppSpacing.md + 4),
-      color: AppColors.primarySurface.withValues(alpha: 0.5),
+      color: context.appPrimarySurfaceColor.withValues(alpha: 0.6),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -931,7 +920,7 @@ class _FocusRecommendations extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(8),
                 decoration: BoxDecoration(
-                  gradient: AppColors.primaryGradient,
+                  gradient: context.appPrimaryGradient,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: const Icon(
@@ -945,7 +934,7 @@ class _FocusRecommendations extends StatelessWidget {
                 'Recommendations',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
                   fontWeight: FontWeight.w700,
-                  color: AppColors.primaryDark,
+                  color: context.appPrimaryColor,
                 ),
               ),
             ],
@@ -974,11 +963,9 @@ class _FocusRecommendations extends StatelessWidget {
                       Expanded(
                         child: Text(
                           tip,
-                          style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(
-                                color: AppColors.textPrimary,
-                                height: 1.5,
-                              ),
+                          style: Theme.of(
+                            context,
+                          ).textTheme.bodyMedium?.copyWith(height: 1.5),
                         ),
                       ),
                     ],
@@ -1026,7 +1013,7 @@ class _RecentActivityRow extends StatelessWidget {
     final dateStr = _shortDate(attempt.submittedAt);
 
     return Material(
-      color: AppColors.card,
+      color: context.appCardColor,
       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       child: InkWell(
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -1084,9 +1071,7 @@ class _RecentActivityRow extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       '${attempt.correctCount}/${attempt.totalQuestions} correct  ·  $dateStr',
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -1096,7 +1081,7 @@ class _RecentActivityRow extends StatelessWidget {
               Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),
@@ -1165,7 +1150,7 @@ class _PerformanceTrendChip extends StatelessWidget {
         vertical: AppSpacing.sm + 4,
       ),
       decoration: BoxDecoration(
-        color: Colors.white.withValues(alpha: 0.08),
+        color: Colors.white.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       ),
       child: Row(
@@ -1223,12 +1208,6 @@ class _PerformanceTrendChip extends StatelessWidget {
 void _showTimedExamChooserSheet(BuildContext context) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.card,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.radiusXl),
-      ),
-    ),
     builder: (sheetCtx) => _TimedExamChooserSheet(
       onQuickExam: () {
         Navigator.of(sheetCtx).pop();
@@ -1270,7 +1249,7 @@ class _TimedExamChooserSheet extends StatelessWidget {
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.divider,
+                  color: context.appDividerColor,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                 ),
               ),
@@ -1285,9 +1264,7 @@ class _TimedExamChooserSheet extends StatelessWidget {
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Pick a format to get started.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.lg),
             _ExamTypeOption(
@@ -1338,9 +1315,9 @@ class _ExamTypeOption extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 2),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.appSurfaceHighColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
           ),
           child: Row(
             children: [
@@ -1366,9 +1343,7 @@ class _ExamTypeOption extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -1376,7 +1351,7 @@ class _ExamTypeOption extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),

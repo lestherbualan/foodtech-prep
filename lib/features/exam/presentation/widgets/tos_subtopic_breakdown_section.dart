@@ -66,9 +66,9 @@ class _SubtopicCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -119,7 +119,7 @@ class _SubtopicCard extends StatelessWidget {
             '${subtopic.total} items',
             style: Theme.of(
               context,
-            ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+            ).textTheme.labelSmall?.copyWith(color: context.appTextHintColor),
           ),
 
           const SizedBox(height: AppSpacing.sm),
@@ -130,7 +130,7 @@ class _SubtopicCard extends StatelessWidget {
             child: LinearProgressIndicator(
               value: pct / 100,
               minHeight: 6,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDividerColor,
               color: barColor,
             ),
           ),
@@ -163,7 +163,7 @@ class _SubtopicCard extends StatelessWidget {
               Text(
                 '${subtopic.correct}/${subtopic.total}',
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                   fontWeight: FontWeight.w500,
                 ),
               ),
@@ -205,9 +205,9 @@ class _MiniStat extends StatelessWidget {
         const SizedBox(width: 4),
         Text(
           '$value $label',
-          style: Theme.of(
-            context,
-          ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+          style: Theme.of(context).textTheme.labelSmall?.copyWith(
+            color: context.appTextSecondaryColor,
+          ),
         ),
       ],
     );

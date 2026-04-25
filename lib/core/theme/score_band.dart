@@ -33,6 +33,22 @@ abstract final class ScoreBand {
     return AppColors.errorLight;
   }
 
+  // ── Dark surface variants ──
+
+  static Color surfaceDark(double? score) {
+    if (score == null) return AppDarkColors.surface;
+    if (score >= passingThreshold) return AppDarkColors.successLight;
+    if (score >= borderlineThreshold) return AppDarkColors.warningLight;
+    return AppDarkColors.errorLight;
+  }
+
+  /// Context-aware surface — returns [surfaceDark] in dark mode, [surface] in light.
+  static Color surfaceFor(BuildContext context, double? score) {
+    return Theme.of(context).brightness == Brightness.dark
+        ? surfaceDark(score)
+        : surface(score);
+  }
+
   // ── Foreground text on the surface variant ──
 
   static Color foregroundOnSurface(double? score) {

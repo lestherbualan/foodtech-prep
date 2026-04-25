@@ -151,7 +151,7 @@ class _AdminQuestionPlayerScreenState
     final q = _currentQ;
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.appSurfaceColor,
       appBar: AppBar(
         title: Text(
           'Question Review',
@@ -163,7 +163,7 @@ class _AdminQuestionPlayerScreenState
           preferredSize: const Size.fromHeight(3),
           child: LinearProgressIndicator(
             value: (_currentIndex + 1) / _total,
-            backgroundColor: AppColors.divider,
+            backgroundColor: context.appDividerColor,
             color: AppColors.primary,
             minHeight: 3,
           ),
@@ -261,9 +261,9 @@ class _AdminQuestionHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md - 2),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -294,16 +294,16 @@ class _AdminQuestionHeader extends StatelessWidget {
           Text(
             q.subjectName,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             q.subtopicName,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
         ],
       ),
@@ -340,9 +340,9 @@ class _DifficultyChip extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final (Color bg, Color fg) = switch (difficulty.toLowerCase()) {
-      'easy' => (AppColors.successLight, AppColors.success),
-      'hard' || 'difficult' => (AppColors.errorLight, AppColors.error),
-      _ => (AppColors.warningLight, AppColors.warning),
+      'easy' => (context.appSuccessLightColor, AppColors.success),
+      'hard' || 'difficult' => (context.appErrorLightColor, AppColors.error),
+      _ => (context.appWarningLightColor, AppColors.warning),
     };
     return _HeaderChip(label: difficulty, bg: bg, fg: fg);
   }
@@ -359,7 +359,7 @@ class _AdminMetaChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: bg ?? AppColors.surfaceHigh,
+        color: bg ?? context.appSurfaceHighColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
         border: Border.all(color: AppColors.outlineVariant),
       ),
@@ -368,7 +368,7 @@ class _AdminMetaChip extends StatelessWidget {
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: fg ?? AppColors.textSecondary,
+          color: fg ?? context.appTextSecondaryColor,
           fontFamily: 'monospace',
         ),
       ),
@@ -453,9 +453,9 @@ class _AdminExplanationCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -485,15 +485,15 @@ class _AdminExplanationCard extends StatelessWidget {
             q.explanation,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               height: 1.6,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
             ),
           ),
 
           // ── Study note ────────────────────────────────────────────────────
           if (q.studyNote != null) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -511,7 +511,7 @@ class _AdminExplanationCard extends StatelessWidget {
                       Text(
                         'Study Tip',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -520,7 +520,7 @@ class _AdminExplanationCard extends StatelessWidget {
                         q.studyNote!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           height: 1.55,
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                         ),
                       ),
                     ],
@@ -532,17 +532,17 @@ class _AdminExplanationCard extends StatelessWidget {
 
           // ── Source info (always visible in admin player) ──────────────────
           if (q.sourceFile != null || q.sourceReference != null) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const Icon(
+                Icon(
                   Icons.source_rounded,
                   size: 16,
-                  color: AppColors.textHint,
+                  color: context.appTextHintColor,
                 ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
@@ -552,7 +552,7 @@ class _AdminExplanationCard extends StatelessWidget {
                       Text(
                         'Source',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -561,7 +561,7 @@ class _AdminExplanationCard extends StatelessWidget {
                         _formatSource(q),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           height: 1.45,
-                          color: AppColors.textHint,
+                          color: context.appTextHintColor,
                         ),
                       ),
                     ],
@@ -636,7 +636,7 @@ class _BottomActionBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -741,8 +741,8 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onPressed != null
-        ? AppColors.textSecondary
-        : AppColors.disabled;
+        ? context.appTextSecondaryColor
+        : context.appDisabledColor;
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,

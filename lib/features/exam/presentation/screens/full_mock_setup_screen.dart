@@ -28,7 +28,6 @@ class FullMockSetupScreen extends ConsumerWidget {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) => Center(
@@ -39,8 +38,8 @@ class FullMockSetupScreen extends ConsumerWidget {
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md + 4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.errorLight,
+                  decoration: BoxDecoration(
+                    color: context.appErrorLightColor,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -108,7 +107,7 @@ class FullMockSetupScreen extends ConsumerWidget {
                           vertical: AppSpacing.xl,
                         ),
                         elevated: true,
-                        gradient: AppColors.heroGradient,
+                        gradient: context.appHeroGradient,
                         child: Column(
                           children: [
                             Container(
@@ -236,7 +235,7 @@ class FullMockSetupScreen extends ConsumerWidget {
                             size: 14,
                             color:
                                 totalAvailable >= FullMockConfig.totalQuestions
-                                ? AppColors.textHint
+                                ? context.appTextHintColor
                                 : AppColors.warning,
                           ),
                           const SizedBox(width: 6),
@@ -249,7 +248,7 @@ class FullMockSetupScreen extends ConsumerWidget {
                                 color:
                                     totalAvailable >=
                                         FullMockConfig.totalQuestions
-                                    ? AppColors.textHint
+                                    ? context.appTextHintColor
                                     : AppColors.warning,
                                 fontWeight: FontWeight.w500,
                               ),
@@ -302,11 +301,9 @@ class FullMockSetupScreen extends ConsumerWidget {
                                 ' for balanced coverage. Within each subject,'
                                 ' questions follow TOS subtopic distribution.'
                                 ' Answers are revealed after submission.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textSecondary,
-                                      height: 1.5,
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(height: 1.5),
                               ),
                             ),
                           ],
@@ -328,7 +325,7 @@ class FullMockSetupScreen extends ConsumerWidget {
                   AppSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.appCardColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
@@ -352,7 +349,7 @@ class FullMockSetupScreen extends ConsumerWidget {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 56),
                       backgroundColor: const Color(0xFF0D9488),
-                      disabledBackgroundColor: AppColors.disabled,
+                      disabledBackgroundColor: context.appDisabledColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusLg,
@@ -402,12 +399,9 @@ class FullMockSetupScreen extends ConsumerWidget {
   }
 
   static Widget _divider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
-      child: Divider(
-        height: 1,
-        color: AppColors.divider.withValues(alpha: 0.5),
-      ),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
+      child: Divider(height: 1),
     );
   }
 }
@@ -458,10 +452,9 @@ class _SubjectAllocationCard extends StatelessWidget {
               children: [
                 Text(
                   name,
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.textPrimary,
-                  ),
+                  style: Theme.of(
+                    context,
+                  ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
@@ -471,7 +464,7 @@ class _SubjectAllocationCard extends StatelessWidget {
                   style: TextStyle(
                     fontSize: 11.5,
                     color: isSufficient
-                        ? AppColors.textHint
+                        ? context.appTextHintColor
                         : AppColors.warning,
                     fontWeight: FontWeight.w500,
                   ),
@@ -487,8 +480,8 @@ class _SubjectAllocationCard extends StatelessWidget {
             ),
             decoration: BoxDecoration(
               color: isSufficient
-                  ? AppColors.successLight
-                  : AppColors.warningLight,
+                  ? context.appSuccessLightColor
+                  : context.appWarningLightColor,
               borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
             ),
             child: Text(
@@ -534,10 +527,10 @@ class _SectionLabel extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
                 letterSpacing: -0.2,
               ),
             ),
@@ -548,9 +541,9 @@ class _SectionLabel extends StatelessWidget {
           padding: const EdgeInsets.only(left: AppSpacing.sm + 3),
           child: Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               height: 1.4,
             ),
           ),
@@ -592,18 +585,16 @@ class _ExamDetailRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         const Spacer(),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
     );

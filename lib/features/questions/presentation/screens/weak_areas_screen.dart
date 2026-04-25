@@ -27,7 +27,6 @@ class WeakAreasScreen extends ConsumerWidget {
     final user = ref.watch(authStateProvider).valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: Column(
         children: [
           const SecondaryScreenHeader(
@@ -142,13 +141,13 @@ class _WeakAreasBody extends ConsumerWidget {
                       value: '${stats.latestScore.round()}%',
                       color: _scoreColor(stats.latestScore),
                     ),
-                    _contextDivider(),
+                    _contextDivider(context),
                     _ContextRow(
                       label: 'Average Score',
                       value: '${stats.averageScore.round()}%',
                       color: _scoreColor(stats.averageScore),
                     ),
-                    _contextDivider(),
+                    _contextDivider(context),
                     if (strongSubject != null)
                       _ContextRow(
                         label: 'Strongest',
@@ -156,7 +155,7 @@ class _WeakAreasBody extends ConsumerWidget {
                         color: AppColors.success,
                       ),
                     if (strongSubject != null && weakSubject != null)
-                      _contextDivider(),
+                      _contextDivider(context),
                     if (weakSubject != null)
                       _ContextRow(
                         label: 'Weakest',
@@ -201,12 +200,12 @@ class _WeakAreasBody extends ConsumerWidget {
     return AppColors.warning;
   }
 
-  Widget _contextDivider() {
+  Widget _contextDivider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm),
       child: Divider(
         height: 1,
-        color: AppColors.divider.withValues(alpha: 0.5),
+        color: context.appDividerColor.withValues(alpha: 0.5),
       ),
     );
   }
@@ -229,12 +228,15 @@ class _WeakSubjectHeroCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.warningLight,
+        color: isDark ? AppDarkColors.card : AppColors.warningLight,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.warning.withValues(alpha: 0.25)),
+        border: Border.all(
+          color: AppColors.warning.withValues(alpha: isDark ? 0.45 : 0.25),
+        ),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -283,7 +285,7 @@ class _WeakSubjectHeroCard extends StatelessWidget {
           Text(
             subjectFullName,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               height: 1.4,
             ),
           ),
@@ -331,7 +333,7 @@ class _NoDataCard extends StatelessWidget {
             Container(
               padding: const EdgeInsets.all(AppSpacing.md + 4),
               decoration: BoxDecoration(
-                color: AppColors.primarySurface,
+                color: context.appPrimarySurfaceColor,
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -352,7 +354,7 @@ class _NoDataCard extends StatelessWidget {
             Text(
               'Complete at least one timed exam so the app can analyse your weak areas and give you personalised recommendations.',
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.appTextSecondaryColor,
                 height: 1.5,
               ),
               textAlign: TextAlign.center,
@@ -375,9 +377,9 @@ class _RecommendationTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -398,7 +400,7 @@ class _RecommendationTile extends StatelessWidget {
             child: Text(
               text,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
                 height: 1.45,
               ),
             ),
@@ -435,7 +437,7 @@ class _ContextRow extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
+            color: context.appTextSecondaryColor,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -444,7 +446,7 @@ class _ContextRow extends StatelessWidget {
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimaryColor,
           ),
         ),
       ],
@@ -479,9 +481,9 @@ class _QuickActionTile extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 2),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
           ),
           child: Row(
             children: [
@@ -508,16 +510,16 @@ class _QuickActionTile extends StatelessWidget {
                     Text(
                       subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                       ),
                     ),
                   ],
                 ),
               ),
-              const Icon(
+              Icon(
                 Icons.chevron_right_rounded,
                 size: 20,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),

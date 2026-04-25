@@ -23,7 +23,7 @@ Future<void> showReportQuestionSheet({
   return showModalBottomSheet<void>(
     context: context,
     isScrollControlled: true,
-    backgroundColor: AppColors.card,
+    backgroundColor: context.appCardColor,
     shape: const RoundedRectangleBorder(
       borderRadius: BorderRadius.vertical(
         top: Radius.circular(AppSpacing.radiusXl),
@@ -175,7 +175,7 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
                   width: 36,
                   height: 4,
                   decoration: BoxDecoration(
-                    color: AppColors.divider,
+                    color: context.appDividerColor,
                     borderRadius: BorderRadius.circular(2),
                   ),
                 ),
@@ -194,7 +194,7 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
               Text(
                 'Select the issues you found with this question.',
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                 ),
               ),
               const SizedBox(height: AppSpacing.lg),
@@ -227,16 +227,16 @@ class _ReportQuestionSheetState extends State<_ReportQuestionSheet> {
                   hintText: 'Additional notes (optional)',
                   hintStyle: Theme.of(
                     context,
-                  ).textTheme.bodyMedium?.copyWith(color: AppColors.textHint),
+                  ).textTheme.bodyMedium?.copyWith(color: context.appTextHintColor),
                   filled: true,
-                  fillColor: AppColors.surface,
+                  fillColor: context.appSurfaceColor,
                   border: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide(color: AppColors.divider),
+                    borderSide: BorderSide(color: context.appDividerColor),
                   ),
                   enabledBorder: OutlineInputBorder(
                     borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                    borderSide: BorderSide(color: AppColors.divider),
+                    borderSide: BorderSide(color: context.appDividerColor),
                   ),
                   counterStyle: Theme.of(context).textTheme.labelSmall,
                 ),
@@ -319,7 +319,7 @@ class _IssueCheckbox extends StatelessWidget {
                 shape: RoundedRectangleBorder(
                   borderRadius: BorderRadius.circular(4),
                 ),
-                side: BorderSide(color: AppColors.disabled, width: 1.5),
+                side: BorderSide(color: context.appDisabledColor, width: 1.5),
                 materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
                 visualDensity: VisualDensity.compact,
               ),
@@ -328,7 +328,7 @@ class _IssueCheckbox extends StatelessWidget {
             Text(
               label,
               style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
                 fontWeight: isSelected ? FontWeight.w500 : FontWeight.w400,
               ),
             ),

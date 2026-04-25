@@ -31,7 +31,7 @@ class PremiumCard extends StatelessWidget {
     final radius = borderRadius ?? AppSpacing.radiusLg;
 
     final decoration = BoxDecoration(
-      color: gradient == null ? (color ?? AppColors.card) : null,
+      color: gradient == null ? (color ?? context.appCardColor) : null,
       gradient: gradient,
       borderRadius: BorderRadius.circular(radius),
       border: borderColor != null

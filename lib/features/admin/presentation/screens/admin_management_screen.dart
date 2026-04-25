@@ -53,7 +53,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
     final privilegedAsync = ref.watch(_privilegedUsersProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: Column(
         children: [
           const SecondaryScreenHeader(title: 'Manage Admins'),
@@ -104,7 +104,7 @@ class _AdminManagementScreenState extends ConsumerState<AdminManagementScreen> {
                         child: Text(
                           'No privileged users found.',
                           style: Theme.of(context).textTheme.bodyMedium
-                              ?.copyWith(color: AppColors.textHint),
+                              ?.copyWith(color: context.appTextHintColor),
                         ),
                       );
                     }
@@ -206,17 +206,17 @@ class _SearchField extends StatelessWidget {
         hintText: 'Search by name or email…',
         hintStyle: Theme.of(
           context,
-        ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+        ).textTheme.bodySmall?.copyWith(color: context.appTextHintColor),
         prefixIcon: const Icon(Icons.search, size: 20),
         filled: true,
-        fillColor: AppColors.card,
+        fillColor: context.appCardColor,
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: context.appDividerColor),
         ),
         enabledBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-          borderSide: const BorderSide(color: AppColors.divider),
+          borderSide: BorderSide(color: context.appDividerColor),
         ),
         contentPadding: const EdgeInsets.symmetric(
           horizontal: AppSpacing.md,
@@ -261,7 +261,7 @@ class _SearchResults extends ConsumerWidget {
               'No users found for "$query"',
               style: Theme.of(
                 context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textHint),
+              ).textTheme.bodyMedium?.copyWith(color: context.appTextHintColor),
             ),
           );
         }
@@ -272,7 +272,7 @@ class _SearchResults extends ConsumerWidget {
               '${users.length} result${users.length != 1 ? "s" : ""}',
               style: Theme.of(
                 context,
-              ).textTheme.labelSmall?.copyWith(color: AppColors.textHint),
+              ).textTheme.labelSmall?.copyWith(color: context.appTextHintColor),
             ),
             const SizedBox(height: AppSpacing.sm),
             ...users.map(
@@ -300,9 +300,11 @@ class _UserRoleCard extends StatelessWidget {
       margin: const EdgeInsets.only(bottom: AppSpacing.sm + 2),
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.6)),
+        border: Border.all(
+          color: context.appDividerColor.withValues(alpha: 0.6),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -341,7 +343,7 @@ class _UserRoleCard extends StatelessWidget {
                     Text(
                       profile.email ?? '',
                       style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.textHint,
+                        color: context.appTextHintColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,

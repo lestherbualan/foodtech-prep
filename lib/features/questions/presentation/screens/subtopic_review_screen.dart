@@ -174,7 +174,7 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
     );
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -278,7 +278,7 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
                           ? '$total question${total == 1 ? '' : 's'}'
                           : '${filtered.length} of $total question${total == 1 ? '' : 's'}',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textHint,
+                        color: context.appTextHintColor,
                         fontWeight: FontWeight.w500,
                       ),
                     ),
@@ -297,13 +297,13 @@ class _SubtopicReviewScreenState extends ConsumerState<SubtopicReviewScreen> {
                           Icon(
                             Icons.search_off_rounded,
                             size: 48,
-                            color: AppColors.textHint,
+                            color: context.appTextHintColor,
                           ),
                           const SizedBox(height: AppSpacing.md),
                           Text(
                             'No questions match your filters.',
                             style: Theme.of(context).textTheme.bodyMedium
-                                ?.copyWith(color: AppColors.textHint),
+                                ?.copyWith(color: context.appTextHintColor),
                             textAlign: TextAlign.center,
                           ),
                         ],
@@ -377,16 +377,18 @@ class _CountBadge extends StatelessWidget {
         vertical: AppSpacing.xs,
       ),
       decoration: BoxDecoration(
-        color: AppColors.primarySurface,
+        color: context.appPrimarySurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
-        border: Border.all(color: AppColors.primary.withValues(alpha: 0.25)),
+        border: Border.all(
+          color: context.appPrimaryColor.withValues(alpha: 0.25),
+        ),
       ),
       child: Text(
         '$count Q',
-        style: const TextStyle(
+        style: TextStyle(
           fontSize: 11,
           fontWeight: FontWeight.w700,
-          color: AppColors.primary,
+          color: context.appPrimaryColor,
           letterSpacing: 0.3,
         ),
       ),
@@ -417,7 +419,7 @@ class _SummaryCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return PremiumCard(
       padding: const EdgeInsets.all(AppSpacing.md + 4),
-      gradient: AppColors.heroGradient,
+      gradient: context.appHeroGradient,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -637,19 +639,19 @@ class _FilterBar extends StatelessWidget {
             style: const TextStyle(fontSize: 14),
             decoration: InputDecoration(
               hintText: 'Search questions…',
-              hintStyle: const TextStyle(
+              hintStyle: TextStyle(
                 fontSize: 14,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
-              prefixIcon: const Icon(
+              prefixIcon: Icon(
                 Icons.search_rounded,
                 size: 20,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
               suffixIcon: controller.text.isNotEmpty
                   ? IconButton(
                       icon: const Icon(Icons.clear_rounded, size: 18),
-                      color: AppColors.textHint,
+                      color: context.appTextHintColor,
                       onPressed: () {
                         controller.clear();
                         onSearch('');
@@ -657,7 +659,7 @@ class _FilterBar extends StatelessWidget {
                     )
                   : null,
               filled: true,
-              fillColor: AppColors.card,
+              fillColor: context.appCardColor,
               contentPadding: const EdgeInsets.symmetric(
                 horizontal: AppSpacing.md,
                 vertical: AppSpacing.sm + 2,
@@ -665,11 +667,11 @@ class _FilterBar extends StatelessWidget {
               isDense: true,
               border: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.outline),
+                borderSide: BorderSide(color: context.appOutlineColor),
               ),
               enabledBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-                borderSide: const BorderSide(color: AppColors.outline),
+                borderSide: BorderSide(color: context.appOutlineColor),
               ),
               focusedBorder: OutlineInputBorder(
                 borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
@@ -705,16 +707,16 @@ class _FilterBar extends StatelessWidget {
                     labelStyle: TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.w500,
-                      color: selected ? color : AppColors.textSecondary,
+                      color: selected ? color : context.appTextSecondaryColor,
                     ),
                     side: BorderSide(
                       color: selected
                           ? color.withValues(alpha: 0.45)
-                          : AppColors.outline,
+                          : context.appOutlineColor,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     visualDensity: VisualDensity.compact,
-                    backgroundColor: AppColors.card,
+                    backgroundColor: context.appCardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusFull,
@@ -744,7 +746,7 @@ class _FilterBar extends StatelessWidget {
                     label: Text(label),
                     selected: selected,
                     onSelected: (_) => onSourceSelected(s),
-                    selectedColor: AppColors.primarySurface,
+                    selectedColor: context.appPrimarySurfaceColor,
                     checkmarkColor: AppColors.primary,
                     showCheckmark: true,
                     labelStyle: TextStyle(
@@ -752,16 +754,16 @@ class _FilterBar extends StatelessWidget {
                       fontWeight: FontWeight.w500,
                       color: selected
                           ? AppColors.primary
-                          : AppColors.textSecondary,
+                          : context.appTextSecondaryColor,
                     ),
                     side: BorderSide(
                       color: selected
                           ? AppColors.primary.withValues(alpha: 0.40)
-                          : AppColors.outline,
+                          : context.appOutlineColor,
                     ),
                     padding: const EdgeInsets.symmetric(horizontal: 4),
                     visualDensity: VisualDensity.compact,
-                    backgroundColor: AppColors.card,
+                    backgroundColor: context.appCardColor,
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(
                         AppSpacing.radiusFull,
@@ -813,7 +815,7 @@ class _QuestionCard extends StatelessWidget {
     final q = question;
 
     return Material(
-      color: AppColors.card,
+      color: context.appCardColor,
       borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
       child: InkWell(
         onTap: onTap,
@@ -822,7 +824,7 @@ class _QuestionCard extends StatelessWidget {
           padding: const EdgeInsets.all(AppSpacing.md),
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-            border: Border.all(color: AppColors.outlineVariant),
+            border: Border.all(color: context.appOutlineColor),
           ),
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
@@ -836,16 +838,16 @@ class _QuestionCard extends StatelessWidget {
                     width: 30,
                     height: 30,
                     decoration: BoxDecoration(
-                      color: AppColors.primarySurface,
+                      color: context.appPrimarySurfaceColor,
                       borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
                     ),
                     alignment: Alignment.center,
                     child: Text(
                       '$number',
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 11,
                         fontWeight: FontWeight.w700,
-                        color: AppColors.primary,
+                        color: context.appPrimaryColor,
                       ),
                     ),
                   ),
@@ -863,16 +865,16 @@ class _QuestionCard extends StatelessWidget {
                           _Badge(
                             label: q.questionType!,
                             color: AppColors.tertiary,
-                            bgColor: AppColors.tertiarySurface,
+                            bgColor: context.appTertiarySurfaceColor,
                           ),
                       ],
                     ),
                   ),
                   const SizedBox(width: AppSpacing.xs),
-                  const Icon(
+                  Icon(
                     Icons.chevron_right_rounded,
                     size: 20,
-                    color: AppColors.textHint,
+                    color: context.appTextHintColor,
                   ),
                 ],
               ),
@@ -883,7 +885,7 @@ class _QuestionCard extends StatelessWidget {
               Text(
                 q.questionText,
                 style: tt.bodyMedium?.copyWith(
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimaryColor,
                   height: 1.45,
                 ),
                 maxLines: 2,
@@ -895,18 +897,18 @@ class _QuestionCard extends StatelessWidget {
                 const SizedBox(height: AppSpacing.sm),
                 Row(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.article_outlined,
                       size: 12,
-                      color: AppColors.textHint,
+                      color: context.appTextHintColor,
                     ),
                     const SizedBox(width: AppSpacing.xs),
                     Expanded(
                       child: Text(
                         _sourceLabel(q),
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 11,
-                          color: AppColors.textHint,
+                          color: context.appTextHintColor,
                           height: 1.3,
                         ),
                         maxLines: 1,
@@ -969,7 +971,7 @@ class _DifficultyBadge extends StatelessWidget {
     return _Badge(
       label: difficulty,
       color: _color(difficulty),
-      bgColor: _bgColor(difficulty),
+      bgColor: _bgColor(context, difficulty),
     );
   }
 
@@ -985,15 +987,15 @@ class _DifficultyBadge extends StatelessWidget {
     }
   }
 
-  static Color _bgColor(String d) {
+  static Color _bgColor(BuildContext context, String d) {
     switch (d.toLowerCase()) {
       case 'easy':
-        return AppColors.successLight;
+        return context.appSuccessLightColor;
       case 'hard':
       case 'difficult':
-        return AppColors.errorLight;
+        return context.appErrorLightColor;
       default:
-        return AppColors.warningLight;
+        return context.appWarningLightColor;
     }
   }
 }
@@ -1042,16 +1044,16 @@ class _AdminChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
       decoration: BoxDecoration(
-        color: bgColor ?? AppColors.surfaceHigh,
+        color: bgColor ?? context.appSurfaceHighColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusSm),
-        border: Border.all(color: AppColors.outlineVariant),
+        border: Border.all(color: context.appOutlineColor),
       ),
       child: Text(
         label,
         style: TextStyle(
           fontSize: 10,
           fontWeight: FontWeight.w500,
-          color: color ?? AppColors.textSecondary,
+          color: color ?? context.appTextSecondaryColor,
           fontFamily: 'monospace',
         ),
       ),

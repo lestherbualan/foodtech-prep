@@ -94,12 +94,12 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
         if (!didPop) context.go(RouteNames.home);
       },
       child: Scaffold(
-        backgroundColor: AppColors.surface,
+        backgroundColor: context.appSurfaceColor,
         appBar: AppBar(
           leading: Padding(
             padding: const EdgeInsets.all(6),
             child: Material(
-              color: AppColors.card,
+              color: context.appCardColor,
               borderRadius: BorderRadius.circular(14),
               elevation: 0,
               child: InkWell(
@@ -232,9 +232,9 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                 width: double.infinity,
                 padding: const EdgeInsets.all(AppSpacing.lg + 4),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.appCardColor,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-                  border: Border.all(color: AppColors.divider),
+                  border: Border.all(color: context.appDividerColor),
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.04),
@@ -271,11 +271,13 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                     _StatRow(
                       label: 'Total Questions',
                       value: '${result.totalQuestions}',
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimaryColor,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: Divider(height: 1, color: AppColors.divider),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: Divider(height: 1, color: context.appDividerColor),
                     ),
                     _StatRow(
                       label: 'Correct',
@@ -294,14 +296,16 @@ class _ExamResultScreenState extends ConsumerState<ExamResultScreen> {
                       value: '${result.unansweredCount}',
                       color: AppColors.warning,
                     ),
-                    const Padding(
-                      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm),
-                      child: Divider(height: 1, color: AppColors.divider),
+                    Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.sm,
+                      ),
+                      child: Divider(height: 1, color: context.appDividerColor),
                     ),
                     _StatRow(
                       label: 'Time Spent',
                       value: _formatDuration(result.durationSeconds),
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimaryColor,
                     ),
                   ],
                 ),
@@ -452,7 +456,7 @@ class _StatRow extends StatelessWidget {
           child: Text(
             label,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               fontWeight: FontWeight.w500,
             ),
           ),

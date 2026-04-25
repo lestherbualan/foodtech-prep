@@ -57,7 +57,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
     }
 
     return Scaffold(
-      backgroundColor: AppColors.surface,
+      backgroundColor: context.appSurfaceColor,
       appBar: AppBar(
         leading: IconButton(
           icon: const Icon(Icons.close_rounded),
@@ -74,8 +74,8 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                 preferredSize: const Size.fromHeight(3),
                 child: LinearProgressIndicator(
                   value: (_currentIndex + 1) / questions.length,
-                  backgroundColor: AppColors.divider,
-                  color: AppColors.primary,
+                  backgroundColor: context.appDividerColor,
+                  color: context.appPrimaryColor,
                   minHeight: 3,
                 ),
               )
@@ -110,17 +110,21 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                       _filter = f;
                       _currentIndex = 0;
                     }),
-                    selectedColor: AppColors.primary.withValues(alpha: 0.12),
-                    checkmarkColor: AppColors.primary,
+                    selectedColor: context.appPrimaryColor.withValues(
+                      alpha: 0.12,
+                    ),
+                    checkmarkColor: context.appPrimaryColor,
                     labelStyle: TextStyle(
                       fontSize: 12,
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                       color: isActive
-                          ? AppColors.primary
-                          : AppColors.textSecondary,
+                          ? context.appPrimaryColor
+                          : context.appTextSecondaryColor,
                     ),
                     side: BorderSide(
-                      color: isActive ? AppColors.primary : AppColors.divider,
+                      color: isActive
+                          ? context.appPrimaryColor
+                          : context.appDividerColor,
                     ),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
@@ -246,9 +250,9 @@ class _EmptyFilterState extends StatelessWidget {
             Text(
               subtitle,
               textAlign: TextAlign.center,
-              style: Theme.of(
-                context,
-              ).textTheme.bodyMedium?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                color: context.appTextSecondaryColor,
+              ),
             ),
           ],
         ),
@@ -367,9 +371,9 @@ class _ReviewQuestionHeader extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -402,16 +406,16 @@ class _ReviewQuestionHeader extends StatelessWidget {
           Text(
             subjectName,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
               fontWeight: FontWeight.w600,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             subtopicName,
-            style: Theme.of(
-              context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+            style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              color: context.appTextSecondaryColor,
+            ),
           ),
         ],
       ),
@@ -425,10 +429,20 @@ class _DifficultyBadge extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final bool isDark = Theme.of(context).brightness == Brightness.dark;
     final (Color bg, Color fg) = switch (difficulty) {
-      'Easy' => (const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
-      'Hard' => (const Color(0xFFFFEBEE), const Color(0xFFC62828)),
-      _ => (const Color(0xFFFFF3E0), const Color(0xFFE65100)),
+      'Easy' =>
+        isDark
+            ? (context.appSuccessLightColor, AppColors.success)
+            : (const Color(0xFFE8F5E9), const Color(0xFF2E7D32)),
+      'Hard' =>
+        isDark
+            ? (context.appErrorLightColor, AppColors.error)
+            : (const Color(0xFFFFEBEE), const Color(0xFFC62828)),
+      _ =>
+        isDark
+            ? (context.appWarningLightColor, AppColors.warning)
+            : (const Color(0xFFFFF3E0), const Color(0xFFE65100)),
     };
 
     return Container(
@@ -460,9 +474,9 @@ class _ReviewExplanation extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -489,13 +503,13 @@ class _ReviewExplanation extends StatelessWidget {
             question.explanation,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               height: 1.6,
-              color: AppColors.textPrimary,
+              color: context.appTextPrimaryColor,
             ),
           ),
           if (question.studyNote != null) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
@@ -513,7 +527,7 @@ class _ReviewExplanation extends StatelessWidget {
                       Text(
                         'Study Tip',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -522,7 +536,7 @@ class _ReviewExplanation extends StatelessWidget {
                         question.studyNote!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                           height: 1.55,
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                         ),
                       ),
                     ],
@@ -534,14 +548,18 @@ class _ReviewExplanation extends StatelessWidget {
           if (showSource &&
               (question.sourceReference != null ||
                   question.sourceFile != null)) ...[
-            const Padding(
-              padding: EdgeInsets.symmetric(vertical: AppSpacing.md),
-              child: Divider(height: 1, color: AppColors.divider),
+            Padding(
+              padding: const EdgeInsets.symmetric(vertical: AppSpacing.md),
+              child: Divider(height: 1, color: context.appDividerColor),
             ),
             Row(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Icon(Icons.source_rounded, size: 16, color: AppColors.textHint),
+                Icon(
+                  Icons.source_rounded,
+                  size: 16,
+                  color: context.appTextHintColor,
+                ),
                 const SizedBox(width: AppSpacing.sm),
                 Expanded(
                   child: Column(
@@ -550,7 +568,7 @@ class _ReviewExplanation extends StatelessWidget {
                       Text(
                         'Source',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
-                          color: AppColors.textSecondary,
+                          color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
                       ),
@@ -563,7 +581,7 @@ class _ReviewExplanation extends StatelessWidget {
                         ].join(' - '),
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           height: 1.45,
-                          color: AppColors.textHint,
+                          color: context.appTextHintColor,
                         ),
                       ),
                     ],
@@ -607,7 +625,7 @@ class _ReviewBottomBar extends StatelessWidget {
         vertical: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -702,8 +720,8 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onPressed != null
-        ? AppColors.textSecondary
-        : AppColors.disabled;
+        ? context.appTextSecondaryColor
+        : context.appDisabledColor;
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,

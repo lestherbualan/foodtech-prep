@@ -60,7 +60,7 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
         if (!didPop) _showExitDialog(context);
       },
       child: Scaffold(
-        backgroundColor: AppColors.background,
+        backgroundColor: context.appBackgroundColor,
         body: SafeArea(
           child: Column(
             children: [
@@ -100,7 +100,7 @@ class _TimedExamScreenState extends ConsumerState<TimedExamScreen> {
                           height: 1.65,
                           fontWeight: FontWeight.w500,
                           fontSize: 17,
-                          color: AppColors.textPrimary,
+                          color: context.appTextPrimaryColor,
                           letterSpacing: -0.1,
                         ),
                       ),
@@ -214,7 +214,7 @@ class _ExamTopBar extends StatelessWidget {
         vertical: AppSpacing.sm + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -230,7 +230,7 @@ class _ExamTopBar extends StatelessWidget {
               // Close button
               Container(
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceColor,
                   borderRadius: BorderRadius.circular(10),
                 ),
                 child: IconButton(
@@ -241,7 +241,7 @@ class _ExamTopBar extends StatelessWidget {
                     minHeight: 38,
                   ),
                   padding: EdgeInsets.zero,
-                  color: AppColors.textSecondary,
+                  color: context.appTextSecondaryColor,
                 ),
               ),
               const Spacer(),
@@ -258,7 +258,7 @@ class _ExamTopBar extends StatelessWidget {
                   vertical: 6,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.primarySurface,
+                  color: context.appPrimarySurfaceColor,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                 ),
                 child: Text(
@@ -278,7 +278,7 @@ class _ExamTopBar extends StatelessWidget {
             borderRadius: BorderRadius.circular(4),
             child: LinearProgressIndicator(
               value: (exam.currentIndex + 1) / exam.totalQuestions,
-              backgroundColor: AppColors.divider,
+              backgroundColor: context.appDividerColor,
               color: AppColors.primary,
               minHeight: 5,
             ),
@@ -309,7 +309,9 @@ class _TimerChip extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 9),
       decoration: BoxDecoration(
-        color: isLow ? AppColors.errorLight : AppColors.primarySurface,
+        color: isLow
+            ? context.appErrorLightColor
+            : context.appPrimarySurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
         border: Border.all(color: color.withValues(alpha: 0.2), width: 1),
       ),
@@ -358,7 +360,7 @@ class _ExamQuestionHeader extends StatelessWidget {
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 6),
           decoration: BoxDecoration(
-            gradient: AppColors.primaryGradient,
+            gradient: context.appPrimaryGradient,
             borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
           ),
           child: Text(
@@ -376,13 +378,13 @@ class _ExamQuestionHeader extends StatelessWidget {
           child: Container(
             padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 5),
             decoration: BoxDecoration(
-              color: AppColors.surface,
+              color: context.appSurfaceColor,
               borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
             ),
             child: Text(
               subjectName,
               style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                color: AppColors.textSecondary,
+                color: context.appTextSecondaryColor,
                 fontWeight: FontWeight.w600,
               ),
               maxLines: 2,
@@ -399,7 +401,7 @@ class _ExamQuestionHeader extends StatelessWidget {
               child: Icon(
                 Icons.flag_outlined,
                 size: 18,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ),
           ),
@@ -434,7 +436,7 @@ class _ExamBottomBar extends StatelessWidget {
         vertical: AppSpacing.sm + 4,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.06),
@@ -502,13 +504,13 @@ class _ProgressInfo extends StatelessWidget {
       alignment: Alignment.center,
       padding: const EdgeInsets.symmetric(horizontal: AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
       ),
       child: Text(
         '$answered of $total answered',
         style: Theme.of(context).textTheme.bodySmall?.copyWith(
-          color: AppColors.textSecondary,
+          color: context.appTextSecondaryColor,
           fontWeight: FontWeight.w600,
         ),
       ),
@@ -532,8 +534,8 @@ class _NavButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final color = onPressed != null
-        ? AppColors.textPrimary
-        : AppColors.disabled;
+        ? context.appTextPrimaryColor
+        : context.appDisabledColor;
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,
@@ -547,8 +549,8 @@ class _NavButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
         decoration: BoxDecoration(
           color: onPressed != null
-              ? AppColors.surface
-              : AppColors.surface.withValues(alpha: 0.5),
+              ? context.appSurfaceColor
+              : context.appSurfaceColor.withValues(alpha: 0.5),
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
         child: Row(

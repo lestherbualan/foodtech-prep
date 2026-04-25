@@ -20,7 +20,7 @@ class SubjectBreakdownScreen extends ConsumerWidget {
     final user = ref.watch(authStateProvider).valueOrNull;
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: CustomScrollView(
         slivers: [
           const SliverToBoxAdapter(
@@ -71,10 +71,10 @@ class _BreakdownBody extends ConsumerWidget {
                 elevated: true,
                 child: Column(
                   children: [
-                    const Icon(
+                    Icon(
                       Icons.bar_chart_rounded,
                       size: 48,
-                      color: AppColors.textHint,
+                      color: context.appTextHintColor,
                     ),
                     const SizedBox(height: AppSpacing.md),
                     Text(
@@ -88,7 +88,7 @@ class _BreakdownBody extends ConsumerWidget {
                     Text(
                       'Complete timed exams to see a performance breakdown across all subjects.',
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                         height: 1.5,
                       ),
                       textAlign: TextAlign.center,
@@ -122,7 +122,9 @@ class _BreakdownBody extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md + 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primarySurface.withValues(alpha: 0.5),
+                    color: context.appPrimarySurfaceColor.withValues(
+                      alpha: 0.5,
+                    ),
                     borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                   ),
                   child: Row(
@@ -131,7 +133,7 @@ class _BreakdownBody extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(8),
                         decoration: BoxDecoration(
-                          gradient: AppColors.primaryGradient,
+                          gradient: context.appPrimaryGradient,
                           borderRadius: BorderRadius.circular(10),
                         ),
                         child: const Icon(
@@ -146,7 +148,7 @@ class _BreakdownBody extends ConsumerWidget {
                           stats.focusAdvice.first,
                           style: Theme.of(context).textTheme.bodyMedium
                               ?.copyWith(
-                                color: AppColors.textPrimary,
+                                color: context.appTextPrimaryColor,
                                 height: 1.5,
                               ),
                         ),
@@ -270,7 +272,7 @@ class _SummaryChip extends StatelessWidget {
         horizontal: AppSpacing.sm,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -294,7 +296,7 @@ class _SummaryChip extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -332,7 +334,7 @@ class _SubjectRankCard extends StatelessWidget {
         ? AppColors.success
         : data.isWeakest
         ? AppColors.warning
-        : AppColors.textSecondary;
+        : context.appTextSecondaryColor;
 
     final badgeLabel = data.isStrongest
         ? 'Strongest'
@@ -343,14 +345,14 @@ class _SubjectRankCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md + 4),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         border: Border.all(
           color: data.isStrongest
               ? AppColors.success.withValues(alpha: 0.3)
               : data.isWeakest
               ? AppColors.warning.withValues(alpha: 0.3)
-              : AppColors.divider,
+              : context.appDividerColor,
         ),
         boxShadow: [
           BoxShadow(
@@ -396,7 +398,7 @@ class _SubjectRankCard extends StatelessWidget {
                 Text(
                   data.fullName,
                   style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                    color: AppColors.textSecondary,
+                    color: context.appTextSecondaryColor,
                     height: 1.3,
                   ),
                   maxLines: 2,

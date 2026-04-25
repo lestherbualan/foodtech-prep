@@ -38,7 +38,6 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) => Center(
@@ -49,8 +48,8 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md + 4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.errorLight,
+                  decoration: BoxDecoration(
+                    color: context.appErrorLightColor,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -116,7 +115,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                           vertical: AppSpacing.xl,
                         ),
                         elevated: true,
-                        gradient: AppColors.heroGradient,
+                        gradient: context.appHeroGradient,
                         child: Column(
                           children: [
                             Container(
@@ -224,7 +223,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                                 Icons.info_outline_rounded,
                                 size: 14,
                                 color: hasEnoughQuestions
-                                    ? AppColors.textHint
+                                    ? context.appTextHintColor
                                     : AppColors.warning,
                               ),
                               const SizedBox(width: 6),
@@ -233,7 +232,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                                 style: TextStyle(
                                   fontSize: 12.5,
                                   color: hasEnoughQuestions
-                                      ? AppColors.textHint
+                                      ? context.appTextHintColor
                                       : AppColors.warning,
                                   fontWeight: FontWeight.w500,
                                 ),
@@ -249,7 +248,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.md + 2),
                         decoration: BoxDecoration(
-                          color: AppColors.warningLight,
+                          color: context.appWarningLightColor,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusLg,
                           ),
@@ -275,11 +274,9 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                             Expanded(
                               child: Text(
                                 'You can navigate between questions and change your answers before submitting. Answers are revealed after submission.',
-                                style: Theme.of(context).textTheme.bodySmall
-                                    ?.copyWith(
-                                      color: AppColors.textSecondary,
-                                      height: 1.5,
-                                    ),
+                                style: Theme.of(
+                                  context,
+                                ).textTheme.bodySmall?.copyWith(height: 1.5),
                               ),
                             ),
                           ],
@@ -301,7 +298,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                   AppSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.appCardColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
@@ -336,7 +333,7 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 56),
                       backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.disabled,
+                      disabledBackgroundColor: context.appDisabledColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusLg,
@@ -359,12 +356,9 @@ class _ExamSetupScreenState extends ConsumerState<ExamSetupScreen> {
   }
 
   Widget _divider() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
-      child: Divider(
-        height: 1,
-        color: AppColors.divider.withValues(alpha: 0.5),
-      ),
+    return const Padding(
+      padding: EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
+      child: Divider(height: 1),
     );
   }
 }
@@ -397,10 +391,10 @@ class _SectionLabel extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
                 letterSpacing: -0.2,
               ),
             ),
@@ -411,9 +405,9 @@ class _SectionLabel extends StatelessWidget {
           padding: const EdgeInsets.only(left: AppSpacing.sm + 3),
           child: Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               height: 1.4,
             ),
           ),
@@ -455,18 +449,16 @@ class _ExamDetailRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.md),
         Text(
           label,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w500),
         ),
         const Spacer(),
         Text(
           value,
-          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodyMedium?.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
     );

@@ -43,7 +43,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) => Center(
@@ -54,8 +54,8 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
               children: [
                 Container(
                   padding: const EdgeInsets.all(AppSpacing.md + 4),
-                  decoration: const BoxDecoration(
-                    color: AppColors.errorLight,
+                  decoration: BoxDecoration(
+                    color: context.appErrorLightColor,
                     shape: BoxShape.circle,
                   ),
                   child: const Icon(
@@ -126,7 +126,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                           vertical: AppSpacing.xl,
                         ),
                         elevated: true,
-                        gradient: AppColors.heroGradient,
+                        gradient: context.appHeroGradient,
                         child: Column(
                           children: [
                             Container(
@@ -180,7 +180,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                               value: '${BoardExamConfig.totalQuestions} items',
                               color: AppColors.primary,
                             ),
-                            _divider(),
+                            _divider(context),
                             _ExamDetailRow(
                               icon: Icons.schedule_rounded,
                               label: 'Duration',
@@ -188,14 +188,14 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                                   '${BoardExamConfig.durationMinutes} minutes',
                               color: AppColors.secondary,
                             ),
-                            _divider(),
+                            _divider(context),
                             _ExamDetailRow(
                               icon: Icons.auto_awesome_rounded,
                               label: 'Distribution',
                               value: 'TOS-based',
                               color: AppColors.accent,
                             ),
-                            _divider(),
+                            _divider(context),
                             _ExamDetailRow(
                               icon: Icons.visibility_off_rounded,
                               label: 'Answers',
@@ -273,7 +273,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                                 color:
                                     availableForSelected >=
                                         BoardExamConfig.totalQuestions
-                                    ? AppColors.textHint
+                                    ? context.appTextHintColor
                                     : AppColors.warning,
                               ),
                               const SizedBox(width: 6),
@@ -287,7 +287,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                                     color:
                                         availableForSelected >=
                                             BoardExamConfig.totalQuestions
-                                        ? AppColors.textHint
+                                        ? context.appTextHintColor
                                         : AppColors.warning,
                                     fontWeight: FontWeight.w500,
                                   ),
@@ -304,7 +304,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                         width: double.infinity,
                         padding: const EdgeInsets.all(AppSpacing.md + 2),
                         decoration: BoxDecoration(
-                          color: AppColors.warningLight,
+                          color: context.appWarningLightColor,
                           borderRadius: BorderRadius.circular(
                             AppSpacing.radiusLg,
                           ),
@@ -336,7 +336,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                                 ' Answers are revealed after submission.',
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
-                                      color: AppColors.textSecondary,
+                                      color: context.appTextSecondaryColor,
                                       height: 1.5,
                                     ),
                               ),
@@ -360,7 +360,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                   AppSpacing.md,
                 ),
                 decoration: BoxDecoration(
-                  color: AppColors.card,
+                  color: context.appCardColor,
                   boxShadow: [
                     BoxShadow(
                       color: Colors.black.withValues(alpha: 0.06),
@@ -386,7 +386,7 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
                     style: FilledButton.styleFrom(
                       minimumSize: const Size(double.infinity, 56),
                       backgroundColor: AppColors.primary,
-                      disabledBackgroundColor: AppColors.disabled,
+                      disabledBackgroundColor: context.appDisabledColor,
                       shape: RoundedRectangleBorder(
                         borderRadius: BorderRadius.circular(
                           AppSpacing.radiusLg,
@@ -443,12 +443,12 @@ class _BoardExamSetupScreenState extends ConsumerState<BoardExamSetupScreen> {
     );
   }
 
-  static Widget _divider() {
+  Widget _divider(BuildContext context) {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: AppSpacing.sm + 2),
       child: Divider(
         height: 1,
-        color: AppColors.divider.withValues(alpha: 0.5),
+        color: context.appDividerColor.withValues(alpha: 0.5),
       ),
     );
   }
@@ -482,11 +482,11 @@ class _SubjectSelectionCard extends StatelessWidget {
         padding: const EdgeInsets.all(AppSpacing.md),
         decoration: BoxDecoration(
           color: isSelected
-              ? AppColors.primary.withValues(alpha: 0.06)
-              : AppColors.card,
+              ? context.appPrimarySurfaceColor
+              : context.appCardColor,
           borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
           border: Border.all(
-            color: isSelected ? AppColors.primary : AppColors.divider,
+            color: isSelected ? AppColors.primary : context.appDividerColor,
             width: isSelected ? 2 : 1,
           ),
           boxShadow: [
@@ -528,7 +528,7 @@ class _SubjectSelectionCard extends StatelessWidget {
                     blueprint.tosFullName,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                       fontWeight: FontWeight.w600,
-                      color: AppColors.textPrimary,
+                      color: context.appTextPrimaryColor,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
@@ -540,7 +540,7 @@ class _SubjectSelectionCard extends StatelessWidget {
                     style: TextStyle(
                       fontSize: 11.5,
                       color: isSufficient
-                          ? AppColors.textHint
+                          ? context.appTextHintColor
                           : AppColors.warning,
                       fontWeight: FontWeight.w500,
                     ),
@@ -613,7 +613,7 @@ class _TosSubtopicRow extends StatelessWidget {
               subtopic.name,
               style: Theme.of(context).textTheme.bodySmall?.copyWith(
                 fontWeight: FontWeight.w500,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
               ),
               maxLines: 2,
               overflow: TextOverflow.ellipsis,
@@ -673,10 +673,10 @@ class _SectionLabel extends StatelessWidget {
             const SizedBox(width: AppSpacing.sm),
             Text(
               title,
-              style: const TextStyle(
+              style: TextStyle(
                 fontSize: 17,
                 fontWeight: FontWeight.w700,
-                color: AppColors.textPrimary,
+                color: context.appTextPrimaryColor,
                 letterSpacing: -0.2,
               ),
             ),
@@ -687,9 +687,9 @@ class _SectionLabel extends StatelessWidget {
           padding: const EdgeInsets.only(left: AppSpacing.sm + 3),
           child: Text(
             subtitle,
-            style: const TextStyle(
+            style: TextStyle(
               fontSize: 13,
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               height: 1.4,
             ),
           ),
@@ -732,7 +732,7 @@ class _ExamDetailRow extends StatelessWidget {
         Text(
           label,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-            color: AppColors.textSecondary,
+            color: context.appTextSecondaryColor,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -741,7 +741,7 @@ class _ExamDetailRow extends StatelessWidget {
           value,
           style: Theme.of(context).textTheme.bodyMedium?.copyWith(
             fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
+            color: context.appTextPrimaryColor,
           ),
         ),
       ],

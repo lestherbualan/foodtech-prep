@@ -71,3 +71,123 @@ class AppColors {
     end: Alignment.bottomCenter,
   );
 }
+
+/// Dark-mode surface and text colors.
+/// Brand colors (primary, secondary, accent, etc.) are reused from [AppColors].
+class AppDarkColors {
+  AppDarkColors._();
+
+  // ── Surface & background ──
+  static const Color background = Color(0xFF121A1A);
+  static const Color surface = Color(0xFF192020);
+  static const Color surfaceHigh = Color(0xFF1E2828);
+  static const Color card = Color(0xFF1E2828);
+  static const Color cardElevated = Color(0xFF243030);
+
+  // ── Text ──
+  static const Color textPrimary = Color(0xFFE4ECEB);
+  static const Color textSecondary = Color(0xFF90A8A5);
+  static const Color textHint = Color(0xFF4E6665);
+  static const Color textOnPrimary = Color(0xFFFFFFFF);
+
+  // ── Status surfaces (dark variants) ──
+  static const Color primarySurface = Color(0xFF142424);
+  static const Color secondarySurface = Color(0xFF281E10);
+  static const Color accentSurface = Color(0xFF162220);
+  static const Color tertiarySurface = Color(0xFF1C1A2C);
+  static const Color errorLight = Color(0xFF2A1614);
+  static const Color successLight = Color(0xFF152A1E);
+  static const Color warningLight = Color(0xFF2A1E10);
+
+  // ── Borders & misc ──
+  static const Color divider = Color(0xFF2A3838);
+  static const Color disabled = Color(0xFF3A4A4A);
+  static const Color shimmer = Color(0xFF1E2C2C);
+  static const Color outline = Color(0xFF2E4040);
+  static const Color outlineVariant = Color(0xFF2A3838);
+
+  // ── Gradient helpers ──
+  static const LinearGradient warmGradient = LinearGradient(
+    colors: [Color(0xFF121A1A), Color(0xFF192020)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  /// Dark-mode hero gradient — smooth 2-stop vertical teal wash.
+  /// No midpoint stop means no acceleration change, giving a
+  /// seamless, continuous blend across the card.
+  static const LinearGradient heroGradient = LinearGradient(
+    colors: [Color(0xFF0D2E2E), Color(0xFF163C3C)],
+    begin: Alignment.topCenter,
+    end: Alignment.bottomCenter,
+  );
+
+  /// Dark-mode primary gradient — very dark teal to mid teal.
+  static const LinearGradient primaryGradient = LinearGradient(
+    colors: [Color(0xFF0D3333), Color(0xFF1A6B6A)],
+    begin: Alignment.topLeft,
+    end: Alignment.bottomRight,
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// BuildContext extension — theme-aware color helpers
+//
+// Use these in [build] methods instead of referencing [AppColors] or
+// [AppDarkColors] directly so the correct palette is used in both themes.
+// ─────────────────────────────────────────────────────────────────────────────
+
+extension AppThemeColors on BuildContext {
+  bool get _isDark => Theme.of(this).brightness == Brightness.dark;
+
+  Color get appBackgroundColor =>
+      _isDark ? AppDarkColors.background : AppColors.background;
+  Color get appSurfaceColor =>
+      _isDark ? AppDarkColors.surface : AppColors.surface;
+  Color get appSurfaceHighColor =>
+      _isDark ? AppDarkColors.surfaceHigh : AppColors.surfaceHigh;
+  Color get appCardColor => _isDark ? AppDarkColors.card : AppColors.card;
+  Color get appCardElevatedColor =>
+      _isDark ? AppDarkColors.cardElevated : AppColors.cardElevated;
+
+  Color get appTextPrimaryColor =>
+      _isDark ? AppDarkColors.textPrimary : AppColors.textPrimary;
+  Color get appTextSecondaryColor =>
+      _isDark ? AppDarkColors.textSecondary : AppColors.textSecondary;
+  Color get appTextHintColor =>
+      _isDark ? AppDarkColors.textHint : AppColors.textHint;
+
+  Color get appDividerColor =>
+      _isDark ? AppDarkColors.divider : AppColors.divider;
+  Color get appOutlineColor =>
+      _isDark ? AppDarkColors.outline : AppColors.outline;
+  Color get appDisabledColor =>
+      _isDark ? AppDarkColors.disabled : AppColors.disabled;
+
+  Color get appPrimarySurfaceColor =>
+      _isDark ? AppDarkColors.primarySurface : AppColors.primarySurface;
+  Color get appSecondarySurfaceColor =>
+      _isDark ? AppDarkColors.secondarySurface : AppColors.secondarySurface;
+  Color get appAccentSurfaceColor =>
+      _isDark ? AppDarkColors.accentSurface : AppColors.accentSurface;
+  Color get appTertiarySurfaceColor =>
+      _isDark ? AppDarkColors.tertiarySurface : AppColors.tertiarySurface;
+  Color get appSuccessLightColor =>
+      _isDark ? AppDarkColors.successLight : AppColors.successLight;
+  Color get appWarningLightColor =>
+      _isDark ? AppDarkColors.warningLight : AppColors.warningLight;
+  Color get appErrorLightColor =>
+      _isDark ? AppDarkColors.errorLight : AppColors.errorLight;
+
+  /// Brand primary — slightly lighter in dark mode for better contrast.
+  Color get appPrimaryColor =>
+      _isDark ? AppColors.primaryLight : AppColors.primary;
+
+  /// Hero gradient — darker/deeper teal in dark mode.
+  LinearGradient get appHeroGradient =>
+      _isDark ? AppDarkColors.heroGradient : AppColors.heroGradient;
+
+  /// Primary gradient — darker teal in dark mode.
+  LinearGradient get appPrimaryGradient =>
+      _isDark ? AppDarkColors.primaryGradient : AppColors.primaryGradient;
+}

@@ -9,6 +9,7 @@ import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/constants/user_roles.dart';
 import '../../../../core/services/push_notification_service.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/theme_mode_notifier.dart';
 import '../../../../core/widgets/secondary_screen_header.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../exam/domain/exam_subject.dart';
@@ -25,7 +26,6 @@ class ProfileScreen extends ConsumerWidget {
     final role = ref.watch(userRoleProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: Column(
         children: [
           const SecondaryScreenHeader(title: 'Profile'),
@@ -70,6 +70,13 @@ class ProfileScreen extends ConsumerWidget {
                       onTap: () => context.push(RouteNames.adminManagement),
                     ),
                   ],
+
+                  const SizedBox(height: AppSpacing.xl),
+
+                  // ── Settings: Appearance ──
+                  _SectionLabel(title: 'Settings'),
+                  const SizedBox(height: AppSpacing.sm + 2),
+                  const _AppearanceTile(),
 
                   const SizedBox(height: AppSpacing.xl),
 
@@ -120,7 +127,7 @@ class _ProfileSummaryCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        gradient: AppColors.heroGradient,
+        gradient: context.appHeroGradient,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -343,9 +350,11 @@ class _StatTile extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider.withValues(alpha: 0.5)),
+        border: Border.all(
+          color: context.appDividerColor.withValues(alpha: 0.5),
+        ),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.03),
@@ -380,7 +389,6 @@ class _StatTile extends StatelessWidget {
                 Text(
                   label,
                   style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                    color: AppColors.textSecondary,
                     fontWeight: FontWeight.w500,
                     fontSize: 10.5,
                   ),
@@ -430,10 +438,10 @@ class _SubjectInsightSection extends ConsumerWidget {
               width: double.infinity,
               padding: const EdgeInsets.all(AppSpacing.md + 4),
               decoration: BoxDecoration(
-                color: AppColors.card,
+                color: context.appCardColor,
                 borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
                 border: Border.all(
-                  color: AppColors.divider.withValues(alpha: 0.5),
+                  color: context.appDividerColor.withValues(alpha: 0.5),
                 ),
                 boxShadow: [
                   BoxShadow(
@@ -459,7 +467,7 @@ class _SubjectInsightSection extends ConsumerWidget {
                       ),
                       child: Divider(
                         height: 1,
-                        color: AppColors.divider.withValues(alpha: 0.5),
+                        color: context.appDividerColor.withValues(alpha: 0.5),
                       ),
                     ),
                   if (weakAbbr != null)
@@ -507,18 +515,16 @@ class _InsightRow extends StatelessWidget {
         const SizedBox(width: AppSpacing.sm + 4),
         Text(
           '$label:',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.textSecondary,
-            fontWeight: FontWeight.w500,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w500),
         ),
         const SizedBox(width: AppSpacing.sm),
         Text(
           value,
-          style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w700,
-            color: AppColors.textPrimary,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.titleSmall?.copyWith(fontWeight: FontWeight.w700),
         ),
       ],
     );
@@ -645,7 +651,7 @@ class _DebugNotificationSectionState extends State<_DebugNotificationSection> {
         Text(
           'Debug · Push Notifications',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.textSecondary,
+            color: context.appTextSecondaryColor,
             letterSpacing: 0.8,
           ),
         ),
@@ -685,7 +691,7 @@ class _DebugNotificationSectionState extends State<_DebugNotificationSection> {
         Text(
           'Broadcast · All Users',
           style: Theme.of(context).textTheme.labelSmall?.copyWith(
-            color: AppColors.textSecondary,
+            color: context.appTextSecondaryColor,
             letterSpacing: 0.8,
           ),
         ),
@@ -696,10 +702,10 @@ class _DebugNotificationSectionState extends State<_DebugNotificationSection> {
               : () => _run(() async {
                   final result =
                       await PushNotificationService.sendNotificationToAllUsers(
-                    title: 'FoodTech Prep',
-                    body:
-                        'Keep studying! Your board exam is getting closer. 📚',
-                  );
+                        title: 'FoodTech Prep',
+                        body:
+                            'Keep studying! Your board exam is getting closer. 📚',
+                      );
                   if (mounted) {
                     final sent = result['sent'] ?? 0;
                     final skipped = result['skipped'] ?? 0;
@@ -758,18 +764,18 @@ class _SignOutButton extends StatelessWidget {
       icon: Icon(
         Icons.logout_rounded,
         size: 18,
-        color: AppColors.textSecondary,
+        color: context.appTextSecondaryColor,
       ),
       label: Text(
         'Sign Out',
         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
+          color: context.appTextSecondaryColor,
           fontWeight: FontWeight.w600,
         ),
       ),
       style: OutlinedButton.styleFrom(
         minimumSize: const Size(double.infinity, 48),
-        side: BorderSide(color: AppColors.divider),
+        side: BorderSide(color: context.appDividerColor),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         ),
@@ -821,16 +827,225 @@ class _EmptyCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.lg),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Text(
         text,
         textAlign: TextAlign.center,
-        style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-          color: AppColors.textSecondary,
-          height: 1.5,
+        style: Theme.of(context).textTheme.bodyMedium,
+      ),
+    );
+  }
+}
+
+// ═══════════════════════════════════════════════════════════════════════════════
+// Appearance setting tile + bottom sheet
+// ═══════════════════════════════════════════════════════════════════════════════
+
+class _AppearanceTile extends ConsumerWidget {
+  const _AppearanceTile();
+
+  static const _labels = {
+    ThemeMode.light: 'Light',
+    ThemeMode.dark: 'Dark',
+    ThemeMode.system: 'System',
+  };
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final current =
+        ref.watch(themeModeProvider).valueOrNull ?? ThemeMode.system;
+    final label = _labels[current] ?? 'System';
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: () => _showPicker(context, ref),
+        borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+        child: Container(
+          padding: const EdgeInsets.all(AppSpacing.md),
+          decoration: BoxDecoration(
+            color: context.appCardColor,
+            borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
+            border: Border.all(
+              color: context.appDividerColor.withValues(alpha: 0.5),
+            ),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.03),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
+          child: Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: AppColors.primary.withValues(alpha: 0.08),
+                  borderRadius: BorderRadius.circular(10),
+                ),
+                child: const Icon(
+                  Icons.contrast_rounded,
+                  size: 18,
+                  color: AppColors.primary,
+                ),
+              ),
+              const SizedBox(width: AppSpacing.sm + 2),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Appearance',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(height: 2),
+                    Text(label, style: Theme.of(context).textTheme.bodySmall),
+                  ],
+                ),
+              ),
+              Icon(
+                Icons.chevron_right_rounded,
+                color: context.appTextHintColor,
+                size: 20,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  void _showPicker(BuildContext context, WidgetRef ref) {
+    showModalBottomSheet<void>(
+      context: context,
+      builder: (_) => Consumer(
+        builder: (ctx, r, _) {
+          final current =
+              r.watch(themeModeProvider).valueOrNull ?? ThemeMode.system;
+          return _AppearanceSheet(
+            current: current,
+            onSelect: (mode) {
+              r.read(themeModeProvider.notifier).setThemeMode(mode);
+              Navigator.of(ctx).pop();
+            },
+          );
+        },
+      ),
+    );
+  }
+}
+
+class _AppearanceSheet extends StatelessWidget {
+  const _AppearanceSheet({required this.current, required this.onSelect});
+
+  final ThemeMode current;
+  final ValueChanged<ThemeMode> onSelect;
+
+  static const _options = [
+    (mode: ThemeMode.light, label: 'Light', icon: Icons.light_mode_rounded),
+    (mode: ThemeMode.dark, label: 'Dark', icon: Icons.dark_mode_rounded),
+    (
+      mode: ThemeMode.system,
+      label: 'System',
+      icon: Icons.brightness_auto_rounded,
+    ),
+  ];
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(
+          AppSpacing.lg,
+          AppSpacing.md,
+          AppSpacing.lg,
+          AppSpacing.lg,
+        ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // ── Handle bar ──
+            Center(
+              child: Container(
+                width: 36,
+                height: 4,
+                margin: const EdgeInsets.only(bottom: AppSpacing.md),
+                decoration: BoxDecoration(
+                  color: context.appDividerColor,
+                  borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
+                ),
+              ),
+            ),
+            Text(
+              'Appearance',
+              style: Theme.of(
+                context,
+              ).textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w700),
+            ),
+            const SizedBox(height: AppSpacing.md),
+            ...List.generate(_options.length, (i) {
+              final opt = _options[i];
+              final selected = opt.mode == current;
+              return Column(
+                children: [
+                  if (i > 0)
+                    Divider(
+                      height: 1,
+                      color: context.appDividerColor.withValues(alpha: 0.5),
+                    ),
+                  InkWell(
+                    onTap: () => onSelect(opt.mode),
+                    borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(
+                        vertical: AppSpacing.sm + 4,
+                      ),
+                      child: Row(
+                        children: [
+                          Icon(
+                            opt.icon,
+                            size: 20,
+                            color: selected
+                                ? AppColors.primary
+                                : context.appTextSecondaryColor,
+                          ),
+                          const SizedBox(width: AppSpacing.md),
+                          Expanded(
+                            child: Text(
+                              opt.label,
+                              style: Theme.of(context).textTheme.bodyLarge
+                                  ?.copyWith(
+                                    fontWeight: selected
+                                        ? FontWeight.w600
+                                        : FontWeight.w400,
+                                    color: selected
+                                        ? AppColors.primary
+                                        : context.appTextPrimaryColor,
+                                  ),
+                            ),
+                          ),
+                          if (selected)
+                            const Icon(
+                              Icons.check_rounded,
+                              size: 20,
+                              color: AppColors.primary,
+                            ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              );
+            }),
+          ],
         ),
       ),
     );

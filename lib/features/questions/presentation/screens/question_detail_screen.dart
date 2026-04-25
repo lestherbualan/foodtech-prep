@@ -165,7 +165,7 @@ class _MetaRow extends StatelessWidget {
             label,
             style: Theme.of(
               context,
-            ).textTheme.bodySmall?.copyWith(color: AppColors.textHint),
+            ).textTheme.bodySmall?.copyWith(color: context.appTextHintColor),
           ),
         ),
         Expanded(
@@ -223,7 +223,7 @@ class _ChoiceCard extends StatelessWidget {
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         side: BorderSide(
-          color: isCorrect ? AppColors.success : AppColors.divider,
+          color: isCorrect ? AppColors.success : context.appDividerColor,
           width: isCorrect ? 1.5 : 1,
         ),
       ),
@@ -236,13 +236,13 @@ class _ChoiceCard extends StatelessWidget {
               radius: 14,
               backgroundColor: isCorrect
                   ? AppColors.success
-                  : AppColors.textHint.withValues(alpha: 0.2),
+                  : context.appTextHintColor.withValues(alpha: 0.2),
               child: Text(
                 letter,
                 style: TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  color: isCorrect ? Colors.white : AppColors.textPrimary,
+                  color: isCorrect ? Colors.white : context.appTextPrimaryColor,
                 ),
               ),
             ),
@@ -274,9 +274,9 @@ class _SectionCard extends StatelessWidget {
       width: double.infinity,
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.surface,
+        color: context.appSurfaceColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
-        border: Border.all(color: AppColors.divider),
+        border: Border.all(color: context.appDividerColor),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

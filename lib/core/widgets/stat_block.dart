@@ -34,14 +34,14 @@ class StatBlock extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: valueColor ?? AppColors.textPrimary,
+              color: valueColor ?? context.appTextPrimaryColor,
             ),
           ),
           const SizedBox(height: 2),
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: AppColors.textSecondary,
+              color: context.appTextSecondaryColor,
               fontWeight: FontWeight.w500,
             ),
           ),
@@ -52,7 +52,7 @@ class StatBlock extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(AppSpacing.md),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusMd),
         boxShadow: [
           BoxShadow(
@@ -86,7 +86,7 @@ class StatBlock extends StatelessWidget {
             value,
             style: Theme.of(context).textTheme.headlineSmall?.copyWith(
               fontWeight: FontWeight.w700,
-              color: valueColor ?? AppColors.textPrimary,
+              color: valueColor ?? context.appTextPrimaryColor,
             ),
           ),
           const SizedBox(height: 2),
@@ -94,7 +94,7 @@ class StatBlock extends StatelessWidget {
             label,
             style: Theme.of(
               context,
-            ).textTheme.labelSmall?.copyWith(color: AppColors.textSecondary),
+            ).textTheme.labelSmall?.copyWith(color: context.appTextSecondaryColor),
           ),
         ],
       ),

@@ -24,7 +24,6 @@ class SubjectPracticeScreen extends ConsumerWidget {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading subjects…'),
         error: (error, _) =>
@@ -54,7 +53,7 @@ class SubjectPracticeScreen extends ConsumerWidget {
                         child: Container(
                           padding: const EdgeInsets.all(AppSpacing.md + 2),
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface.withValues(
+                            color: context.appPrimarySurfaceColor.withValues(
                               alpha: 0.5,
                             ),
                             borderRadius: BorderRadius.circular(
@@ -66,7 +65,7 @@ class SubjectPracticeScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
+                                  gradient: context.appPrimaryGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -79,11 +78,9 @@ class SubjectPracticeScreen extends ConsumerWidget {
                               Expanded(
                                 child: Text(
                                   'Choose a subject, then pick your study mode.',
-                                  style: Theme.of(context).textTheme.bodySmall
-                                      ?.copyWith(
-                                        color: AppColors.textSecondary,
-                                        height: 1.5,
-                                      ),
+                                  style: Theme.of(
+                                    context,
+                                  ).textTheme.bodySmall?.copyWith(height: 1.5),
                                 ),
                               ),
                             ],
@@ -188,9 +185,9 @@ class _SubjectCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 4),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.03),
@@ -225,10 +222,9 @@ class _SubjectCard extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       subject.subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                        height: 1.4,
-                      ),
+                      style: Theme.of(
+                        context,
+                      ).textTheme.bodySmall?.copyWith(height: 1.4),
                       maxLines: 2,
                       overflow: TextOverflow.ellipsis,
                     ),
@@ -239,13 +235,15 @@ class _SubjectCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceHighColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
                 child: Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: isEmpty ? AppColors.disabled : AppColors.textHint,
+                  color: isEmpty
+                      ? context.appDisabledColor
+                      : context.appTextHintColor,
                 ),
               ),
             ],
@@ -287,12 +285,6 @@ void _showSubjectModeSheet(
 ) {
   showModalBottomSheet<void>(
     context: context,
-    backgroundColor: AppColors.card,
-    shape: const RoundedRectangleBorder(
-      borderRadius: BorderRadius.vertical(
-        top: Radius.circular(AppSpacing.radiusXl),
-      ),
-    ),
     builder: (sheetCtx) => SafeArea(
       child: Padding(
         padding: const EdgeInsets.fromLTRB(
@@ -310,7 +302,7 @@ void _showSubjectModeSheet(
                 width: 36,
                 height: 4,
                 decoration: BoxDecoration(
-                  color: AppColors.divider,
+                  color: context.appDividerColor,
                   borderRadius: BorderRadius.circular(AppSpacing.radiusFull),
                 ),
               ),
@@ -325,9 +317,7 @@ void _showSubjectModeSheet(
             const SizedBox(height: AppSpacing.xs),
             Text(
               'Pick a study mode to begin.',
-              style: Theme.of(
-                context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              style: Theme.of(context).textTheme.bodySmall,
             ),
             const SizedBox(height: AppSpacing.lg),
             _StudyModeOption(
@@ -384,9 +374,9 @@ class _StudyModeOption extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 2),
           decoration: BoxDecoration(
-            color: AppColors.surface,
+            color: context.appSurfaceHighColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
           ),
           child: Row(
             children: [
@@ -412,9 +402,7 @@ class _StudyModeOption extends StatelessWidget {
                     const SizedBox(height: 3),
                     Text(
                       subtitle,
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
-                      ),
+                      style: Theme.of(context).textTheme.bodySmall,
                     ),
                   ],
                 ),
@@ -422,7 +410,7 @@ class _StudyModeOption extends StatelessWidget {
               Icon(
                 Icons.arrow_forward_ios_rounded,
                 size: 14,
-                color: AppColors.textHint,
+                color: context.appTextHintColor,
               ),
             ],
           ),

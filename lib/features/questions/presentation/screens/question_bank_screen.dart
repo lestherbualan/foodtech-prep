@@ -25,7 +25,7 @@ class QuestionBankScreen extends ConsumerWidget {
     final questionsAsync = ref.watch(questionsProvider);
 
     return Scaffold(
-      backgroundColor: AppColors.background,
+      backgroundColor: context.appBackgroundColor,
       body: questionsAsync.when(
         loading: () => const LoadingIndicator(message: 'Loading questions…'),
         error: (error, _) => ErrorStateWidget(
@@ -64,7 +64,7 @@ class QuestionBankScreen extends ConsumerWidget {
                             vertical: AppSpacing.md,
                           ),
                           decoration: BoxDecoration(
-                            color: AppColors.primarySurface.withValues(
+                            color: context.appPrimarySurfaceColor.withValues(
                               alpha: 0.5,
                             ),
                             borderRadius: BorderRadius.circular(
@@ -76,7 +76,7 @@ class QuestionBankScreen extends ConsumerWidget {
                               Container(
                                 padding: const EdgeInsets.all(10),
                                 decoration: BoxDecoration(
-                                  gradient: AppColors.primaryGradient,
+                                  gradient: context.appPrimaryGradient,
                                   borderRadius: BorderRadius.circular(12),
                                 ),
                                 child: const Icon(
@@ -97,7 +97,7 @@ class QuestionBankScreen extends ConsumerWidget {
                                           .titleSmall
                                           ?.copyWith(
                                             fontWeight: FontWeight.w700,
-                                            color: AppColors.primaryDark,
+                                            color: context.appPrimaryColor,
                                           ),
                                     ),
                                     const SizedBox(height: 2),
@@ -107,7 +107,8 @@ class QuestionBankScreen extends ConsumerWidget {
                                           .textTheme
                                           .bodySmall
                                           ?.copyWith(
-                                            color: AppColors.textSecondary,
+                                            color:
+                                                context.appTextSecondaryColor,
                                           ),
                                     ),
                                   ],
@@ -244,9 +245,9 @@ class _SubjectExplorerCard extends StatelessWidget {
         child: Container(
           padding: const EdgeInsets.all(AppSpacing.md + 4),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
-            border: Border.all(color: AppColors.divider),
+            border: Border.all(color: context.appDividerColor),
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.03),
@@ -282,7 +283,7 @@ class _SubjectExplorerCard extends StatelessWidget {
                     Text(
                       subject.subtitle,
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: AppColors.textSecondary,
+                        color: context.appTextSecondaryColor,
                         height: 1.4,
                       ),
                       maxLines: 2,
@@ -295,13 +296,13 @@ class _SubjectExplorerCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(4),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceColor,
                   borderRadius: BorderRadius.circular(6),
                 ),
-                child: const Icon(
+                child: Icon(
                   Icons.chevron_right_rounded,
                   size: 18,
-                  color: AppColors.textHint,
+                  color: context.appTextHintColor,
                 ),
               ),
             ],

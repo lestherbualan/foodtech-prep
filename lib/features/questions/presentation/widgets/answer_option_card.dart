@@ -29,7 +29,9 @@ class AnswerOptionCard extends StatelessWidget {
       avatarFg,
       textColor,
       trailingIcon,
-    ) = _resolveStyle();
+    ) = _resolveStyle(
+      context,
+    );
 
     return Padding(
       padding: const EdgeInsets.only(bottom: AppSpacing.sm + 4),
@@ -103,51 +105,51 @@ class AnswerOptionCard extends StatelessWidget {
     Color textColor,
     IconData? trailingIcon,
   )
-  _resolveStyle() {
+  _resolveStyle(BuildContext context) {
     return switch (optionState) {
       AnswerOptionState.idle => (
-        AppColors.card,
-        AppColors.divider,
+        context.appCardColor,
+        context.appDividerColor,
         1.0,
-        AppColors.surface,
-        AppColors.textSecondary,
-        AppColors.textPrimary,
+        context.appSurfaceColor,
+        context.appTextSecondaryColor,
+        context.appTextPrimaryColor,
         null,
       ),
       AnswerOptionState.selected => (
-        AppColors.primarySurface,
-        AppColors.primary,
+        context.appPrimarySurfaceColor,
+        context.appPrimaryColor,
         2.0,
-        AppColors.primary,
+        context.appPrimaryColor,
         Colors.white,
-        AppColors.textPrimary,
+        context.appTextPrimaryColor,
         null,
       ),
       AnswerOptionState.correct => (
-        AppColors.successLight,
+        context.appSuccessLightColor,
         AppColors.success.withValues(alpha: 0.4),
         2.0,
         AppColors.success,
         Colors.white,
-        AppColors.textPrimary,
+        context.appTextPrimaryColor,
         Icons.check_rounded,
       ),
       AnswerOptionState.incorrect => (
-        AppColors.errorLight,
+        context.appErrorLightColor,
         AppColors.error.withValues(alpha: 0.4),
         2.0,
         AppColors.error,
         Colors.white,
-        AppColors.textPrimary,
+        context.appTextPrimaryColor,
         Icons.close_rounded,
       ),
       AnswerOptionState.disabled => (
-        AppColors.surface,
-        AppColors.divider,
+        context.appSurfaceColor,
+        context.appDividerColor,
         1.0,
-        AppColors.divider,
-        AppColors.textHint,
-        AppColors.textHint,
+        context.appDividerColor,
+        context.appTextHintColor,
+        context.appTextHintColor,
         null,
       ),
     };

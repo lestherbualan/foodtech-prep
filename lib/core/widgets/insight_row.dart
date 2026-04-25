@@ -50,7 +50,7 @@ class InsightRow extends StatelessWidget {
               label,
               style: Theme.of(
                 context,
-              ).textTheme.bodySmall?.copyWith(color: AppColors.textSecondary),
+              ).textTheme.bodySmall?.copyWith(color: context.appTextSecondaryColor),
             ),
             const Spacer(),
             Flexible(
@@ -58,7 +58,7 @@ class InsightRow extends StatelessWidget {
                 value,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
                   fontWeight: FontWeight.w600,
-                  color: AppColors.textPrimary,
+                  color: context.appTextPrimaryColor,
                 ),
                 overflow: TextOverflow.ellipsis,
               ),

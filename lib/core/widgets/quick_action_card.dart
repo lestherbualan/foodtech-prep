@@ -38,7 +38,7 @@ class QuickActionCard extends StatelessWidget {
             vertical: AppSpacing.md + 2,
           ),
           decoration: BoxDecoration(
-            color: AppColors.card,
+            color: context.appCardColor,
             borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
             boxShadow: [
               BoxShadow(
@@ -74,9 +74,7 @@ class QuickActionCard extends StatelessWidget {
                       const SizedBox(height: 3),
                       Text(
                         subtitle!,
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: AppColors.textSecondary,
-                        ),
+                        style: Theme.of(context).textTheme.bodySmall,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -87,12 +85,12 @@ class QuickActionCard extends StatelessWidget {
               Container(
                 padding: const EdgeInsets.all(6),
                 decoration: BoxDecoration(
-                  color: AppColors.surface,
+                  color: context.appSurfaceHighColor,
                   borderRadius: BorderRadius.circular(8),
                 ),
                 child: Icon(
                   Icons.arrow_forward_rounded,
-                  color: AppColors.textHint,
+                  color: context.appTextHintColor,
                   size: 16,
                 ),
               ),

@@ -33,7 +33,7 @@ class WeeklyTimedExamPerformanceStrip extends StatelessWidget {
         vertical: AppSpacing.md + 2,
       ),
       decoration: BoxDecoration(
-        color: AppColors.card,
+        color: context.appCardColor,
         borderRadius: BorderRadius.circular(AppSpacing.radiusLg),
         boxShadow: [
           BoxShadow(
@@ -93,19 +93,19 @@ class _DayCell extends StatelessWidget {
 
     if (isToday) {
       circleBg = hasAttempt
-          ? ScoreBand.surface(score)
-          : AppColors.primarySurface;
+          ? ScoreBand.surfaceFor(context, score)
+          : context.appPrimarySurfaceColor;
       circleFg = hasAttempt
           ? ScoreBand.foregroundOnSurface(score)
-          : AppColors.primary;
-      ringColor = AppColors.primary;
+          : context.appPrimaryColor;
+      ringColor = context.appPrimaryColor;
     } else if (hasAttempt) {
-      circleBg = ScoreBand.surface(score);
+      circleBg = ScoreBand.surfaceFor(context, score);
       circleFg = ScoreBand.foregroundOnSurface(score);
       ringColor = ScoreBand.color(score).withValues(alpha: 0.30);
     } else {
-      circleBg = AppColors.surface.withValues(alpha: 0.6);
-      circleFg = AppColors.textHint;
+      circleBg = context.appSurfaceColor.withValues(alpha: 0.6);
+      circleFg = context.appTextHintColor;
       ringColor = null;
     }
 
@@ -119,7 +119,9 @@ class _DayCell extends StatelessWidget {
           Text(
             label,
             style: Theme.of(context).textTheme.labelSmall?.copyWith(
-              color: isToday ? AppColors.primary : AppColors.textSecondary,
+              color: isToday
+                  ? context.appPrimaryColor
+                  : context.appTextSecondaryColor,
               fontWeight: isToday ? FontWeight.w700 : FontWeight.w500,
               fontSize: 10.5,
               letterSpacing: 0.1,
@@ -140,7 +142,7 @@ class _DayCell extends StatelessWidget {
               boxShadow: isToday
                   ? [
                       BoxShadow(
-                        color: AppColors.primary.withValues(alpha: 0.15),
+                        color: context.appPrimaryColor.withValues(alpha: 0.15),
                         blurRadius: 6,
                         offset: const Offset(0, 2),
                       ),
