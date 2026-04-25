@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_spacing.dart';
 import '../theme/app_colors.dart';
+import '../theme/responsive_utils.dart';
 
 class SectionHeader extends StatelessWidget {
   const SectionHeader({
@@ -41,6 +42,7 @@ class SectionHeader extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  fontSize: context.responsiveFontSize(16),
                   fontWeight: FontWeight.w700,
                   letterSpacing: -0.3,
                 ),

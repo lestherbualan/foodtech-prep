@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../constants/app_spacing.dart';
 import '../theme/app_colors.dart';
+import '../theme/responsive_utils.dart';
 
 /// A quick-action card with icon, title, and optional subtitle.
 class QuickActionCard extends StatelessWidget {
@@ -67,6 +68,7 @@ class QuickActionCard extends StatelessWidget {
                     Text(
                       title,
                       style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                        fontSize: context.responsiveFontSize(14),
                         fontWeight: FontWeight.w700,
                       ),
                     ),

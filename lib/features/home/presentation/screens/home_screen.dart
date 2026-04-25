@@ -6,6 +6,7 @@ import '../../../../app/router/route_names.dart';
 import '../../../../core/constants/app_constants.dart';
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive_utils.dart';
 import '../../../../core/widgets/premium_card.dart';
 import '../../../../core/widgets/quick_action_card.dart';
 import '../../../../core/widgets/section_header.dart';
@@ -52,10 +53,10 @@ class HomeScreen extends ConsumerWidget {
             // ── Smart greeting header ──
             SliverToBoxAdapter(
               child: Padding(
-                padding: const EdgeInsets.fromLTRB(
+                padding: EdgeInsets.fromLTRB(
+                  context.pageHorizontalPad,
                   AppSpacing.lg,
-                  AppSpacing.lg,
-                  AppSpacing.lg,
+                  context.pageHorizontalPad,
                   0,
                 ),
                 child: Row(
@@ -68,6 +69,7 @@ class HomeScreen extends ConsumerWidget {
                             '${_timeGreeting()}, $firstName',
                             style: Theme.of(context).textTheme.headlineMedium
                                 ?.copyWith(
+                                  fontSize: context.responsiveFontSize(24),
                                   fontWeight: FontWeight.w700,
                                   letterSpacing: -0.5,
                                 ),
@@ -99,7 +101,8 @@ class HomeScreen extends ConsumerWidget {
                                         color: _countdownColor(daysLeft),
                                         fontWeight: FontWeight.w700,
                                         letterSpacing: 0.1,
-                                        fontSize: 12,
+                                        fontSize: context
+                                            .responsiveSecondaryFontSize(12),
                                       ),
                                 ),
                               );
@@ -187,7 +190,7 @@ class _DashboardBody extends ConsumerWidget {
           return SliverToBoxAdapter(child: _EmptyDashboard());
         }
         return SliverPadding(
-          padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+          padding: EdgeInsets.symmetric(horizontal: context.pageHorizontalPad),
           sliver: SliverList(
             delegate: SliverChildListDelegate([
               // ── 1. Hero performance card ──
@@ -269,7 +272,7 @@ class _EmptyDashboard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppSpacing.lg),
+      padding: EdgeInsets.symmetric(horizontal: context.pageHorizontalPad),
       child: Column(
         children: [
           const SizedBox(height: AppSpacing.lg),
@@ -375,8 +378,8 @@ class _HeroPerformanceCard extends StatelessWidget {
                   children: [
                     Text(
                       '${stats.latestScore.round()}%',
-                      style: const TextStyle(
-                        fontSize: 38,
+                      style: TextStyle(
+                        fontSize: context.responsiveFontSize(38),
                         fontWeight: FontWeight.w700,
                         color: Colors.white,
                         height: 1.1,
@@ -534,8 +537,8 @@ class _HeroMiniStat extends StatelessWidget {
         children: [
           Text(
             value,
-            style: const TextStyle(
-              fontSize: 16,
+            style: TextStyle(
+              fontSize: context.responsiveFontSize(16),
               fontWeight: FontWeight.w700,
               color: Colors.white,
             ),
@@ -659,6 +662,7 @@ class _PerformanceGrid extends StatelessWidget {
                         '${stats.averageScore.round()}%',
                         style: Theme.of(context).textTheme.headlineSmall
                             ?.copyWith(
+                              fontSize: context.responsiveFontSize(20),
                               fontWeight: FontWeight.w700,
                               color: context.appPrimaryColor,
                               letterSpacing: -0.5,
@@ -734,6 +738,7 @@ class _SnapshotMetric extends StatelessWidget {
             Text(
               value,
               style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                fontSize: context.responsiveFontSize(16),
                 fontWeight: FontWeight.w700,
                 letterSpacing: -0.3,
               ),
@@ -933,6 +938,7 @@ class _FocusRecommendations extends StatelessWidget {
               Text(
                 'Recommendations',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontSize: context.responsiveFontSize(14),
                   fontWeight: FontWeight.w700,
                   color: context.appPrimaryColor,
                 ),
@@ -1174,7 +1180,7 @@ class _PerformanceTrendChip extends StatelessWidget {
                 Text(
                   label,
                   style: TextStyle(
-                    fontSize: 13,
+                    fontSize: context.responsiveSecondaryFontSize(13),
                     fontWeight: FontWeight.w700,
                     color: accent,
                     letterSpacing: 0.2,

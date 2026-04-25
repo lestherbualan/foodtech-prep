@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive_utils.dart';
 import '../../../auth/presentation/providers/auth_providers.dart';
 import '../../../questions/domain/question.dart';
 import '../../../questions/presentation/widgets/answer_option_card.dart';
@@ -86,10 +87,10 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
           // ── Filter chips ──
           SingleChildScrollView(
             scrollDirection: Axis.horizontal,
-            padding: const EdgeInsets.fromLTRB(
-              AppSpacing.md,
+            padding: EdgeInsets.fromLTRB(
+              context.pageHorizontalPad,
               AppSpacing.sm,
-              AppSpacing.md,
+              context.pageHorizontalPad,
               0,
             ),
             child: Row(
@@ -115,7 +116,7 @@ class _ExamReviewScreenState extends ConsumerState<ExamReviewScreen> {
                     ),
                     checkmarkColor: context.appPrimaryColor,
                     labelStyle: TextStyle(
-                      fontSize: 12,
+                      fontSize: context.responsiveSecondaryFontSize(12),
                       fontWeight: isActive ? FontWeight.w600 : FontWeight.w400,
                       color: isActive
                           ? context.appPrimaryColor
@@ -287,10 +288,10 @@ class _ReviewBody extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.fromLTRB(
+      padding: EdgeInsets.fromLTRB(
+        context.pageHorizontalPad,
         AppSpacing.md,
-        AppSpacing.md,
-        AppSpacing.md,
+        context.pageHorizontalPad,
         AppSpacing.lg,
       ),
       child: Column(
@@ -310,6 +311,7 @@ class _ReviewBody extends StatelessWidget {
           Text(
             question.questionText,
             style: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              fontSize: context.responsiveFontSize(16),
               height: 1.55,
               fontWeight: FontWeight.w500,
             ),
@@ -391,8 +393,8 @@ class _ReviewQuestionHeader extends StatelessWidget {
                 ),
                 child: Text(
                   'Q$questionNumber of $totalQuestions',
-                  style: const TextStyle(
-                    fontSize: 12,
+                  style: TextStyle(
+                    fontSize: context.responsiveSecondaryFontSize(12),
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
                   ),
@@ -406,6 +408,7 @@ class _ReviewQuestionHeader extends StatelessWidget {
           Text(
             subjectName,
             style: Theme.of(context).textTheme.labelLarge?.copyWith(
+              fontSize: context.responsiveFontSize(14),
               color: context.appTextPrimaryColor,
               fontWeight: FontWeight.w600,
             ),
@@ -414,6 +417,7 @@ class _ReviewQuestionHeader extends StatelessWidget {
           Text(
             subtopicName,
             style: Theme.of(context).textTheme.bodySmall?.copyWith(
+              fontSize: context.responsiveSecondaryFontSize(12),
               color: context.appTextSecondaryColor,
             ),
           ),
@@ -492,6 +496,7 @@ class _ReviewExplanation extends StatelessWidget {
               Text(
                 'Explanation',
                 style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                  fontSize: context.responsiveFontSize(14),
                   color: AppColors.primary,
                   fontWeight: FontWeight.w600,
                 ),
@@ -502,6 +507,7 @@ class _ReviewExplanation extends StatelessWidget {
           Text(
             question.explanation,
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+              fontSize: context.responsiveSecondaryFontSize(14),
               height: 1.6,
               color: context.appTextPrimaryColor,
             ),
@@ -527,6 +533,7 @@ class _ReviewExplanation extends StatelessWidget {
                       Text(
                         'Study Tip',
                         style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                          fontSize: context.responsiveFontSize(14),
                           color: context.appTextSecondaryColor,
                           fontWeight: FontWeight.w600,
                         ),
@@ -535,6 +542,7 @@ class _ReviewExplanation extends StatelessWidget {
                       Text(
                         question.studyNote!,
                         style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                          fontSize: context.responsiveSecondaryFontSize(14),
                           height: 1.55,
                           color: context.appTextSecondaryColor,
                         ),
@@ -693,7 +701,7 @@ class _ReviewBottomBar extends StatelessWidget {
           Text(
             label,
             style: TextStyle(
-              fontSize: 14,
+              fontSize: context.responsiveFontSize(14),
               fontWeight: FontWeight.w600,
               color: color,
             ),
@@ -725,7 +733,11 @@ class _NavButton extends StatelessWidget {
     final iconWidget = Icon(icon, size: 22, color: color);
     final labelWidget = Text(
       label,
-      style: TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: color),
+      style: TextStyle(
+        fontSize: context.responsiveSecondaryFontSize(13),
+        fontWeight: FontWeight.w500,
+        color: color,
+      ),
     );
 
     return InkWell(

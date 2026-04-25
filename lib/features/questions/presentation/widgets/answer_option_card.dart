@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/constants/app_spacing.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/responsive_utils.dart';
 
 enum AnswerOptionState { idle, selected, correct, incorrect, disabled }
 
@@ -69,7 +70,7 @@ class AnswerOptionCard extends StatelessWidget {
                       : Text(
                           letter,
                           style: TextStyle(
-                            fontSize: 15,
+                            fontSize: context.responsiveFontSize(15),
                             fontWeight: FontWeight.w700,
                             color: avatarFg,
                           ),
@@ -80,6 +81,7 @@ class AnswerOptionCard extends StatelessWidget {
                   child: Text(
                     text,
                     style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      fontSize: context.responsiveSecondaryFontSize(14),
                       height: 1.5,
                       color: textColor,
                       fontWeight: optionState == AnswerOptionState.selected
